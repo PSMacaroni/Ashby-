@@ -23,6 +23,7 @@ musk @ git+https://github.com/lilab-stanford/MUSK.git
 einops
 fairscale
 safetensors
+sentencepiece  # MUSK's text tokenizer (see MuskTokenizer in src/models.py)
 
 # Reading whole-slide images (.svs, .tif, ...)
 openslide-python

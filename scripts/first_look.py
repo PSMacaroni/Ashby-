@@ -1,17 +1,20 @@
 """
-First look at CONCH on the Delta datasets. Three tests:
+First look at a zero-shot model (CONCH or MUSK) on the Delta datasets. Three tests:
 
-  1. NCT-CRC-HE-100K (labeled tiles): zero-shot accuracy per tissue class + confusion matrix,
-     at CONCH's 224 px and native 448 px input sizes, to pick the better one.
-  2. PathGen 2k patches: CONCH's guess next to each patch's caption.
+  1. NCT-CRC-HE-100K (labeled tiles): zero-shot accuracy per tissue class + confusion matrix.
+     CONCH runs at 224 px and its native 448 px to pick the better one; MUSK always uses 384 px.
+  2. PathGen 2k patches: the model's guess next to each patch's caption.
   3. (optional, --slide) One TCGA whole slide: random tissue patches.
+
+The same tiles are used for every model (fixed random seed), so results can be compared directly.
 
 Run on a Delta GPU node, from the project folder:
 
     source scripts/delta_env.sh
-    python scripts/first_look.py --slide /work/hdd/bfqi/natmakur/tcga_slides/<name>.svs
+    python scripts/first_look.py --model musk --slide /work/hdd/bfqi/natmakur/tcga_slides/<name>.svs
 
-Paths default to the shared datasets under DATA_DIR. Results go to data/results/first_look/.
+Paths default to the shared datasets under DATA_DIR. Results go to data/results/first_look/ (CONCH)
+or data/results/first_look_<model>/ (other models).
 """
 import argparse
 import gc
@@ -31,8 +34,15 @@ import pandas as pd
 import torch
 
 from src.datasets import load_rgb, sample_nct, sample_pathgen
-from src.models import build_text_classifier, classify_images, load_conch
+from src.models import build_text_classifier, classify_images, load_conch, load_musk
 from src.prompts import CLASSES, PROMPTS_VERSION
+
+
+def load_model(args, size):
+    """Load the chosen model. `size` only matters for CONCH (MUSK is fixed at 384 px)."""
+    if args.model == "musk":
+        return load_musk()
+    return load_conch(args.conch, image_size=size)
 
 
 def try_plot(fn, *args, **kwargs):
@@ -103,12 +113,17 @@ def save_confusion(cm, path_png, title):
 
 
 def nct_test(args, out, items, images):
-    """Zero-shot accuracy on NCT-CRC at each image size. Returns (best_size, metrics)."""
+    """
+    Zero-shot accuracy on NCT-CRC at each image size.
+    Returns (best_size, metrics, (model, preprocess, text_emb) for the best size, still loaded).
+    """
+    name = args.model.upper()
+    sizes = [384] if args.model == "musk" else args.sizes
     true_idx = np.array([CLASSES.index(c) for _, c in items])
-    metrics = {}
-    for size in args.sizes:
+    metrics, kept = {}, None
+    for size in sizes:
         t0 = time.time()
-        model, preprocess = load_conch(args.conch, image_size=size)
+        model, preprocess = load_model(args, size)
         text_emb = build_text_classifier(model)
         probs, _ = classify_images(model, preprocess, images, text_emb)
         pred_idx = probs.argmax(1)
@@ -125,28 +140,31 @@ def nct_test(args, out, items, images):
         df.to_csv(out / f"{tag}_predictions.csv", index=False)
         cm = confusion_matrix(true_idx, pred_idx, out / f"{tag}_confusion.csv")
 
-        print(f"\n== NCT-CRC, CONCH @ {size}px: accuracy {acc:.1%} on {len(items)} tiles "
-              f"({metrics[size]['seconds']}s)")
+        print(f"\n== NCT-CRC, {name} @ {size}px: accuracy {acc:.1%} on {len(items)} tiles "
+              f"({metrics[size]['seconds']}s incl. loading)")
         for c, a in per_class.items():
             print(f"   {c:14s} {a:6.1%}")
-        print("   most common mix-ups (true -> CONCH says: count):")
+        print(f"   most common mix-ups (true -> {name} says: count):")
         off = [(cm[i, j], CLASSES[i], CLASSES[j]) for i in range(len(CLASSES))
                for j in range(len(CLASSES)) if i != j and cm[i, j]]
         for count, t, p in sorted(off, reverse=True)[:5]:
             print(f"     {t} -> {p}: {count}")
 
         try_plot(save_confusion, cm, out / f"{tag}_confusion.png",
-                 f"NCT-CRC zero-shot, CONCH @ {size}px: accuracy {acc:.1%}")
-        # 2 examples per class, so you can see what each class looks like and what CONCH said
+                 f"NCT-CRC zero-shot, {name} @ {size}px: accuracy {acc:.1%}")
+        # 2 examples per class, so you can see what each class looks like and what the model said
         pick = [i for k in range(len(CLASSES)) for i in np.flatnonzero(true_idx == k)[:2]]
         try_plot(save_grid, [images[i] for i in pick], probs[pick], out / f"{tag}_examples.png",
                  titles=[f"TRUE: {items[i][1]}" for i in pick])
 
+        # keep only the best model so far in memory (so we don't reload it for tests 2 and 3)
+        if kept is None or acc > metrics[kept[0]]["accuracy"]:
+            kept = (size, model, preprocess, text_emb)
         del model, preprocess, text_emb
         gc.collect()
         torch.cuda.empty_cache()
-    best = max(metrics, key=lambda s: metrics[s]["accuracy"])
-    return best, metrics
+    best = kept[0]
+    return best, metrics, kept[1:]
 
 
 def main():
@@ -154,29 +172,31 @@ def main():
     data = config.DATA_DIR or Path(".")
     ap.add_argument("--nct-dir", default=str(data / "NCT-CRC-HE-100K" / "data-samples"))
     ap.add_argument("--pathgen-dir", default=str(data / "pathgen_dataset" / "pathgen_2k_output"))
+    ap.add_argument("--model", choices=["conch", "musk"], default="conch")
     ap.add_argument("--slide", help="optional: one TCGA .svs slide for the random-patch test")
+    ap.add_argument("--slide-px", type=int, default=224,
+                    help="slide patch size in px at 0.5 microns/px (same patches for every model)")
     ap.add_argument("--conch", help="optional: path to a CONCH pytorch_model.bin (else Hugging Face)")
     ap.add_argument("--n-per-class", type=int, default=50, help="NCT tiles per class")
     ap.add_argument("--n", type=int, default=16, help="patches for the PathGen and slide tests")
     ap.add_argument("--sizes", type=int, nargs="+", default=[224, 448], help="CONCH input sizes to compare")
-    ap.add_argument("--out", default=str(config.RESULTS_DIR / "first_look"))
+    ap.add_argument("--out", help="output folder (default: data/results/first_look[_<model>])")
     args = ap.parse_args()
 
-    out = Path(args.out)
+    name = args.model.upper()
+    out = Path(args.out or config.RESULTS_DIR / ("first_look" if args.model == "conch"
+                                                   else f"first_look_{args.model}"))
     out.mkdir(parents=True, exist_ok=True)
-    print("device:", config.get_device(), "| prompts", PROMPTS_VERSION)
+    print("model:", name, "| device:", config.get_device(), "| prompts", PROMPTS_VERSION)
 
     # --- Test 1: NCT-CRC accuracy ---
     items = sample_nct(args.nct_dir, args.n_per_class)
     images = [load_rgb(p) for p, _ in items]
-    best, metrics = nct_test(args, out, items, images)
-    summary = {"prompts_version": PROMPTS_VERSION, "best_size": best,
+    best, metrics, (model, preprocess, text_emb) = nct_test(args, out, items, images)
+    summary = {"model": name, "prompts_version": PROMPTS_VERSION, "best_size": best,
                "nct": {str(k): v for k, v in metrics.items()}}
     (out / "metrics.json").write_text(json.dumps(summary, indent=2))
     print(f"\nbest size on NCT-CRC: {best}px -> using it for the rest")
-
-    model, preprocess = load_conch(args.conch, image_size=best)
-    text_emb = build_text_classifier(model)
 
     # --- Test 2: PathGen captions ---
     pg = sample_pathgen(args.pathgen_dir, args.n)
@@ -189,7 +209,7 @@ def main():
     print(f"\n== PathGen: {len(pg)} patches")
     for i, (r, p) in enumerate(zip(pg, pg_probs)):
         guess = ", ".join(f"{c} {v:.2f}" for c, v in top_k(p, 2))
-        print(f"  #{i:2d} CONCH: {guess}\n      CAPTION: {r['caption']}")
+        print(f"  #{i:2d} {name}: {guess}\n      CAPTION: {r['caption']}")
     try_plot(save_grid, pg_images, pg_probs, out / "pathgen_grid.png",
              titles=[r["caption"][:50] + "..." for r in pg])
 
@@ -203,8 +223,8 @@ def main():
         thumb = get_thumbnail(slide, 64)
         thumb.save(out / "slide_thumbnail.png")
         try_plot(plt.imsave, out / "slide_tissue_mask.png", tissue_mask(thumb))
-        coords = sample_tissue_coords(slide, n=args.n, out_px=best, seed=0)
-        patches = [read_patch(slide, x, y, out_px=best) for x, y in coords]
+        coords = sample_tissue_coords(slide, n=args.n, out_px=args.slide_px, seed=0)
+        patches = [read_patch(slide, x, y, out_px=args.slide_px) for x, y in coords]
         probs, _ = classify_images(model, preprocess, patches, text_emb)
         df = prob_table(probs)
         df.insert(0, "y", [y for _, y in coords])

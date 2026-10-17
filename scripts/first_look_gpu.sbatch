@@ -1,7 +1,8 @@
 #!/bin/bash
 # First-look test on 1 GPU. From the project folder on Delta:
 #
-#     mkdir -p data/logs && sbatch scripts/first_look_gpu.sbatch
+#     mkdir -p data/logs && sbatch scripts/first_look_gpu.sbatch          # CONCH
+#     mkdir -p data/logs && sbatch scripts/first_look_gpu.sbatch musk     # MUSK
 #     squeue -u $USER                      # is it waiting / running?
 #     tail -f data/logs/first_look_gpu-<jobid>.out
 #
@@ -21,5 +22,5 @@
 source scripts/delta_env.sh
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 nvidia-smi --query-gpu=name,memory.total --format=csv
-python scripts/first_look.py \
+python scripts/first_look.py --model "${1:-conch}" \
     --slide /work/hdd/bfqi/natmakur/tcga_slides/TCGA-A6-3809-01Z-00-DX1.c26f03e8-c285-4a66-925d-ae9cba17d7b3.svs
