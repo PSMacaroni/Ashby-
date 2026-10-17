@@ -1,0 +1,11 @@
+# What the app needs on a laptop (much smaller than the full requirements.txt for Delta).
+#   pip install -r app/requirements.txt
+streamlit>=1.50
+plotly
+pandas
+numpy
+pillow
+scipy
+python-dotenv
+openai    # NCSA Lumen (optional plain-language rewording)
+fpdf2     # PDF export

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="5 7 52 52" role="img" aria-label="Slide box logo">
+  <!-- An open slide box seen from an angle (isometric), with glass slides standing in it -->
+  <defs>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F2FBFE"/>
+      <stop offset="1" stop-color="#BFE3EE"/>
+    </linearGradient>
+    <linearGradient id="left" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1A8FA3"/>
+      <stop offset="1" stop-color="#11707F"/>
+    </linearGradient>
+  </defs>
+  <!-- inside of the box -->
+  <polygon points="26,31 52,46 52,31 26,16" fill="#0B4552"/>
+  <polygon points="26,31 10.4,40 10.4,25 26,16" fill="#0E5463"/>
+  <polygon points="26,31 52,46 36.4,55 10.4,40" fill="#0A3B47"/>
+  <!-- glass slides, back to front; the white end is the frosted label -->
+  <g stroke="#7FBFD1" stroke-width="0.6" stroke-linejoin="round">
+    <polygon points="28.6,33.2 16.9,40 16.9,19 28.6,12.2" fill="url(#glass)"/>
+    <polygon points="28.6,16.8 16.9,23.5 16.9,19 28.6,12.2" fill="#FFFFFF"/>
+    <polygon points="33.1,35.9 21.5,42.6 21.5,21.6 33.1,14.9" fill="url(#glass)"/>
+    <polygon points="33.1,19.4 21.5,26.1 21.5,21.6 33.1,14.9" fill="#FFFFFF"/>
+    <polygon points="37.7,38.5 26,45.2 23.4,25.8 35.1,19" fill="url(#glass)"/>
+    <polygon points="35.6,23.2 23.9,30 23.4,25.8 35.1,19" fill="#FFFFFF"/>
+    <polygon points="42.2,41.1 30.5,47.9 30.5,26.9 42.2,20.1" fill="url(#glass)"/>
+    <polygon points="42.2,24.6 30.5,31.4 30.5,26.9 42.2,20.1" fill="#FFFFFF"/>
+    <polygon points="46.1,43.4 34.4,50.1 36.4,28 48.1,21.2" fill="url(#glass)"/>
+    <polygon points="47.7,26 36,32.7 36.4,28 48.1,21.2" fill="#FFFFFF"/>
+  </g>
+  <!-- a pink H&E tissue section on the front slide -->
+  <ellipse cx="36.6" cy="34.2" rx="2.4" ry="1.5" transform="rotate(-30 36.6 34.2)" fill="#C2577F" opacity="0.9"/>
+  <!-- front walls of the box -->
+  <polygon points="10.4,40 36.4,55 36.4,40 10.4,25" fill="url(#left)"/>
+  <polygon points="52,46 36.4,55 36.4,40 52,31" fill="#0D5E6D"/>
+  <polygon points="26,16 52,31 36.4,40 10.4,25" fill="none" stroke="#6CCAD8" stroke-width="1.1" stroke-linejoin="round"/>
+  <!-- a small white label on the box front -->
+  <polygon points="17,37 29.5,44.2 29.5,47.6 17,40.4" fill="#FFFFFF" opacity="0.85"/>
+</svg>
