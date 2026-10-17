@@ -90,7 +90,7 @@ def read_metadata(urls, sizes, starts, organ):
     raise RuntimeError("metadata.json not found")
 
 
-def pick(records, organ, other_per_class, vessel_cap, nerve_cap, seed):
+def pick(records, organ, other_per_class, vessel_cap, nerve_cap, seed, targets=TARGETS):
     """{image_name: row} for the tiles we keep."""
     rng = random.Random(seed)
     by_class = {}
@@ -99,9 +99,9 @@ def pick(records, organ, other_per_class, vessel_cap, nerve_cap, seed):
     wanted = {}
     for cls, recs in sorted(by_class.items()):
         recs.sort(key=lambda r: r["image_name"])
-        label = TARGETS.get(cls, "other")
-        cap = {"vessel": vessel_cap, "nerve": nerve_cap}.get(label, other_per_class)
-        if cap is not None and cap < len(recs):
+        label = targets.get(cls, "other")
+        cap = other_per_class if label == "other" else {"vessel": vessel_cap, "nerve": nerve_cap}.get(label)
+        if cap is not None and cap < len(recs):  # cap 0 = skip this class
             recs = rng.sample(recs, cap)
         for r in recs:
             wanted[r["image_name"]] = {"image": r["image_name"], "split": r.get("split", "train"), "label": label,
@@ -208,7 +208,11 @@ def main():
     ap.add_argument("--nerve-cap", type=int, default=None, help="max nerve tiles (default: all)")
     ap.add_argument("--workers", type=int, default=12, help="archive parts streamed in parallel")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--targets", nargs="+", default=None,
+                    help='SPIDER class=our label pairs (default "Nerves=nerve Vessels=vessel"), '
+                         'e.g. --targets Inflammation=inflammation --other-per-class 0')
     args = ap.parse_args()
+    targets = dict(t.split("=", 1) for t in args.targets) if args.targets else TARGETS
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -218,7 +222,7 @@ def main():
 
     records = read_metadata(urls, sizes, starts, args.organ)
     print("classes:", dict(sorted(Counter(r["class"] for r in records).items())), flush=True)
-    wanted = pick(records, args.organ, args.other_per_class, args.vessel_cap, args.nerve_cap, args.seed)
+    wanted = pick(records, args.organ, args.other_per_class, args.vessel_cap, args.nerve_cap, args.seed, targets)
     del records
     print("picked:", dict(Counter((r["split"], r["label"]) for r in wanted.values())), flush=True)
 

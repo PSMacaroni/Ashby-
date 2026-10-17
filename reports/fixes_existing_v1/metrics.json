@@ -1,0 +1,100 @@
+{
+  "pathgen": {
+    "patches": 2141,
+    "negated_left_out": 233,
+    "all": {
+      "n": 1908,
+      "mentions": 876,
+      "t8_max": {
+        "auroc": 0.5639800361049166,
+        "mean_mentioned": 0.05261985585093498,
+        "mean_not": 0.017401978373527527,
+        "flag_mentioned": 0.0410958904109589,
+        "flag_not": 0.01065891472868217
+      },
+      "t8_mean": {
+        "auroc": 0.5629867084350997,
+        "mean_mentioned": 0.025383006781339645,
+        "mean_not": 0.0077203502878546715,
+        "flag_mentioned": 0.014840182648401826,
+        "flag_not": 0.0029069767441860465
+      },
+      "imm_max": {
+        "auroc": 0.6543463063254398,
+        "mean_mentioned": 0.19862276315689087,
+        "mean_not": 0.06386920809745789,
+        "flag_mentioned": 0.17922374429223745,
+        "flag_not": 0.045542635658914726
+      },
+      "imm_mean": {
+        "auroc": 0.6541405613960567,
+        "mean_mentioned": 0.11456835269927979,
+        "mean_not": 0.03251522406935692,
+        "flag_mentioned": 0.07990867579908675,
+        "flag_not": 0.015503875968992248
+      }
+    },
+    "colorectal": {
+      "n": 526,
+      "mentions": 295,
+      "t8_max": {
+        "auroc": 0.6338396067209626,
+        "mean_mentioned": 0.003960330504924059,
+        "mean_not": 0.004687808919698,
+        "flag_mentioned": 0.0,
+        "flag_not": 0.004329004329004329
+      },
+      "t8_mean": {
+        "auroc": 0.633281972265023,
+        "mean_mentioned": 0.0011043051490560174,
+        "mean_not": 0.00446169450879097,
+        "flag_mentioned": 0.0,
+        "flag_not": 0.004329004329004329
+      },
+      "imm_max": {
+        "auroc": 0.6520214249027809,
+        "mean_mentioned": 0.08887046575546265,
+        "mean_not": 0.032178811728954315,
+        "flag_mentioned": 0.06440677966101695,
+        "flag_not": 0.012987012987012988
+      },
+      "imm_mean": {
+        "auroc": 0.6537236774524909,
+        "mean_mentioned": 0.04061831533908844,
+        "mean_not": 0.015681564807891846,
+        "flag_mentioned": 0.010169491525423728,
+        "flag_not": 0.004329004329004329
+      }
+    }
+  },
+  "nct_guard": {
+    "tiles": 89434,
+    "removed": 43,
+    "removed_by_true_class": {
+      "tumor": 0,
+      "normal_mucosa": 1,
+      "muscle": 26,
+      "fat": 0,
+      "lymphocytes": 0,
+      "mucus": 5,
+      "necrosis": 11,
+      "stroma": 0
+    },
+    "removed_correctly_labeled": 34,
+    "colorful_5th_pct_by_class": {
+      "tumor": 0.7396763392857143,
+      "normal_mucosa": 0.7510961415816326,
+      "muscle": 0.5666404257015305,
+      "fat": 0.16446906887755103,
+      "lymphocytes": 0.8055843431122449,
+      "mucus": 0.6364297672193877,
+      "necrosis": 0.7003577407525511,
+      "stroma": 0.8703413982780612
+    }
+  },
+  "nct_back": {
+    "tiles_checked": 2000,
+    "colorful_median": 0.9999202806122449,
+    "would_pass_guard_colorful<0.10": 0.0305
+  }
+}

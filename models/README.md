@@ -14,6 +14,7 @@ scikit-learn version.
 |---|---|---|---|---|
 | `tissue8_split_v1.joblib` | **only the 8 tissue classes** | NCT-CRC-HE-100K + STARC-9 (169,434 tiles, 2 hospitals) | `src/classifier.py` | average accuracy 94.6% on 4 test sets (zero-shot 81.1%), worst 89.1%; `reports/split_v1/` |
 | `structures_split_v1.joblib` | **nerve / vessel / blood / other** | SPIDER colon + skin + STARC-9 blood (38,941 tiles) | `src/structures.py` | nerves 99.7%, vessels 97.5–98.7%, blood 94.5–99.5%; watch fat → blood (7–16%) |
+| `immune_v1.joblib` | **lymphocytes / inflammatory cells present?** (0-1, separate from the tissue class) | NCT + STARC-9 lymphocytes + 9,453 SPIDER inflammation tiles vs all other tissue | `src/detectors.py` | scattered-lymphocyte tiles 0.44 vs stroma 0.01 / tumor 0.03; SPIDER inflamed found 95-97%; `docs/fixes_background_lymph.md` |
 
 **Earlier models (kept for comparison):**
 
