@@ -15,10 +15,13 @@ from tqdm.auto import tqdm
 from src.prompts import CLASSES, build_prompts
 
 
-def load_conch(checkpoint_path=None, device=None):
+def load_conch(checkpoint_path=None, device=None, image_size=None):
     """
     Load CONCH. By default it downloads from Hugging Face (needs HF_TOKEN + approved access).
     If organizers preloaded the weights, pass checkpoint_path=".../pytorch_model.bin" instead.
+
+    image_size: None = CONCH's native 448 px (images are resized to 448). 224 = run CONCH at
+    224 px, which matches 224 px tiles (like NCT-CRC-HE-100K) without upscaling them.
     """
     from conch.open_clip_custom import create_model_from_pretrained
 
@@ -29,10 +32,10 @@ def load_conch(checkpoint_path=None, device=None):
                                "or pass checkpoint_path to preloaded weights.")
         model, preprocess = create_model_from_pretrained(
             "conch_ViT-B-16", "hf_hub:MahmoodLab/conch",
-            device=device, hf_auth_token=config.HF_TOKEN)
+            device=device, hf_auth_token=config.HF_TOKEN, force_image_size=image_size)
     else:
         model, preprocess = create_model_from_pretrained(
-            "conch_ViT-B-16", str(checkpoint_path), device=device)
+            "conch_ViT-B-16", str(checkpoint_path), device=device, force_image_size=image_size)
     model.eval()  # inference mode (CONCH doesn't do this for us)
     return model, preprocess
 

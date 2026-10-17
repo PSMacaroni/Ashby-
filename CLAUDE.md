@@ -30,8 +30,8 @@ Clinical framing: decision support that flags features that are tedious and inco
 - No mutation prediction, no treatment recommendations, no patient data collection.
 
 ## Environment (important)
-- **Delta** (NCSA GPU cluster, used via Open OnDemand Jupyter in the browser) runs everything heavy: reading slides,
-  running models. Slides, datasets and (likely) model weights are preloaded there. Paths come from organizers → `.env`.
+- **Delta** (NCSA GPU cluster, used via Open OnDemand Jupyter in the browser, or SSH + `sbatch`) runs everything
+  heavy: reading slides, running models. See "Delta specifics" below for accounts, paths, and data.
 - **Laptop / VS Code**: write code, run the Streamlit app on small result files downloaded from Delta.
 - Code moves via GitHub: write on laptop → push → `git pull` on Delta → run.
 - Never commit: `.env`, tokens, slides, model weights, big arrays, anything in `data/`.
@@ -99,12 +99,28 @@ Results per slide in `data/results/<slide_id>/`:
   ```
 Update this contract here if it must change.
 
-## Delta specifics (fill in Saturday once organizers share them)
-- Account: 
-- GPU partition: 
-- Preloaded slides path: 
-- Preloaded model weights path: 
-- Python/conda module to load: 
+## Delta specifics
+- Accounts: `bfqi-delta-gpu` (**10 GPU-hours for the whole team**; spend carefully) and
+  `bfqi-delta-cpu` (~9,500 CPU-hours). Prefer batch jobs (`sbatch`) that end when done over
+  interactive sessions that bill while idle; use CPU jobs for anything that doesn't need a GPU.
+- GPU partition: `gpuA100x4` (hackathon reservation on the account, picked up automatically;
+  Sat 07:30 → Sun 07:59 and Sun 08:00 → 18:00). CPU partition: `cpu`. All nodes are RH9.6.
+- Python: `source scripts/delta_env.sh` (loads `pytorch-conda/2.12` = Python 3.12, torch 2.12 cu130,
+  transformers 5.x, and unsets `PYTHONNOUSERSITE` so `pip install --user` packages are visible).
+- Shared datasets (`DATA_DIR`): `/projects/bfqi/shared/datasets`
+  - `NCT-CRC-HE-100K/data-samples/<ADI|BACK|DEB|LYM|MUC|MUS|NORM|STR|TUM>/*.tif`: 100k labeled
+    224 px tiles at 0.5 µm/px (no patient IDs). Mapping to our classes in `src/datasets.py`.
+  - `pathgen_dataset/pathgen_2k_output/<file_id>_<x>_<y>.png|.txt`: ~2,100 PathGen patches + captions
+    from 10 TCGA slides (only 3 colorectal); records in `pathgen_dataset/PathGen-2k_samples.json`.
+  - `pathmmu/`: PathMMU question set + several small image sets.
+  - No TCGA whole slides and no model weights are preloaded.
+- Our TCGA slides (downloaded from GDC, open access): `/work/hdd/bfqi/natmakur/tcga_slides/`
+  with `slides.csv` (file_id, md5, project, pT, pN, stage). AA-3875 T1N0, CM-4746 T2N0, AH-6547 T3N0
+  (READ), AA-3844 T3N2, A6-3809 T4N0 (stage IIB). AA-3844/CM-4746/AH-6547 have PathGen patches.
+- Model weights: downloaded from Hugging Face into `HF_HOME=/projects/bfqi/natmakur/hf_cache` (private).
+- `/projects/bfqi/<user>` and `/work/hdd/bfqi/<user>` are readable by the whole hackathon group:
+  keep `.env`/tokens in the home folder (`~`), which is private. Don't read other teams' folders.
+- Login nodes: light work only (git, pip, file listing). Long commands there can get cut off.
 
 ## Repo layout
 `app/` Streamlit app · `src/` shared code (tiling, models, maps, analysis, summary) · `scripts/` runnable steps

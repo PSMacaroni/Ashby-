@@ -52,21 +52,24 @@ Activate it every time you open a new terminal (you'll see `(.venv)` at the star
    git clone https://github.com/PSMacaroni/Ashby-.git
    cd Ashby-
    ```
-4. Install the packages (`--user` installs them in your own folder, since you can't install system-wide on Delta):
+4. Load Delta's Python + PyTorch, then install our extra packages (`--user` installs them in your own folder, since you can't install system-wide on Delta). Run the `source` line **in every new Delta terminal**:
    ```bash
+   source scripts/delta_env.sh
    pip install --user -r requirements.txt
    ```
-   This needs Python 3.10 or newer. If `python --version` says older, run `module load python` first (ask organizers which version).
-5. Make your private settings file and fill it in:
+5. Make your private settings file and fill it in (keep the repo in your home folder `~`, which only you can read):
    ```bash
    cp .env.example .env
-   nano .env        # paste HF_TOKEN, Lumen key, etc. Ctrl+O to save, Ctrl+X to exit
+   nano .env        # HF_TOKEN, DATA_DIR=/projects/bfqi/shared/datasets, HF_HOME. Ctrl+O save, Ctrl+X exit
    ```
 6. Check everything works:
    ```bash
    python scripts/check_setup.py
    ```
-7. Ask the organizers for the **preloaded data and model paths** on Delta and put them in `DATA_DIR` / `MODEL_DIR` in `.env`. That way you don't download huge files yourself.
+
+Accounts, data paths and GPU budget are in [CLAUDE.md](CLAUDE.md) under "Delta specifics". **The whole team shares 10 GPU-hours**, so run GPU work as batch jobs that end when finished (`sbatch scripts/first_look_gpu.sbatch`), not as open sessions.
+
+**If Open OnDemand is down/slow:** use SSH instead: `ssh <netid>@login.delta.ncsa.illinois.edu` (password + Duo), then do steps 3–6 in that terminal and submit jobs with `sbatch`.
 
 Stuck on Delta? Try the Delta docs chatbot: https://chat.illinois.edu/Delta-Documentation/chat
 
