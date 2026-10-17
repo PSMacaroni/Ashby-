@@ -1,0 +1,436 @@
+{
+  "settings": {
+    "run": "conch_structures_v1",
+    "C": 10.0,
+    "Cs_tried": [
+      0.1,
+      1.0,
+      10.0
+    ],
+    "cv": "GroupKFold(5) by slide",
+    "train_tiles": 20941,
+    "train_slides": 3097,
+    "data": {
+      "colon": "/projects/bfqi/hjeong6/datasets/spider_colorectal",
+      "skin": "/projects/bfqi/hjeong6/datasets/spider_skin"
+    }
+  },
+  "results": {
+    "colon": {
+      "zero_shot": {
+        "n_tiles": 2043,
+        "accuracy": 0.9109153206069506,
+        "balanced_accuracy": 0.9109179043971778,
+        "log_loss": 0.4367058575153351,
+        "recall_other": 0.911504424778761,
+        "recall_vessel": 0.9103313840155945,
+        "flagged_nerve": 0.0548213411649535,
+        "flagged_vessel": 0.4654919236417034,
+        "precision_vessel": 0.982124079915878,
+        "auroc_vessel": 0.9904335842337189,
+        "false_alarms_by_class": {
+          "Adenocarcinoma high grade": {
+            "n": 63,
+            "as_nerve": 0.015873015873015872,
+            "as_vessel": 0.0
+          },
+          "Adenocarcinoma low grade": {
+            "n": 94,
+            "as_nerve": 0.05319148936170213,
+            "as_vessel": 0.0
+          },
+          "Adenoma high grade": {
+            "n": 84,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Adenoma low grade": {
+            "n": 84,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Fat": {
+            "n": 97,
+            "as_nerve": 0.0,
+            "as_vessel": 0.010309278350515464
+          },
+          "Hyperplastic polyp": {
+            "n": 84,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Inflammation": {
+            "n": 94,
+            "as_nerve": 0.031914893617021274,
+            "as_vessel": 0.010638297872340425
+          },
+          "Mucus": {
+            "n": 97,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Muscle": {
+            "n": 70,
+            "as_nerve": 0.5,
+            "as_vessel": 0.0
+          },
+          "Necrosis": {
+            "n": 65,
+            "as_nerve": 0.06153846153846154,
+            "as_vessel": 0.03076923076923077
+          },
+          "Sessile serrated lesion": {
+            "n": 98,
+            "as_nerve": 0.0,
+            "as_vessel": 0.01020408163265306
+          },
+          "Stroma healthy": {
+            "n": 87,
+            "as_nerve": 0.28735632183908044,
+            "as_vessel": 0.13793103448275862
+          }
+        }
+      },
+      "classifier": {
+        "n_tiles": 2043,
+        "accuracy": 0.9662261380323054,
+        "balanced_accuracy": 0.9662147009608584,
+        "log_loss": 0.09275666451245186,
+        "recall_other": 0.9636184857423795,
+        "recall_vessel": 0.9688109161793372,
+        "flagged_nerve": 0.010768477728830151,
+        "flagged_vessel": 0.4982868330885952,
+        "precision_vessel": 0.9764243614931237,
+        "auroc_vessel": 0.9969504773624216,
+        "false_alarms_by_class": {
+          "Adenocarcinoma high grade": {
+            "n": 63,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Adenocarcinoma low grade": {
+            "n": 94,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Adenoma high grade": {
+            "n": 84,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Adenoma low grade": {
+            "n": 84,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Fat": {
+            "n": 97,
+            "as_nerve": 0.0,
+            "as_vessel": 0.020618556701030927
+          },
+          "Hyperplastic polyp": {
+            "n": 84,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Inflammation": {
+            "n": 94,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0425531914893617
+          },
+          "Mucus": {
+            "n": 97,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Muscle": {
+            "n": 70,
+            "as_nerve": 0.014285714285714285,
+            "as_vessel": 0.02857142857142857
+          },
+          "Necrosis": {
+            "n": 65,
+            "as_nerve": 0.015384615384615385,
+            "as_vessel": 0.06153846153846154
+          },
+          "Sessile serrated lesion": {
+            "n": 98,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Stroma healthy": {
+            "n": 87,
+            "as_nerve": 0.12643678160919541,
+            "as_vessel": 0.13793103448275862
+          }
+        }
+      },
+      "vessel_type_zero_shot": {
+        "n_vessel_tiles": 1026,
+        "share_called_artery": 0.195906432748538,
+        "median_p_artery": 0.048114314675331116
+      }
+    },
+    "skin": {
+      "zero_shot": {
+        "n_tiles": 2333,
+        "accuracy": 0.914273467638234,
+        "balanced_accuracy": 0.9172502554757695,
+        "log_loss": 0.3638557195663452,
+        "recall_other": 0.8593913955928646,
+        "recall_nerve": 0.9948387096774194,
+        "recall_vessel": 0.8975206611570248,
+        "flagged_nerve": 0.3883411915987998,
+        "precision_nerve": 0.8509933774834437,
+        "auroc_nerve": 0.9976984554225847,
+        "flagged_vessel": 0.24946420917273895,
+        "precision_vessel": 0.9329896907216495,
+        "auroc_vessel": 0.9847906144781144,
+        "false_alarms_by_class": {
+          "Actinic keratosis": {
+            "n": 29,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Apocrine glands": {
+            "n": 33,
+            "as_nerve": 0.2727272727272727,
+            "as_vessel": 0.12121212121212122
+          },
+          "Basal cell carcinoma": {
+            "n": 34,
+            "as_nerve": 0.20588235294117646,
+            "as_vessel": 0.0
+          },
+          "Carcinoma in situ": {
+            "n": 32,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Collagen": {
+            "n": 60,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Epidermis": {
+            "n": 32,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Fat": {
+            "n": 33,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Follicle": {
+            "n": 52,
+            "as_nerve": 0.21153846153846154,
+            "as_vessel": 0.0
+          },
+          "Inflammation": {
+            "n": 31,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Invasive melanoma": {
+            "n": 47,
+            "as_nerve": 0.2127659574468085,
+            "as_vessel": 0.06382978723404255
+          },
+          "Kaposi\u2019s sarcoma": {
+            "n": 36,
+            "as_nerve": 0.027777777777777776,
+            "as_vessel": 0.5277777777777778
+          },
+          "Keratin": {
+            "n": 56,
+            "as_nerve": 0.03571428571428571,
+            "as_vessel": 0.0
+          },
+          "Melanoma in situ": {
+            "n": 41,
+            "as_nerve": 0.024390243902439025,
+            "as_vessel": 0.0
+          },
+          "Mercel cell carcinoma": {
+            "n": 103,
+            "as_nerve": 0.11650485436893204,
+            "as_vessel": 0.07766990291262135
+          },
+          "Muscle": {
+            "n": 57,
+            "as_nerve": 0.43859649122807015,
+            "as_vessel": 0.017543859649122806
+          },
+          "Necrosis": {
+            "n": 38,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Nevus": {
+            "n": 31,
+            "as_nerve": 0.45161290322580644,
+            "as_vessel": 0.0
+          },
+          "Sebaceous gland": {
+            "n": 34,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Seborrheic keratosis": {
+            "n": 49,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Solar elastosis": {
+            "n": 56,
+            "as_nerve": 0.0,
+            "as_vessel": 0.017857142857142856
+          },
+          "Squamous cell carcinoma": {
+            "n": 45,
+            "as_nerve": 0.1111111111111111,
+            "as_vessel": 0.022222222222222223
+          },
+          "Wart": {
+            "n": 24,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          }
+        }
+      },
+      "classifier": {
+        "n_tiles": 2333,
+        "accuracy": 0.9862837548221175,
+        "balanced_accuracy": 0.9858711544241112,
+        "log_loss": 0.04281736596057106,
+        "recall_other": 0.9874081846799581,
+        "recall_nerve": 0.9883870967741936,
+        "recall_vessel": 0.9818181818181818,
+        "flagged_nerve": 0.3304757822546078,
+        "precision_nerve": 0.993514915693904,
+        "auroc_nerve": 0.9999138680690711,
+        "flagged_vessel": 0.2584654950707244,
+        "precision_vessel": 0.9850746268656716,
+        "auroc_vessel": 0.9989267676767677,
+        "false_alarms_by_class": {
+          "Actinic keratosis": {
+            "n": 29,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Apocrine glands": {
+            "n": 33,
+            "as_nerve": 0.030303030303030304,
+            "as_vessel": 0.0
+          },
+          "Basal cell carcinoma": {
+            "n": 34,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Carcinoma in situ": {
+            "n": 32,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Collagen": {
+            "n": 60,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Epidermis": {
+            "n": 32,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Fat": {
+            "n": 33,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Follicle": {
+            "n": 52,
+            "as_nerve": 0.0,
+            "as_vessel": 0.019230769230769232
+          },
+          "Inflammation": {
+            "n": 31,
+            "as_nerve": 0.0,
+            "as_vessel": 0.03225806451612903
+          },
+          "Invasive melanoma": {
+            "n": 47,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Kaposi\u2019s sarcoma": {
+            "n": 36,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Keratin": {
+            "n": 56,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Melanoma in situ": {
+            "n": 41,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Mercel cell carcinoma": {
+            "n": 103,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Muscle": {
+            "n": 57,
+            "as_nerve": 0.03508771929824561,
+            "as_vessel": 0.05263157894736842
+          },
+          "Necrosis": {
+            "n": 38,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Nevus": {
+            "n": 31,
+            "as_nerve": 0.0,
+            "as_vessel": 0.03225806451612903
+          },
+          "Sebaceous gland": {
+            "n": 34,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Seborrheic keratosis": {
+            "n": 49,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Solar elastosis": {
+            "n": 56,
+            "as_nerve": 0.017857142857142856,
+            "as_vessel": 0.03571428571428571
+          },
+          "Squamous cell carcinoma": {
+            "n": 45,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          },
+          "Wart": {
+            "n": 24,
+            "as_nerve": 0.0,
+            "as_vessel": 0.0
+          }
+        }
+      },
+      "vessel_type_zero_shot": {
+        "n_vessel_tiles": 605,
+        "share_called_artery": 0.3074380165289256,
+        "median_p_artery": 0.16403254866600037
+      }
+    }
+  }
+}

@@ -35,6 +35,8 @@ Clinical framing: decision support that flags features that are tedious and inco
 - **Laptop / VS Code**: write code, run the Streamlit app on small result files downloaded from Delta.
 - Code moves via GitHub: write on laptop → push → `git pull` on Delta → run.
 - Never commit: `.env`, tokens, slides, model weights, big arrays, anything in `data/`.
+  Exception: our own small trained classifier heads (scikit-learn, a few KB) live in `models/` with a model card
+  (`models/README.md`); compact evaluation outputs live in `reports/`.
 - Delta home quota is small: set `HF_HOME` to a project/work directory before loading models.
 - Code must run headless on Delta (no GUI), use GPU if available, fall back to CPU, show progress with tqdm,
   and save results to files (sessions end and memory is lost).
@@ -81,6 +83,10 @@ Results per slide in `data/results/<slide_id>/`:
   p_mucus, p_necrosis, p_stroma, label, confidence`
   (x, y = level-0 pixel top-left; label = argmax class name; confidence = max prob)
 - `tiles/<row>_<col>.jpg`: optional 128 px tile previews for click-to-zoom
+- `structures.csv` (optional side classifier, `src/structures.py`; NOT one of the 8 map classes): one row per tissue tile,
+  `row, col, p_nerve, p_vessel, p_other, structure, p_artery` (structure = argmax of nerve/vessel/other;
+  p_artery = zero-shot artery-vs-vein, experimental and unvalidated, only meaningful where structure = vessel).
+  Used later to find risk spots: tumor next to nerve (perineural invasion), tumor next to/inside vessel (venous/lymphovascular).
 - `summary.json`:
   ```json
   {

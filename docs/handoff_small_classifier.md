@@ -119,6 +119,7 @@ NCT-CRC folder → our class (`src/datasets.py` → `NCT_TO_CLASS`):
 | **NCT-CRC-HE-100K** | `/projects/bfqi/shared/datasets/NCT-CRC-HE-100K/data-samples/<CLASS>/*.tif` (on Delta) | ~89k labeled tiles (excluding BACK), 224×224 px at 0.5 µm/px, color-normalized, from 86 slides | **training** |
 | **CRC-VAL-HE-7K** | not on Delta; download (below) | 7,180 labeled tiles from **50 different patients** (no overlap with the 100K set), same size/classes | **testing** |
 | our TCGA slides | `/work/hdd/bfqi/natmakur/tcga_slides/` | 5 whole slides (+ `slides.csv` with stage) | stretch: real-slide check |
+| **STARC-9 subset** | `scripts/get_starc9.py` → `data/datasets/starc9/` | 90k training tiles (~200 Stanford patients, our 8 classes + blood) + 3 separate-patient test sets incl. TCGA | extra training + honest testing; see `docs/dataset_starc9.md` |
 
 Download the test set once, on a Delta **login node** (free, no GPU), into your own work folder:
 
