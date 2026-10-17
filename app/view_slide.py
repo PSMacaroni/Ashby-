@@ -8,11 +8,11 @@ import plotly.graph_objects as go
 import streamlit as st
 
 import explain
+import export
 import slide_data
 import tile_map
 import ui
-from common import (CAVEATS, CLASSES, COLORS, KNOWN_MIXUPS, NAMES, NOT_ANALYZED_COLOR, RISK_LEVELS,
-                    SHORT_NAMES, pct)
+from common import CAVEATS, CLASSES, COLORS, KNOWN_MIXUPS, NAMES, RISK_LEVELS, SHORT_NAMES, pct
 
 PANELS = ["Summary", "Selected spot", "Look here", "Risk regions"]
 COLOR_BY = {"Tissue type": "tissue", "How sure the AI is": "confidence", "Risk level": "risk"}
@@ -129,22 +129,19 @@ def map_panel(slide, data, markers, arrow):
     st.caption("Hover a spot to see what the AI thinks it is; click it for details. "
                "Scroll to zoom, drag to move.")
 
+    # downloads are made only when clicked; the picture uses the coloring chosen above
+    a, b, _ = st.columns([0.32, 0.32, 0.36])
+    shown = mode if show_overlay else "tissue"
+    a.download_button("Download map picture", lambda: export.map_png(slide, shown, opacity),
+                      file_name=f"{slide.slide_id}_{shown}_map.png", mime="image/png", key=f"dl_png_{k}",
+                      on_click="ignore", icon="🖼️", width="stretch")
+    b.download_button("Download PDF report", lambda: export.pdf_report(slide),
+                      file_name=f"{slide.slide_id}_report.pdf", mime="application/pdf", key=f"dl_pdf_{k}",
+                      on_click="ignore", icon="📄", width="stretch")
+
 
 def legend(data, mode):
-    tiles = data["tiles"]
-    items = []
-    if mode == "tissue":
-        fr = (tiles.loc[data["ok"], "label"].value_counts(normalize=True)).to_dict()
-        items = [(f"{SHORT_NAMES[c]} {pct(fr.get(c, 0))}", COLORS[c]) for c in CLASSES]
-    elif mode == "confidence":
-        for level, color in tile_map.SURE_COLORS.items():
-            items.append((f"{level} ({int((data['sure'] == level).sum()):,})", color))
-    else:
-        for level, (name, color) in RISK_LEVELS.items():
-            items.append((f"Level {level} {name} ({int((tiles['risk_level'] == level).sum()):,})", color))
-    if (~data["ok"]).any():
-        items.append((f"Not analyzed ({int((~data['ok']).sum())})", NOT_ANALYZED_COLOR))
-    ui.legend(items)
+    ui.legend(tile_map.legend_items(data, mode))
 
 
 # ---------------------------------------------------------------- right-hand panels

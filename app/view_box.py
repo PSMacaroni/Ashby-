@@ -7,6 +7,7 @@ import json
 
 import streamlit as st
 
+import export
 import slide_data
 import ui
 
@@ -107,10 +108,17 @@ def slide_menu(key):
 
     st.markdown("**Export**")
     a, b = st.columns(2)
-    summary = slide_data.read_summary(slide.folder)
-    a.download_button("Summary (.json)", json.dumps(summary, indent=2), file_name=f"{slide.slide_id}_summary.json",
-                      mime="application/json", key=f"exp_json_{key}", width="stretch", on_click="ignore")
-    b.download_button("Tile table (.csv)", (slide.folder / "tiles.csv").read_bytes(),
+    # files are made only when a button is clicked (the lambda runs then)
+    a.download_button("PDF report (1 page)", lambda: export.pdf_report(slide),
+                      file_name=f"{slide.slide_id}_report.pdf", mime="application/pdf",
+                      key=f"exp_pdf_{key}", width="stretch", on_click="ignore", icon="📄")
+    b.download_button("Map picture (.png)", lambda: export.map_png(slide, "tissue"),
+                      file_name=f"{slide.slide_id}_tissue_map.png", mime="image/png",
+                      key=f"exp_png_{key}", width="stretch", on_click="ignore", icon="🖼️")
+    a.download_button("Summary (.json)", lambda: json.dumps(slide_data.read_summary(slide.folder), indent=2),
+                      file_name=f"{slide.slide_id}_summary.json", mime="application/json",
+                      key=f"exp_json_{key}", width="stretch", on_click="ignore")
+    b.download_button("Tile table (.csv)", lambda: (slide.folder / "tiles.csv").read_bytes(),
                       file_name=f"{slide.slide_id}_tiles.csv", mime="text/csv",
                       key=f"exp_csv_{key}", width="stretch", on_click="ignore")
 

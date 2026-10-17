@@ -211,9 +211,9 @@ def blank_thumbnail(geom):
     return Image.new("RGB", (geom["width"], geom["height"]), (236, 236, 240))
 
 
-@st.cache_data(show_spinner=False)
-def _map_jpeg(folder_str, _stamp, mode, opacity, show_overlay):
-    data = _prepare(folder_str, _stamp)
+def _compose(folder_str, stamp, mode, opacity, show_overlay):
+    """The slide thumbnail with the colored map blended on top (a PIL image)."""
+    data = _prepare(folder_str, stamp)
     g = data["geom"]
     thumb = slide_data.read_thumbnail(Path(folder_str))
     base = (thumb if thumb is not None else blank_thumbnail(g)).convert("RGBA")
@@ -225,14 +225,41 @@ def _map_jpeg(folder_str, _stamp, mode, opacity, show_overlay):
         layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
         layer.paste(over, (round(g["x0"]), round(g["y0"])))
         base = Image.alpha_composite(base, layer)
+    return base.convert("RGB")
+
+
+@st.cache_data(show_spinner=False)
+def _map_jpeg(folder_str, _stamp, mode, opacity, show_overlay):
     buf = io.BytesIO()
-    base.convert("RGB").save(buf, "JPEG", quality=88)
+    _compose(folder_str, _stamp, mode, opacity, show_overlay).save(buf, "JPEG", quality=88)
     return buf.getvalue()
 
 
 def map_jpeg(slide, mode, opacity, show_overlay):
-    """The slide thumbnail with the colored map blended on top, as JPEG bytes."""
+    """The map picture as JPEG bytes, for the interactive figure."""
     return _map_jpeg(str(slide.folder), slide_data.stamp(slide.folder), mode, round(opacity, 2), show_overlay)
+
+
+def map_image(slide, mode, opacity, show_overlay=True):
+    """The map picture as a PIL image, for exports."""
+    return _compose(str(slide.folder), slide_data.stamp(slide.folder), mode, round(opacity, 2), show_overlay)
+
+
+def legend_items(data, mode):
+    """[(label, hex color)] explaining the map colors, with counts or shares."""
+    tiles, ok = data["tiles"], data["ok"]
+    items = []
+    if mode == "tissue":
+        fr = tiles.loc[ok, "label"].value_counts(normalize=True).to_dict()
+        items = [(f"{SHORT_NAMES[c]} {fr.get(c, 0):.0%}", COLORS[c]) for c in CLASSES]
+    elif mode == "confidence":
+        items = [(f"{level} ({int((data['sure'] == level).sum()):,})", color) for level, color in SURE_COLORS.items()]
+    else:
+        items = [(f"Level {level} {name} ({int((tiles['risk_level'] == level).sum()):,})", color)
+                 for level, (name, color) in RISK_LEVELS.items()]
+    if (~ok).any():
+        items.append((f"Not analyzed ({int((~ok).sum())})", NOT_ANALYZED_COLOR))
+    return items
 
 
 def neighborhood(slide, data, idx, radius=6, scale=4):

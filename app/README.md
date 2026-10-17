@@ -31,8 +31,8 @@ To remake them: `python app/make_demo_data.py`.
 
 | Level | Screen | What you can do |
 |---|---|---|
-| 1 | **Slide Box** | A card per processed slide (thumbnail, name, case ID, date, risk flags). **Open** goes to Level 2. The **⋮** button opens the slide's menu: rename (and copy its details), duplicate, export (summary JSON, tile CSV), remove. Streamlit can't catch right-clicks, so this button replaces the right-click menu. |
-| 2 | **Slide explorer** | Left: the slide with the tissue map on top. Turn the map on or off, color it by **tissue type**, **how sure the AI is**, or **risk level**. **Hover** any spot for a tooltip; **click** it for details. Scroll to zoom, drag to move. Right: four panels (below). |
+| 1 | **Slide Box** | A card per processed slide (thumbnail, name, case ID, date, risk flags). **Open** goes to Level 2. The **⋮** button opens the slide's menu: rename (and copy its details), duplicate, export (one-page PDF report, map picture, summary JSON, tile CSV), remove. Streamlit can't catch right-clicks, so this button replaces the right-click menu. |
+| 2 | **Slide explorer** | Left: the slide with the tissue map on top. Turn the map on or off, color it by **tissue type**, **how sure the AI is**, or **risk level**. **Hover** any spot for a tooltip; **click** it for details. Scroll to zoom, drag to move. Under the map: **Download map picture** (in the current coloring) and **Download PDF report**. Right: four panels (below). |
 
 Right-hand panels on Level 2:
 - **Summary**: top risk flags and key findings; **Expand summary** shows everything (border, depth, direction, immune, necrosis, stroma, all 8 tissue classes, caveats). An arrow on the map shows which way the front faces *in this slice*.
@@ -51,6 +51,7 @@ The ← → arrows at the top work like a browser's back and forward.
 | `view_slide.py` | Level 2, the map and the four right-hand panels |
 | `tile_map.py` | Map picture, hover text, clickable points, "unsure" spots |
 | `explain.py` | Plain-language text built from the numbers (templates, no AI) |
+| `export.py` | Map picture (PNG with title and color key) and the one-page PDF report |
 | `slide_data.py` | Finds slides, reads result files, remembers renames/copies/removed slides |
 | `ui.py` | Top bar, back/forward history, badges, page style |
 | `common.py` | Folders, the 8 classes, colors, known model mix-ups, caveats |
@@ -59,6 +60,14 @@ The ← → arrows at the top work like a browser's back and forward.
 
 The app writes only two things: `app/demo_data/` (fake slides) and `app/slide_box.json` (your renames,
 copies and removed slides). Both are git-ignored. Result files are never changed.
+
+## Exports
+
+- **Map picture (.png)**: the map with the slide name above and a color key below, ready for a slide deck.
+- **PDF report (1 page)**: map, tissue breakdown, how sure the AI is, top risk flags, key findings, top risk
+  regions, where the AI is unsure, and the caveats (always printed in full). Longer lists end with "+ N more in the app".
+
+Both are made only when the button is clicked; the picture takes a few seconds.
 
 ## Where slides come from
 
@@ -134,7 +143,6 @@ version (features doc, section 7) is final.
 
 ## Not built yet
 
-- Export of the map picture and a one-page PDF report
 - Text search in the open slide (CONCH text encoder on the laptop, with a list of precomputed queries as fallback)
 - Lumen rewording of the summaries (template text is shown until then)
 - Level 3 tile deep dive (stitched previews), after the core is done
