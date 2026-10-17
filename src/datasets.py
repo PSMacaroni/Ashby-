@@ -39,12 +39,23 @@ def sample_nct(nct_dir, n_per_class=50, seed=0):
     return items
 
 
-def sample_pathgen(pathgen_dir, n=16, seed=0):
+# The PathGen 2k sample comes from 10 TCGA slides of many cancer types; only these are colorectal
+# (GDC file_id -> slide). Our tissue classes are for colon, so tests default to these.
+PATHGEN_COLORECTAL_FILE_IDS = {
+    "bffacf34-4942-496d-9c5d-d36294d80a9d": "TCGA-AA-3844 (COAD)",
+    "ed7c20f8-e2a0-4a07-baaf-5002433d8c0c": "TCGA-CM-4746 (COAD)",
+    "32abfee5-daea-4816-8c24-122dbf593aff": "TCGA-AH-6547 (READ)",
+}
+
+
+def sample_pathgen(pathgen_dir, n=16, seed=0, file_ids=PATHGEN_COLORECTAL_FILE_IDS):
     """
-    Pick n random PathGen patches that have a caption. Returns a list of dicts:
-    {path, file_id, x, y, caption}. x, y are full-resolution pixel positions in the TCGA slide.
+    Pick n random PathGen patches that have a caption, from slides in `file_ids`
+    (None = any slide). Returns a list of dicts: {path, file_id, x, y, caption}.
+    x, y are full-resolution pixel positions in the TCGA slide.
     """
-    pngs = sorted(p for p in Path(pathgen_dir).glob("*.png") if p.with_suffix(".txt").exists())
+    pngs = sorted(p for p in Path(pathgen_dir).glob("*.png") if p.with_suffix(".txt").exists()
+                  and (file_ids is None or p.stem.rsplit("_", 2)[0] in file_ids))
     rng = np.random.default_rng(seed)
     out = []
     for i in rng.choice(len(pngs), min(n, len(pngs)), replace=False):
