@@ -49,7 +49,10 @@ Clinical framing: decision support that flags features that are tedious and inco
   txt_emb = model.encode_text(tokenize(texts=prompts, tokenizer=get_tokenizer()))
   probs = (img_emb @ txt_emb.T * model.logit_scale.exp()).softmax(-1)
   ```
-- Stretch: MUSK (`xiangjx/musk`), PathGen-CLIP (`jamessyx/PathGen-CLIP`): follow each model card's usage.
+- MUSK (`xiangjx/musk`): `load_musk()` in `src/models.py` (same interface as CONCH; own `MuskTokenizer` because
+  transformers 5 can't load its .spm file). Zero-shot on NCT-CRC (400 tiles): CONCH 90.0%, MUSK 90.5%, average 92.0%;
+  MUSK better at tumor/stroma and far better calibrated. Details: `docs/handoff_small_classifier.md`.
+- Stretch: PathGen-CLIP (`jamessyx/PathGen-CLIP`): follow the model card's usage.
 - Approach: zero-shot with prompt ensembles (several phrasings per class, averaged). We do NOT train big models.
   If a class is inaccurate, train a small logistic regression on CONCH embeddings (labels from PathGen captions
   by keyword, or a small hand-labeled set).
