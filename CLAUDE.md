@@ -74,33 +74,47 @@ Laptop: (8) Streamlit + Plotly app reads results; summary text from templates, o
 (pathologist + patient versions) that may only restate numbers from summary.json.
 
 ## Data contract (all code must follow this)
-Results per slide in `data/results/<slide_id>/`:
-- `thumbnail.png`: downsampled slide image; record its downsample factor in summary.json
+Tiles are **224 px at 0.5 µm/px = 112 µm** (same as NCT-CRC; one tile = 0.0125 mm²).
+Results per slide in `data/results/<slide_id>/`.
+
+Made on Delta by the whole-slide pipeline (GPU):
+- `thumbnail.png`: downsampled slide image; its downsample factor (level-0 px per thumbnail px) goes in summary.json
 - `tiles.csv`: one row per tissue tile, columns:
   `row, col, x, y, tile_size_px, qc_ok, qc_reason, p_tumor, p_normal_mucosa, p_muscle, p_fat, p_lymphocytes,
   p_mucus, p_necrosis, p_stroma, label, confidence`
   (x, y = level-0 pixel top-left; label = argmax class name; confidence = max prob)
+  Optional: `p_nerve`, `p_artery` (trained yes/no detectors, 0-1), `alt_label` (a second model's top class,
+  e.g. MUSK's when the p_* columns are CONCH's; disagreement = "unsure here")
+- `embeddings.npy`: float32 [n_tiles, dim], rows in the same order as tiles.csv (CONCH 512, MUSK 1024)
 - `tiles/<row>_<col>.jpg`: optional 128 px tile previews for click-to-zoom
-- `summary.json`:
-  ```json
-  {
-    "slide_id": "", "mpp": 0.5, "tile_size_px": 448, "thumbnail_downsample": 64,
-    "grid_shape": [0, 0], "n_tissue_tiles": 0,
-    "tissue_fractions": {"tumor": 0, "normal_mucosa": 0, "muscle": 0, "fat": 0,
-                         "lymphocytes": 0, "mucus": 0, "necrosis": 0, "stroma": 0},
-    "tumor": {"fraction_of_tissue": 0, "area_mm2": 0, "centroid_rc": [0, 0]},
-    "border": {"n_border_tiles": 0, "solidity": 0, "irregularity": 0, "pattern": "pushing|infiltrative"},
-    "invasion": {"border_touch_fraction": {"muscle": 0, "fat": 0, "normal_mucosa": 0, "stroma": 0},
-                 "deepest_layer": "mucosa|muscle|fat", "t_stage_hint": "",
-                 "direction": {"side": "", "vector_rc": [0, 0]}},
-    "immune": {"core_fraction": 0, "margin_fraction": 0,
-               "margin_by_side": {"top": 0, "bottom": 0, "left": 0, "right": 0}, "pattern": ""},
-    "necrosis": {"fraction_in_tumor": 0, "central": false},
-    "high_risk_flags": [], "caveats": [],
-    "model": {"name": "CONCH", "prompts_version": ""}
-  }
-  ```
+- `summary.json` slide info: `slide_id, mpp (0.5), tile_size_px (224), thumbnail_downsample, grid_shape,
+  model {name, prompts_version}, embeddings_model`, optional `project, pT, pN, stage`
+
+Made on the laptop or Delta (CPU only):
+- `phrase_scores.csv`: `row, col` + one column per key in `src/phrases.py` (`scripts/score_phrases.py`;
+  needs embeddings.npy + the text side of the same model)
+- `scripts/analyze_slide.py` adds to `summary.json`: `tissue_fractions, tumor, border` (growth pattern + front
+  arcs), `satellites, invasion` (border_touch_fraction, deepest_layer, t_stage_hint, direction, heading_into),
+  `fat, spread, stroma, necrosis, mucin, immune, lymph_nodes, outer_edge, uncertainty, flags, risk,
+  high_risk_flags, caveats`. Full example: `docs/summary_example.json` (the fake infiltrative slide).
+  Keys from the old contract are kept (e.g. `border.irregularity` = front roughness in µm).
+- `tile_analysis.csv`: per tissue tile `row, col, label` (smoothed), `unsure, risk_points, zone, border,
+  dist_to_front_um, in_main_tumor, on_front`: for the app's overlays.
 Update this contract here if it must change.
+
+## Trained vs computed (who makes what)
+- **Trained** (Models teammate): the 8-class classifier on CONCH/MUSK embeddings (Kather tiles), and yes/no
+  nerve and artery detectors (pathologist-labeled tiles) -> `p_*` and `p_nerve`/`p_artery` in tiles.csv.
+- **Text match, no training**: search bar and flag phrases (`src/phrases.py`).
+- **Computed, no model** (`src/front.py`, `src/features.py`): tumor mask, invasive front, zones, growth
+  pattern, direction, depth hint, fat, stroma ratio, necrosis + rim, mucin, immune zones, lymph nodes,
+  deposits, outer edge, uncertainty, risk map (`src/risk.py`).
+- **Model + geometry** (`src/flags.py`): perineural, venous, lymphatic, budding hotspot, stroma maturity,
+  leftover adenoma. "Look here" hints only; "strong" ones feed the risk map.
+- **Not doing**: nucleus model (budding counts, neutrophils, eosinophils), MSI predictor.
+- Every analysis number is in `src/cutoffs.py`, marked doc / literature / PLACEHOLDER. PLACEHOLDER cutoffs
+  need the pathologist before results are shown. The risk table's section-7 rows are placeholders (that
+  section wasn't in the PDF). Test on fake slides: `python scripts/make_fake_slide.py`, `pytest -q`.
 
 ## Delta specifics
 - Accounts: `bfqi-delta-gpu` (**10 GPU-hours for the whole team**; spend carefully) and
@@ -126,8 +140,13 @@ Update this contract here if it must change.
 - Login nodes: light work only (git, pip, file listing). Long commands there can get cut off.
 
 ## Repo layout
-`app/` Streamlit app · `src/` shared code (tiling, models, maps, analysis, summary) · `scripts/` runnable steps
-(e.g. `scripts/process_slide.py --slide PATH --out data/results/`) · `notebooks/` experiments · `data/` git-ignored.
+`app/` Streamlit app · `src/` shared code · `scripts/` runnable steps · `tests/` pytest on fake slides ·
+`docs/` handoffs + `summary_example.json` · `notebooks/` experiments · `data/` git-ignored.
+- Models: `src/models.py` (CONCH, MUSK, zero-shot, `encode_texts`), `src/prompts.py`, `src/datasets.py`, `src/slides.py`
+- Analysis (CPU): `src/tilemap.py` (tiles.csv -> grids) -> `src/front.py` -> `src/features.py`, `src/flags.py`
+  (+ `src/phrases.py`), `src/risk.py`; `src/analysis.py` runs them all; `src/cutoffs.py`; `src/viz.py` (class colors)
+- Scripts: `first_look.py` (model bake-off), `analyze_slide.py`, `score_phrases.py`, `make_fake_slide.py`,
+  `check_setup.py`. Still to build: the whole-slide pipeline (tile + embed + classify -> tiles.csv, embeddings.npy).
 
 ## Validation we want for judges
 Normal (-11) slides → near-zero tumor; tissue accuracy on ~100 hand-checked tiles (zero-shot vs small classifier);
