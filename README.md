@@ -98,6 +98,7 @@ Ashby-/
 ├── src/                 # shared Python code used by notebooks, scripts, and the app
 ├── notebooks/           # Jupyter notebooks for experiments
 ├── scripts/             # command-line scripts (check_setup.py lives here)
+├── docs/                # handoff notes for teammates (e.g. handoff_small_classifier.md)
 ├── data/                # local data. Git-ignored, never committed
 ├── .env.example         # template for your private .env
 ├── requirements.txt     # Python packages to install
