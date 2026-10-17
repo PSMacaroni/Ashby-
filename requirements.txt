@@ -2,7 +2,7 @@
 numpy
 pandas
 pillow
-matplotlib
+matplotlib>=3.11.2  # Delta's conda matplotlib 3.11.0 crashes drawing any text (FreeType "raster overflow")
 scikit-learn
 scikit-image
 tqdm

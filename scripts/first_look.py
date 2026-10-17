@@ -35,6 +35,15 @@ from src.models import build_text_classifier, classify_images, load_conch
 from src.prompts import CLASSES, PROMPTS_VERSION
 
 
+def try_plot(fn, *args, **kwargs):
+    """Draw a figure, but don't let a drawing error throw away the (expensive) results."""
+    try:
+        return fn(*args, **kwargs)
+    except Exception as e:
+        print(f"  [warning] could not draw {fn.__name__}: {type(e).__name__}: {e}")
+        plt.close("all")
+
+
 def top_k(prob_row, k=3):
     order = np.argsort(prob_row)[::-1][:k]
     return [(CLASSES[i], float(prob_row[i])) for i in order]
@@ -64,13 +73,18 @@ def prob_table(probs):
     return df
 
 
-def save_confusion(true_idx, pred_idx, path_png, path_csv, title):
+def confusion_matrix(true_idx, pred_idx, path_csv):
     n = len(CLASSES)
     cm = np.zeros((n, n), dtype=int)
     for t, p in zip(true_idx, pred_idx):
         cm[t, p] += 1
     pd.DataFrame(cm, index=[f"true_{c}" for c in CLASSES],
                  columns=[f"pred_{c}" for c in CLASSES]).to_csv(path_csv)
+    return cm
+
+
+def save_confusion(cm, path_png, title):
+    n = len(CLASSES)
     fig, ax = plt.subplots(figsize=(7, 6))
     ax.imshow(cm / cm.sum(1, keepdims=True).clip(min=1), cmap="Blues", vmin=0, vmax=1)
     ax.set_xticks(range(n), CLASSES, rotation=45, ha="right")
@@ -86,7 +100,6 @@ def save_confusion(true_idx, pred_idx, path_png, path_csv, title):
     plt.tight_layout()
     fig.savefig(path_png, dpi=100)
     plt.close(fig)
-    return cm
 
 
 def nct_test(args, out, items, images):
@@ -104,23 +117,30 @@ def nct_test(args, out, items, images):
         metrics[size] = {"accuracy": acc, "per_class_accuracy": per_class,
                          "n_tiles": len(items), "seconds": round(time.time() - t0, 1)}
 
+        # Save the numbers first; pictures last (a drawing error must not lose results)
         tag = f"nct_{size}px"
-        save_confusion(true_idx, pred_idx, out / f"{tag}_confusion.png", out / f"{tag}_confusion.csv",
-                       f"NCT-CRC zero-shot, CONCH @ {size}px: accuracy {acc:.1%}")
         df = prob_table(probs)
         df.insert(0, "true_label", [c for _, c in items])
         df.insert(0, "file", [p.name for p, _ in items])
         df.to_csv(out / f"{tag}_predictions.csv", index=False)
-
-        # 2 examples per class, so you can see what each class looks like and what CONCH said
-        pick = [i for k in range(len(CLASSES)) for i in np.flatnonzero(true_idx == k)[:2]]
-        save_grid([images[i] for i in pick], probs[pick], out / f"{tag}_examples.png",
-                  titles=[f"TRUE: {items[i][1]}" for i in pick])
+        cm = confusion_matrix(true_idx, pred_idx, out / f"{tag}_confusion.csv")
 
         print(f"\n== NCT-CRC, CONCH @ {size}px: accuracy {acc:.1%} on {len(items)} tiles "
               f"({metrics[size]['seconds']}s)")
         for c, a in per_class.items():
             print(f"   {c:14s} {a:6.1%}")
+        print("   most common mix-ups (true -> CONCH says: count):")
+        off = [(cm[i, j], CLASSES[i], CLASSES[j]) for i in range(len(CLASSES))
+               for j in range(len(CLASSES)) if i != j and cm[i, j]]
+        for count, t, p in sorted(off, reverse=True)[:5]:
+            print(f"     {t} -> {p}: {count}")
+
+        try_plot(save_confusion, cm, out / f"{tag}_confusion.png",
+                 f"NCT-CRC zero-shot, CONCH @ {size}px: accuracy {acc:.1%}")
+        # 2 examples per class, so you can see what each class looks like and what CONCH said
+        pick = [i for k in range(len(CLASSES)) for i in np.flatnonzero(true_idx == k)[:2]]
+        try_plot(save_grid, [images[i] for i in pick], probs[pick], out / f"{tag}_examples.png",
+                 titles=[f"TRUE: {items[i][1]}" for i in pick])
 
         del model, preprocess, text_emb
         gc.collect()
@@ -150,6 +170,9 @@ def main():
     items = sample_nct(args.nct_dir, args.n_per_class)
     images = [load_rgb(p) for p, _ in items]
     best, metrics = nct_test(args, out, items, images)
+    summary = {"prompts_version": PROMPTS_VERSION, "best_size": best,
+               "nct": {str(k): v for k, v in metrics.items()}}
+    (out / "metrics.json").write_text(json.dumps(summary, indent=2))
     print(f"\nbest size on NCT-CRC: {best}px -> using it for the rest")
 
     model, preprocess = load_conch(args.conch, image_size=best)
@@ -159,8 +182,6 @@ def main():
     pg = sample_pathgen(args.pathgen_dir, args.n)
     pg_images = [load_rgb(r["path"]) for r in pg]
     pg_probs, _ = classify_images(model, preprocess, pg_images, text_emb)
-    save_grid(pg_images, pg_probs, out / "pathgen_grid.png",
-              titles=[r["caption"][:50] + "..." for r in pg])
     df = prob_table(pg_probs)
     df.insert(0, "caption", [r["caption"] for r in pg])
     df.insert(0, "file", [r["path"].name for r in pg])
@@ -169,6 +190,8 @@ def main():
     for i, (r, p) in enumerate(zip(pg, pg_probs)):
         guess = ", ".join(f"{c} {v:.2f}" for c, v in top_k(p, 2))
         print(f"  #{i:2d} CONCH: {guess}\n      CAPTION: {r['caption']}")
+    try_plot(save_grid, pg_images, pg_probs, out / "pathgen_grid.png",
+             titles=[r["caption"][:50] + "..." for r in pg])
 
     # --- Test 3 (optional): one whole slide ---
     if args.slide:
@@ -179,11 +202,10 @@ def main():
         print(f"\n== Slide {name}: size {slide.dimensions}, microns/px {get_mpp(slide)}")
         thumb = get_thumbnail(slide, 64)
         thumb.save(out / "slide_thumbnail.png")
-        plt.imsave(out / "slide_tissue_mask.png", tissue_mask(thumb))
+        try_plot(plt.imsave, out / "slide_tissue_mask.png", tissue_mask(thumb))
         coords = sample_tissue_coords(slide, n=args.n, out_px=best, seed=0)
         patches = [read_patch(slide, x, y, out_px=best) for x, y in coords]
         probs, _ = classify_images(model, preprocess, patches, text_emb)
-        save_grid(patches, probs, out / "slide_tiles_grid.png")
         df = prob_table(probs)
         df.insert(0, "y", [y for _, y in coords])
         df.insert(0, "x", [x for x, _ in coords])
@@ -191,10 +213,8 @@ def main():
         df.to_csv(out / "slide_tiles.csv", index=False)
         for i, p in enumerate(probs):
             print(f"  #{i:2d} " + ", ".join(f"{c} {v:.2f}" for c, v in top_k(p)))
+        try_plot(save_grid, patches, probs, out / "slide_tiles_grid.png")
 
-    summary = {"prompts_version": PROMPTS_VERSION, "best_size": best,
-               "nct": {str(k): v for k, v in metrics.items()}}
-    (out / "metrics.json").write_text(json.dumps(summary, indent=2))
     print(f"\nsaved to {out}: {sorted(p.name for p in out.iterdir())}")
 
 
