@@ -1,0 +1,9 @@
+Kather class,fat,lymphocytes,mucus,muscle,necrosis,normal_mucosa,stroma,tumor
+01_TUMOR,0,6,11,3,8,2,3,592
+02_STROMA,8,1,22,330,1,0,262,1
+03_COMPLEX,0,5,15,32,27,1,467,78
+04_LYMPHO,0,411,6,8,32,1,152,15
+05_DEBRIS,19,1,242,30,160,0,172,1
+06_MUCOSA,0,1,5,0,0,614,0,5
+07_ADIPOSE,598,0,8,1,17,0,1,0
+08_EMPTY,5,0,7,61,552,0,0,0

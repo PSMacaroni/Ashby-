@@ -8,6 +8,15 @@ embed the tiles, then call the matching helper in `src/`.
 Saved with scikit-learn 1.9.1 (laptop) and Delta's `pytorch-conda/2.12` environment. Load them with the same major
 scikit-learn version.
 
+**Recommended (split models, `docs/split_models.md`):**
+
+| file | what it predicts | trained on | code | details |
+|---|---|---|---|---|
+| `tissue8_split_v1.joblib` | **only the 8 tissue classes** | NCT-CRC-HE-100K + STARC-9 (169,434 tiles, 2 hospitals) | `src/classifier.py` | average accuracy 94.6% on 4 test sets (zero-shot 81.1%), worst 89.1%; `reports/split_v1/` |
+| `structures_split_v1.joblib` | **nerve / vessel / blood / other** | SPIDER colon + skin + STARC-9 blood (38,941 tiles) | `src/structures.py` | nerves 99.7%, vessels 97.5–98.7%, blood 94.5–99.5%; watch fat → blood (7–16%) |
+
+**Earlier models (kept for comparison):**
+
 | file | what it predicts | trained on | code | details |
 |---|---|---|---|---|
 | `conch_lr_starc9_lr.joblib` | 8 tissue classes + **blood** (blood = "ignore this tile") | STARC-9, 90,000 tiles, ~200 Stanford patients | `src/classifier.py` | `docs/dataset_starc9.md`, `reports/starc9_lr/` |

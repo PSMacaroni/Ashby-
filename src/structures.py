@@ -80,10 +80,14 @@ def load_structures(path):
 
 
 def predict_structures(bundle, embeddings):
-    """Per-tile structure probabilities from CONCH embeddings [n, 512]."""
-    p = np.zeros((len(embeddings), len(STRUCTURE_LABELS)))
+    """
+    Per-tile structure probabilities from CONCH embeddings [n, 512]: p_<label> for every label the model knows
+    (v1: other, nerve, vessel; v2 adds blood = tile to ignore), the most likely label, and zero-shot p_artery.
+    """
+    labels = bundle.get("labels", STRUCTURE_LABELS)
+    p = np.zeros((len(embeddings), len(labels)))
     p[:, bundle["clf"].classes_] = bundle["clf"].predict_proba(embeddings)
     pv = softmax(bundle["logit_scale"] * embeddings @ bundle["vessel_type_text"].T)
-    return {"p_other": p[:, 0], "p_nerve": p[:, 1], "p_vessel": p[:, 2],
-            "structure": np.array(STRUCTURE_LABELS)[p.argmax(1)],
+    return {**{f"p_{name}": p[:, i] for i, name in enumerate(labels)},
+            "structure": np.array(labels)[p.argmax(1)],
             "p_artery": pv[:, bundle["vessel_type_names"].index("artery")]}
