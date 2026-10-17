@@ -139,23 +139,26 @@ def tokenize(tokenizer, texts):
 
 
 @torch.inference_mode()
+def encode_texts(model, texts):
+    """Turn a list of phrases into normalized text embeddings [len(texts), dim] (CONCH or MUSK)."""
+    if isinstance(model, MuskModel):
+        return model.encode_texts(texts)
+    from conch.open_clip_custom import get_tokenizer
+
+    device = next(model.parameters()).device
+    return model.encode_text(tokenize(get_tokenizer(), texts).to(device))
+
+
+@torch.inference_mode()
 def build_text_classifier(model, prompts=None):
     """
     Turn each class's prompts into one averaged text embedding.
     Returns a tensor of shape [n_classes, dim], rows in CLASSES order (dim: CONCH 512, MUSK 1024).
     """
     prompts = prompts or build_prompts()
-    device = next(model.parameters()).device
-    if isinstance(model, MuskModel):
-        encode = model.encode_texts
-    else:
-        from conch.open_clip_custom import get_tokenizer
-
-        tokenizer = get_tokenizer()
-        encode = lambda texts: model.encode_text(tokenize(tokenizer, texts).to(device))
     rows = []
     for c in CLASSES:
-        emb = encode(prompts[c])                  # [n_prompts, dim], already normalized
+        emb = encode_texts(model, prompts[c])     # [n_prompts, dim], already normalized
         emb = emb.mean(dim=0)                     # average the phrasings
         rows.append(emb / emb.norm())             # re-normalize to length 1
     return torch.stack(rows)

@@ -35,3 +35,6 @@ openai
 # App
 streamlit
 plotly
+
+# Tests (run: pytest -q)
+pytest

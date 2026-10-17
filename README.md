@@ -98,12 +98,29 @@ Ashby-/
 ├── src/                 # shared Python code used by notebooks, scripts, and the app
 ├── notebooks/           # Jupyter notebooks for experiments
 ├── scripts/             # command-line scripts (check_setup.py lives here)
-├── docs/                # handoff notes for teammates (e.g. handoff_small_classifier.md)
+├── tests/               # automatic checks on fake slides (run: pytest -q)
+├── docs/                # handoff notes + summary_example.json (what the app reads)
 ├── data/                # local data. Git-ignored, never committed
 ├── .env.example         # template for your private .env
 ├── requirements.txt     # Python packages to install
 └── README.md
 ```
+
+## Slide analysis (laptop, no GPU)
+
+Everything in the summary panel (tumor %, growth pattern, depth hint, direction, stroma, necrosis, immune
+zones, lymph nodes, flags, risk map) is computed from a slide's `tiles.csv` with ordinary Python. It runs on
+a laptop in seconds, so you can work on it **before** real slides are processed, using fake ones:
+
+```bash
+python scripts/make_fake_slide.py                              # writes data/results/fake_*/
+python scripts/analyze_slide.py data/results/fake_infiltrative # writes summary.json + a check picture
+pytest -q                                                      # 19 automatic checks
+```
+
+Open `data/results/fake_infiltrative/analysis_overview.png` to see the tissue map, zones, risk map and flags.
+For a real slide, copy its folder from Delta and run the same `analyze_slide.py` command. All the numbers it
+uses are in `src/cutoffs.py`; the ones marked PLACEHOLDER need a pathologist's check before showing anyone.
 
 ## Team roles
 

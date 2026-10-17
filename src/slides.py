@@ -38,11 +38,12 @@ def tissue_mask(thumbnail):
     return sat > max(threshold_otsu(sat), 20)
 
 
-def read_patch(slide, x, y, out_px=448, target_mpp=0.5):
+def read_patch(slide, x, y, out_px=224, target_mpp=0.5):
     """
     Read a square patch whose top-left is (x, y) in full-resolution pixels, covering
     out_px * target_mpp microns, resized to out_px x out_px. If the slide's mpp is unknown,
     reads out_px pixels at full resolution with no rescaling.
+    Default 224 px at 0.5 µm/px = 112 µm, the same as the NCT-CRC tiles (our tile size).
     """
     mpp = get_mpp(slide)
     read_px = int(round(out_px * target_mpp / mpp)) if mpp else out_px
@@ -52,7 +53,7 @@ def read_patch(slide, x, y, out_px=448, target_mpp=0.5):
     return patch
 
 
-def sample_tissue_coords(slide, n=16, out_px=448, target_mpp=0.5, downsample=64, seed=0,
+def sample_tissue_coords(slide, n=16, out_px=224, target_mpp=0.5, downsample=64, seed=0,
                          min_tissue=0.5):
     """
     Pick n random patch positions (full-resolution x, y) that are mostly tissue.
@@ -73,3 +74,16 @@ def sample_tissue_coords(slide, n=16, out_px=448, target_mpp=0.5, downsample=64,
     if len(candidates) > n:
         candidates = [candidates[i] for i in rng.choice(len(candidates), n, replace=False)]
     return candidates
+
+
+def blur_score(patch):
+    """
+    Sharpness of a patch: variance of the Laplacian (an edge filter) on the grayscale image.
+    Blurry patches have few sharp edges, so a low score = blurry. Compare with cutoffs.BLUR_MIN,
+    which is a placeholder: pick it by looking at ~20 tiles.
+    """
+    from skimage.color import rgb2gray
+    from skimage.filters import laplace
+
+    gray = rgb2gray(np.asarray(patch.convert("RGB"), dtype=float) / 255.0)
+    return float(laplace(gray).var())

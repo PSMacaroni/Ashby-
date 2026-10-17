@@ -268,6 +268,19 @@ The pipeline already gets embeddings from `classify_images()` (it returns `probs
 zero-shot for the classifier is one line (or two calls + `np.hstack` for the combined version). In `summary.json`, set
 `"model": {"name": "CONCH + MUSK + logistic regression v1", ...}`.
 
+### Step 4: nerve and artery detectors (we are doing these)
+
+Same recipe as the 8-class classifier, but one **yes/no** classifier per structure, because a tile can be
+"fat" *and* contain a nerve:
+1. Find candidates with text search on a few TCGA slides (phrases in `src/phrases.py`: `nerve`, `artery`),
+   top ~50 each, and have the pathologist mark each tile yes/no (aim for 30–50 yes per structure).
+2. Fit `LogisticRegression` (yes vs no) on the same embeddings; check precision on held-out labeled tiles.
+3. In the whole-slide pipeline, write the probabilities into `tiles.csv` as **`p_nerve`** and **`p_artery`**
+   (0–1). `scripts/analyze_slide.py` picks them up automatically: the perineural and venous flags then
+   use the detectors instead of the weaker text phrases (see `src/flags.py`). Nothing else to change.
+
+Main look-alike to include as "no": smooth muscle (for nerves) and veins/stroma (for arteries).
+
 ### Stretch: check on our real TCGA slides
 
 Accuracy on NCT-CRC isn't the same as accuracy on real slides. If there's time: hand-label ~100 tiles from our TCGA

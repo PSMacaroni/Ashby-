@@ -1,0 +1,942 @@
+{
+  "slide_id": "fake_infiltrative",
+  "mpp": 0.5,
+  "tile_size_px": 224,
+  "thumbnail_downsample": 112,
+  "model": {
+    "name": "fake (no model)",
+    "prompts_version": "v1"
+  },
+  "grid_shape": [
+    64,
+    96
+  ],
+  "n_tissue_tiles": 4600,
+  "tile_um": 112.0,
+  "tissue_fractions": {
+    "tumor": 0.205,
+    "normal_mucosa": 0.081,
+    "muscle": 0.119,
+    "fat": 0.474,
+    "lymphocytes": 0.03,
+    "mucus": 0.004,
+    "necrosis": 0.013,
+    "stroma": 0.073
+  },
+  "tumor": {
+    "found": true,
+    "fraction_of_tissue": 0.191,
+    "area_mm2": 10.91,
+    "centroid_rc": [
+      19.4,
+      47.4
+    ],
+    "n_tumor_pieces": 6,
+    "n_tissue_sections": 1,
+    "analyzed_section": 1
+  },
+  "border": {
+    "n_border_tiles": 141,
+    "n_front_tiles": 80,
+    "solidity": 0.927,
+    "irregularity": 58.1,
+    "roughness_um": 58.1,
+    "fractal_dimension": 0.806,
+    "n_fingers": 3,
+    "n_satellites_within_1mm": 3,
+    "pattern": "infiltrative",
+    "pattern_text": "Infiltrative: solidity 0.93, 3 finger protrusions, 3 satellites within 1.0 mm.",
+    "pattern_cutoff_calibrated": false,
+    "arcs": [
+      {
+        "id": 0,
+        "center_rc": [
+          23.7,
+          30.6
+        ],
+        "normal_rc": [
+          -0.051,
+          -0.999
+        ],
+        "bearing_deg": 272.9,
+        "clock": 9,
+        "length_um": 1068,
+        "roughness_um": 74.6,
+        "n_fingers_near": 2,
+        "n_satellites_near": 0,
+        "infiltrative": true,
+        "score": 3.24
+      },
+      {
+        "id": 1,
+        "center_rc": [
+          15.7,
+          30.7
+        ],
+        "normal_rc": [
+          -0.119,
+          -0.993
+        ],
+        "bearing_deg": 276.8,
+        "clock": 9,
+        "length_um": 830,
+        "roughness_um": 35.5,
+        "n_fingers_near": 1,
+        "n_satellites_near": 0,
+        "infiltrative": true,
+        "score": 1.59
+      },
+      {
+        "id": 2,
+        "center_rc": [
+          10.6,
+          63.4
+        ],
+        "normal_rc": [
+          -0.514,
+          0.858
+        ],
+        "bearing_deg": 59.1,
+        "clock": 2,
+        "length_um": 1049,
+        "roughness_um": 27.0,
+        "n_fingers_near": 0,
+        "n_satellites_near": 0,
+        "infiltrative": false,
+        "score": 0.45
+      },
+      {
+        "id": 3,
+        "center_rc": [
+          19.4,
+          65.4
+        ],
+        "normal_rc": [
+          0.047,
+          0.999
+        ],
+        "bearing_deg": 92.7,
+        "clock": 3,
+        "length_um": 1054,
+        "roughness_um": 34.9,
+        "n_fingers_near": 0,
+        "n_satellites_near": 0,
+        "infiltrative": false,
+        "score": 0.58
+      },
+      {
+        "id": 4,
+        "center_rc": [
+          27.5,
+          62.0
+        ],
+        "normal_rc": [
+          0.677,
+          0.736
+        ],
+        "bearing_deg": 132.6,
+        "clock": 4,
+        "length_um": 1095,
+        "roughness_um": 26.0,
+        "n_fingers_near": 0,
+        "n_satellites_near": 0,
+        "infiltrative": false,
+        "score": 0.43
+      },
+      {
+        "id": 5,
+        "center_rc": [
+          32.3,
+          54.8
+        ],
+        "normal_rc": [
+          0.908,
+          0.418
+        ],
+        "bearing_deg": 155.3,
+        "clock": 5,
+        "length_um": 1035,
+        "roughness_um": 30.8,
+        "n_fingers_near": 0,
+        "n_satellites_near": 0,
+        "infiltrative": false,
+        "score": 0.51
+      },
+      {
+        "id": 6,
+        "center_rc": [
+          33.6,
+          45.6
+        ],
+        "normal_rc": [
+          0.998,
+          0.061
+        ],
+        "bearing_deg": 176.5,
+        "clock": 6,
+        "length_um": 1022,
+        "roughness_um": 37.2,
+        "n_fingers_near": 2,
+        "n_satellites_near": 1,
+        "infiltrative": true,
+        "score": 3.62
+      },
+      {
+        "id": 7,
+        "center_rc": [
+          33.3,
+          38.8
+        ],
+        "normal_rc": [
+          0.997,
+          -0.079
+        ],
+        "bearing_deg": 184.5,
+        "clock": 6,
+        "length_um": 1035,
+        "roughness_um": 106.4,
+        "n_fingers_near": 3,
+        "n_satellites_near": 2,
+        "infiltrative": true,
+        "score": 6.77
+      },
+      {
+        "id": 8,
+        "center_rc": [
+          35.5,
+          35.5
+        ],
+        "normal_rc": [
+          0.719,
+          -0.695
+        ],
+        "bearing_deg": 224.1,
+        "clock": 7,
+        "length_um": 1035,
+        "roughness_um": 100.2,
+        "n_fingers_near": 3,
+        "n_satellites_near": 3,
+        "infiltrative": true,
+        "score": 7.67
+      },
+      {
+        "id": 9,
+        "center_rc": [
+          28.8,
+          32.2
+        ],
+        "normal_rc": [
+          0.814,
+          -0.58
+        ],
+        "bearing_deg": 215.5,
+        "clock": 7,
+        "length_um": 989,
+        "roughness_um": 108.6,
+        "n_fingers_near": 3,
+        "n_satellites_near": 2,
+        "infiltrative": true,
+        "score": 6.81
+      }
+    ]
+  },
+  "satellites": [
+    {
+      "id": 2,
+      "row": 36,
+      "col": 24,
+      "x": 10752,
+      "y": 16128,
+      "area_mm2": 0.263,
+      "diameter_um": 579,
+      "solidity": 1.0,
+      "distance_to_main_um": 763,
+      "sits_in": "fat",
+      "fat_fraction_around": 1.0,
+      "satellite": true,
+      "possible_deposit": true,
+      "in_lymph_node": false,
+      "bearing_deg": 216.9
+    },
+    {
+      "id": 3,
+      "row": 42,
+      "col": 32,
+      "x": 14336,
+      "y": 18816,
+      "area_mm2": 0.263,
+      "diameter_um": 579,
+      "solidity": 1.0,
+      "distance_to_main_um": 363,
+      "sits_in": "fat",
+      "fat_fraction_around": 1.0,
+      "satellite": true,
+      "possible_deposit": true,
+      "in_lymph_node": false,
+      "bearing_deg": 218.7
+    },
+    {
+      "id": 4,
+      "row": 44,
+      "col": 42,
+      "x": 18816,
+      "y": 19712,
+      "area_mm2": 0.263,
+      "diameter_um": 579,
+      "solidity": 1.0,
+      "distance_to_main_um": 672,
+      "sits_in": "fat",
+      "fat_fraction_around": 1.0,
+      "satellite": true,
+      "possible_deposit": true,
+      "in_lymph_node": false,
+      "bearing_deg": 139.4
+    },
+    {
+      "id": 5,
+      "row": 45,
+      "col": 11,
+      "x": 4928,
+      "y": 20160,
+      "area_mm2": 0.063,
+      "diameter_um": 283,
+      "solidity": 1.0,
+      "distance_to_main_um": 2654,
+      "sits_in": "lymphocytes",
+      "fat_fraction_around": 0.0,
+      "satellite": false,
+      "possible_deposit": false,
+      "in_lymph_node": true,
+      "bearing_deg": 228.2
+    },
+    {
+      "id": 6,
+      "row": 45,
+      "col": 64,
+      "x": 28672,
+      "y": 20160,
+      "area_mm2": 0.201,
+      "diameter_um": 506,
+      "solidity": 1.0,
+      "distance_to_main_um": 1492,
+      "sits_in": "fat",
+      "fat_fraction_around": 0.73,
+      "satellite": false,
+      "possible_deposit": false,
+      "in_lymph_node": false,
+      "bearing_deg": 153.4
+    }
+  ],
+  "invasion": {
+    "border_touch_fraction": {
+      "muscle": 0.071,
+      "fat": 0.326,
+      "stroma": 0.035,
+      "normal_mucosa": 0.071
+    },
+    "deepest_layer": "fat",
+    "t_stage_hint": "Tumor touches fat: consistent with at least pT3 (check that this fat lies outside the muscle wall).",
+    "direction": {
+      "side": "8 o'clock",
+      "clock": 8,
+      "bearing_deg": 225.0,
+      "vector_rc": [
+        0.707,
+        -0.707
+      ],
+      "rose_16": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.35,
+        0.0,
+        0.488,
+        0.0,
+        0.163,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "n_infiltrative_arcs": 6,
+      "text": "Front most infiltrative toward 8 o'clock (on the slide image), where 2 of 3 satellites lie."
+    },
+    "heading_into": {
+      "mix": {
+        "fat": 0.63,
+        "muscle": 0.17,
+        "stroma": 0.17,
+        "tumor": 0.04
+      },
+      "nearest_um": {
+        "muscle": 112,
+        "stroma": 112,
+        "fat": 112,
+        "tumor": 672
+      },
+      "text": "Facing fat 63%, muscle 17%, stroma 17%. Nearest fat 0.1 mm ahead.",
+      "based_on": "infiltrative arcs"
+    }
+  },
+  "fat": {
+    "contact_mm": 5.15,
+    "share_of_front": 0.575,
+    "depth_past_muscle_um": 2125.0,
+    "over_5mm": false,
+    "text": "Front touches fat along 5.2 mm (57% of the front). Tumor reaches about 2.1 mm past the nearest muscle."
+  },
+  "spread": {
+    "mucosa_border_mm": 1.12,
+    "front_mm": 8.96,
+    "text": "Border against normal mucosa 1.1 mm vs invasive front 9.0 mm."
+  },
+  "stroma": {
+    "worst_field_stroma_fraction": 0.613,
+    "stroma_high": true,
+    "row": 13,
+    "col": 27,
+    "x": 12096,
+    "y": 5824,
+    "window_diameter_um": 2000,
+    "text": "Stroma-high: 61% stroma in the worst field (marked)."
+  },
+  "necrosis": {
+    "fraction_in_tumor": 0.068,
+    "central": true,
+    "rim_fraction_of_tumor": 0.067,
+    "lymphocytes_in_rim": 0.02,
+    "lymphocytes_rest_of_tumor": 0.023,
+    "text": "Central necrosis, 7% of tumor area. Likely low-oxygen rim next to it: 7% of tumor tiles."
+  },
+  "mucin": {
+    "fraction_in_tumor": 0.006,
+    "label": "1% of the tumor is mucin (mucinous features).",
+    "pools": [
+      {
+        "row": 41,
+        "col": 78,
+        "x": 34944,
+        "y": 18368,
+        "area_mm2": 0.176,
+        "distance_past_muscle_um": 1456.0,
+        "text": "Mucin pool in fat, 1.5 mm beyond the muscle: check for floating tumor cells."
+      }
+    ]
+  },
+  "immune": {
+    "core_fraction": 0.025,
+    "margin_fraction": 0.067,
+    "peritumoral_fraction": 0.022,
+    "margin_by_side": {
+      "top": 0.032,
+      "right": 0.156,
+      "bottom": 0.021,
+      "left": 0.018
+    },
+    "pattern": "lymphocytes stay at the edge (excluded-like)",
+    "pattern_cutoffs_calibrated": false,
+    "measure": "mean P(lymphocytes) per tile in each zone (0-1)",
+    "text": "Lymphocyte score: core 0.03, front 0.07, outside 0.02: lymphocytes stay at the edge (excluded-like). H&E shows where lymphocytes sit, not their type (no CD8/CD4) or what they're doing."
+  },
+  "lymph_nodes": [
+    {
+      "row": 47,
+      "col": 13,
+      "x": 5824,
+      "y": 21056,
+      "diameter_um": 1245,
+      "area_mm2": 1.217,
+      "tumor_tiles_inside": 5,
+      "possible_metastasis": true,
+      "text": "Probable lymph node, 1.2 mm across (or a large lymphoid aggregate). Possible node metastasis: tumor tiles inside a lymphocyte-rich nodule."
+    }
+  ],
+  "outer_edge": {
+    "found": true,
+    "distance_um": 2016,
+    "touches": false,
+    "text": "Tumor within 2.0 mm of the outer tissue edge.",
+    "caveat": "The outer edge may be a cut surface rather than serosa, and the rectum below the peritoneal fold has no serosa: check before calling pT4a."
+  },
+  "uncertainty": {
+    "fraction_unsure": 0.009,
+    "fraction_low_confidence": 0.004,
+    "fraction_models_disagree": 0.004,
+    "regions": [
+      {
+        "row": 9,
+        "col": 38,
+        "x": 17024,
+        "y": 4032,
+        "n_tiles": 20,
+        "why": "CONCH and MUSK disagree"
+      },
+      {
+        "row": 51,
+        "col": 86,
+        "x": 38528,
+        "y": 22848,
+        "n_tiles": 20,
+        "why": "low confidence"
+      }
+    ],
+    "text": "Unsure on 1% of tissue tiles. Largest unsure area: 20 tiles (CONCH and MUSK disagree)."
+  },
+  "flags": [
+    {
+      "key": "perineural",
+      "title": "Possible perineural invasion",
+      "status": "ok",
+      "why_skipped": null,
+      "source": "trained detector",
+      "trust": "experimental",
+      "action": "Look for tumor cells wrapping around or inside this nerve.",
+      "note": null,
+      "candidates": [
+        {
+          "row": 32,
+          "col": 56,
+          "x": 25088,
+          "y": 14336,
+          "score": 0.0605,
+          "z": 6.0,
+          "strong": true,
+          "why": "nerve next to tumor"
+        },
+        {
+          "row": 32,
+          "col": 57,
+          "x": 25536,
+          "y": 14336,
+          "score": 0.0385,
+          "z": 3.8,
+          "strong": true,
+          "why": "nerve next to tumor"
+        }
+      ],
+      "n_strong": 2,
+      "measure": {
+        "nerve_tiles_touching_tumor": 2,
+        "farthest_beyond_front_um": 112,
+        "text": "Tumor reaches nerves up to 0.1 mm beyond the front."
+      }
+    },
+    {
+      "key": "venous",
+      "title": "Possible venous invasion",
+      "status": "ok",
+      "why_skipped": null,
+      "source": "shape rule + trained detector",
+      "trust": "experimental",
+      "action": "Consider an elastin stain on this block.",
+      "note": null,
+      "candidates": [
+        {
+          "row": 45,
+          "col": 64,
+          "x": 28672,
+          "y": 20160,
+          "score": 0.0687,
+          "z": 6.8,
+          "strong": true,
+          "why": "round tumor island (506 \u00b5m) in fat next to an artery"
+        },
+        {
+          "row": 47,
+          "col": 66,
+          "x": 29568,
+          "y": 21056,
+          "score": 0.0676,
+          "z": 6.7,
+          "strong": true,
+          "why": "looks like tumor in a vein (text match)"
+        },
+        {
+          "row": 48,
+          "col": 62,
+          "x": 27776,
+          "y": 21504,
+          "score": 0.06,
+          "z": 5.9,
+          "strong": true,
+          "why": "looks like tumor in a vein (text match)"
+        }
+      ],
+      "n_strong": 3,
+      "measure": {
+        "orphan_arteries": [
+          {
+            "row": 45,
+            "col": 68,
+            "x": 30464,
+            "y": 20160,
+            "why": "artery with a round tumor island beside it"
+          }
+        ]
+      }
+    },
+    {
+      "key": "lymphatic",
+      "title": "Possible lymphatic invasion",
+      "status": "ok",
+      "why_skipped": null,
+      "source": "text phrase only (less reliable)",
+      "trust": "weak",
+      "action": "A D2-40 stain tells lymphatic invasion apart from retraction artifact.",
+      "note": "Expect many false alarms: on H&E, retraction artifact looks almost the same.",
+      "candidates": [
+        {
+          "row": 20,
+          "col": 68,
+          "x": 30464,
+          "y": 8960,
+          "score": 0.0464,
+          "z": 4.8,
+          "strong": true,
+          "why": "tumor in a thin-walled space? (text match)"
+        },
+        {
+          "row": 22,
+          "col": 22,
+          "x": 9856,
+          "y": 9856,
+          "score": 0.037,
+          "z": 3.8,
+          "strong": false,
+          "why": "tumor in a thin-walled space? (text match)"
+        },
+        {
+          "row": 33,
+          "col": 55,
+          "x": 24640,
+          "y": 14784,
+          "score": 0.0294,
+          "z": 3.0,
+          "strong": false,
+          "why": "tumor in a thin-walled space? (text match)"
+        },
+        {
+          "row": 22,
+          "col": 72,
+          "x": 32256,
+          "y": 9856,
+          "score": 0.0293,
+          "z": 3.0,
+          "strong": false,
+          "why": "tumor in a thin-walled space? (text match)"
+        },
+        {
+          "row": 16,
+          "col": 82,
+          "x": 36736,
+          "y": 7168,
+          "score": 0.029,
+          "z": 3.0,
+          "strong": false,
+          "why": "tumor in a thin-walled space? (text match)"
+        }
+      ],
+      "n_strong": 1,
+      "measure": null
+    },
+    {
+      "key": "budding",
+      "title": "Budding hotspot: count buds here",
+      "status": "ok",
+      "why_skipped": null,
+      "source": "text phrase only (less reliable)",
+      "trust": "experimental",
+      "action": "Count tumor buds in this field (ITBCC). The app does not grade budding.",
+      "note": null,
+      "candidates": [
+        {
+          "row": 29,
+          "col": 26,
+          "x": 11648,
+          "y": 12992,
+          "score": 0.0527,
+          "z": 9.8,
+          "strong": true,
+          "radius_um": 500,
+          "field_mm2": 0.615,
+          "why": "highest average budding-phrase score in a budding-sized field along the front"
+        }
+      ],
+      "n_strong": 1,
+      "measure": null
+    },
+    {
+      "key": "stroma_maturity",
+      "title": "Stroma at the front (experimental)",
+      "status": "ok",
+      "why_skipped": null,
+      "source": "text phrase only (less reliable)",
+      "trust": "experimental",
+      "action": "Hand-check about 20 of these tiles with the pathologist before showing this to anyone.",
+      "note": null,
+      "candidates": [
+        {
+          "row": 13,
+          "col": 27,
+          "x": 12096,
+          "y": 5824,
+          "score": 0.0505,
+          "z": 3.3,
+          "strong": false,
+          "why": "most immature-looking stroma at the front (text match)"
+        },
+        {
+          "row": 16,
+          "col": 28,
+          "x": 12544,
+          "y": 7168,
+          "score": 0.0471,
+          "z": 3.1,
+          "strong": false,
+          "why": "most immature-looking stroma at the front (text match)"
+        },
+        {
+          "row": 15,
+          "col": 29,
+          "x": 12992,
+          "y": 6720,
+          "score": 0.0462,
+          "z": 3.1,
+          "strong": false,
+          "why": "most immature-looking stroma at the front (text match)"
+        },
+        {
+          "row": 14,
+          "col": 27,
+          "x": 12096,
+          "y": 6272,
+          "score": 0.0452,
+          "z": 3.0,
+          "strong": false,
+          "why": "most immature-looking stroma at the front (text match)"
+        },
+        {
+          "row": 17,
+          "col": 29,
+          "x": 12992,
+          "y": 7616,
+          "score": 0.0433,
+          "z": 2.9,
+          "strong": false,
+          "why": "most immature-looking stroma at the front (text match)"
+        }
+      ],
+      "n_strong": 0,
+      "measure": {
+        "shares": {
+          "mature": 0.324,
+          "keloid_like": 0.0,
+          "immature": 0.676
+        },
+        "text": "Front stroma leans: mature 32%, keloid-like 0%, immature 68%. Immature stroma is the worst sign (Ueno)."
+      }
+    },
+    {
+      "key": "adenoma",
+      "title": "Possible leftover adenoma",
+      "status": "ok",
+      "why_skipped": null,
+      "source": "text phrase only (less reliable)",
+      "trust": "experimental",
+      "action": "Check for adenoma next to the cancer.",
+      "note": null,
+      "candidates": [
+        {
+          "row": 7,
+          "col": 36,
+          "x": 16128,
+          "y": 3136,
+          "score": 0.0736,
+          "z": 7.3,
+          "strong": true,
+          "why": "tumor next to normal mucosa that looks like adenoma"
+        },
+        {
+          "row": 11,
+          "col": 33,
+          "x": 14784,
+          "y": 4928,
+          "score": 0.0659,
+          "z": 6.5,
+          "strong": true,
+          "why": "tumor next to normal mucosa that looks like adenoma"
+        },
+        {
+          "row": 8,
+          "col": 35,
+          "x": 15680,
+          "y": 3584,
+          "score": 0.0483,
+          "z": 4.8,
+          "strong": true,
+          "why": "tumor next to normal mucosa that looks like adenoma"
+        },
+        {
+          "row": 9,
+          "col": 34,
+          "x": 15232,
+          "y": 4032,
+          "score": 0.0474,
+          "z": 4.7,
+          "strong": true,
+          "why": "tumor next to normal mucosa that looks like adenoma"
+        },
+        {
+          "row": 10,
+          "col": 34,
+          "x": 15232,
+          "y": 4480,
+          "score": 0.0436,
+          "z": 4.3,
+          "strong": true,
+          "why": "tumor next to normal mucosa that looks like adenoma"
+        }
+      ],
+      "n_strong": 5,
+      "measure": null
+    }
+  ],
+  "risk": {
+    "max_level": 6,
+    "cards": [
+      {
+        "row": 24,
+        "col": 60,
+        "x": 26880,
+        "y": 10752,
+        "level": 6,
+        "n_tiles": 1055,
+        "features": [
+          "possible venous invasion (consider an elastin stain)",
+          "possible lymphatic invasion (D2-40 can confirm)",
+          "possible perineural invasion",
+          "next to necrosis (likely low oxygen)",
+          "infiltrative arc",
+          "satellite tumor island",
+          "front faces fat",
+          "budding hotspot (count buds here)",
+          "stroma-high field"
+        ],
+        "text": "Level 6: possible venous invasion (consider an elastin stain), possible lymphatic invasion (D2-40 can confirm), possible perineural invasion, next to necrosis (likely low oxygen), infiltrative arc, satellite tumor island, front faces fat, budding hotspot (count buds here), stroma-high field."
+      },
+      {
+        "row": 44,
+        "col": 71,
+        "x": 31808,
+        "y": 19712,
+        "level": 3,
+        "n_tiles": 72,
+        "features": [
+          "possible venous invasion (consider an elastin stain)",
+          "mucin pool past the muscle"
+        ],
+        "text": "Level 3: possible venous invasion (consider an elastin stain), mucin pool past the muscle."
+      }
+    ],
+    "points_table": [
+      {
+        "key": "venous_candidate",
+        "points": 2,
+        "bin": "flag",
+        "source": "doc"
+      },
+      {
+        "key": "lymphatic_candidate",
+        "points": 2,
+        "bin": "flag",
+        "source": "doc"
+      },
+      {
+        "key": "perineural_candidate",
+        "points": 2,
+        "bin": "flag",
+        "source": "doc"
+      },
+      {
+        "key": "serosal_involvement",
+        "points": 2,
+        "bin": "flag",
+        "source": "doc"
+      },
+      {
+        "key": "tumor_in_fat_over_5mm",
+        "points": 1,
+        "bin": "measure",
+        "source": "doc"
+      },
+      {
+        "key": "mucin_pool_past_muscle",
+        "points": 1,
+        "bin": "measure",
+        "source": "doc"
+      },
+      {
+        "key": "necrosis_rim",
+        "points": 1,
+        "bin": "measure",
+        "source": "doc"
+      },
+      {
+        "key": "infiltrative_arc",
+        "points": 1,
+        "bin": "measure",
+        "source": "PLACEHOLDER"
+      },
+      {
+        "key": "satellite",
+        "points": 1,
+        "bin": "measure",
+        "source": "PLACEHOLDER"
+      },
+      {
+        "key": "faces_fat",
+        "points": 1,
+        "bin": "measure",
+        "source": "PLACEHOLDER"
+      },
+      {
+        "key": "budding_hotspot",
+        "points": 1,
+        "bin": "flag",
+        "source": "PLACEHOLDER"
+      },
+      {
+        "key": "stroma_high_field",
+        "points": 1,
+        "bin": "measure",
+        "source": "PLACEHOLDER"
+      }
+    ]
+  },
+  "high_risk_flags": [
+    "Tumor touches fat: consistent with at least pT3 (check).",
+    "Infiltrative front (Infiltrative: solidity 0.93, 3 finger protrusions, 3 satellites within 1.0 mm.)",
+    "Possible perineural invasion: check 2 marked spot(s) (Look for tumor cells wrapping around or inside this nerve.)",
+    "Possible venous invasion: check 3 marked spot(s) (Consider an elastin stain on this block.)",
+    "Possible lymphatic invasion: check 1 marked spot(s) (A D2-40 stain tells lymphatic invasion apart from retraction artifact.)",
+    "Possible tumor deposit: check 3 island(s) in fat for a lymph node remnant or vessel wall (N1c).",
+    "Possible lymph node metastasis: check.",
+    "Stroma-high: 61% stroma in the worst field (marked).",
+    "Budding hotspot marked: count buds there."
+  ],
+  "caveats": [
+    "Decision support only: not a diagnosis and not a treatment recommendation.",
+    "One slide is a 2D snapshot: 'direction' means where the front faces in this section, not where it will grow.",
+    "T stage needs more than one slide: the depth line is a 'consistent with' hint, never a stage.",
+    "H&E shows where lymphocytes sit, not their type (CD8 vs CD4) or what they are doing.",
+    "The map works at 112 \u00b5m tiles: single budding cells and tumor pieces smaller than ~0.3 mm are invisible to it.",
+    "Flags are 'look here' hints from text matching and shape rules; expect false alarms.",
+    "Pushing vs infiltrative uses a placeholder solidity cutoff: not yet calibrated with a pathologist.",
+    "Some risk-map points are placeholders until the features doc's points table is copied in.",
+    "The outer edge may be a cut surface rather than serosa, and the rectum below the peritoneal fold has no serosa: check before calling pT4a."
+  ]
+}
