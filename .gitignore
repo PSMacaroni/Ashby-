@@ -1,0 +1,37 @@
+# Secrets - NEVER commit these
+.env
+
+# Data: ignore everything in data/ except the placeholder
+data/*
+!data/.gitkeep
+
+# Slides and big images
+*.svs
+*.tif
+*.tiff
+*.ndpi
+
+# Model weights and saved arrays
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.npy
+*.npz
+*.h5
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# OS / editor
+.DS_Store
+.vscode/
