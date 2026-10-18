@@ -6,7 +6,8 @@ Steps:
   1. thumbnail (64x smaller) + fat-aware tissue mask (src/slides.fat_aware_mask: stained pixels + textured pale
      pixels next to them, i.e. fat; cutoffs.TISSUE_MASK_*)
   2. grid of 224 px tiles at 0.5 µm/px (112 µm), keep grid cells that are >= 50% tissue in the thumbnail
-  3. per tile: read at full resolution, colorful fraction, blur score, 128 px preview
+  3. per tile: read at full resolution, colorful fraction, blur score, texture measures (edges, structure_cov,
+     ink_*: src/detectors.texture_measures), 128 px preview
   4. CONCH image embeddings (224 px) -> embeddings.npy (rows = tiles.csv rows); MUSK image embeddings of the same
      tiles (MUSK enlarges them to 384 px) -> embeddings_musk.npy
   5. tissue model (models/tissue8_split_v1.joblib, CONCH) -> p_<class>, label (raw argmax), confidence
@@ -14,7 +15,7 @@ Steps:
   7. blood check (models/structures_musk_v1.joblib, MUSK) -> p_blood; MUSK's own tissue model
      (models/tissue8_musk_v1.joblib) -> alt_label, a second opinion kept for reference (the analysis doesn't use it)
   8. quality check (src/detectors.quality_check + is_blood): qc_reason "background" (colorless and not fat, or
-     glass: very flat and pale), "blood" (p_blood >= cutoffs.BLOOD_PROB and not labeled fat) or "blur"
+     glass: very flat and pale, or glass / pen ink by texture: docs/preprocessing_test.md), "blood" (p_blood >= cutoffs.BLOOD_PROB and not labeled fat) or "blur"
      (< cutoffs.BLUR_REL x the slide's typical sharpness). scripts/recheck_quality.py re-applies this to saved tiles
 
 Writes data/results/<slide_id>/: thumbnail.png, tiles.csv, embeddings.npy, embeddings_musk.npy, tiles/<row>_<col>.jpg,
@@ -47,8 +48,8 @@ from tqdm import tqdm
 
 from src import cutoffs
 from src.classifier import load_classifier, predict
-from src.detectors import (class_probs, colorful_fraction, is_blood, load_bundle, load_immune, predict_blood,
-                           predict_immune, quality_check)
+from src.detectors import (TEXTURE_COLUMNS, class_probs, colorful_fraction, glass_color, is_blood, load_bundle,
+                           load_immune, predict_blood, predict_immune, quality_check, texture_measures)
 from src.models import load_conch, load_musk
 from src.prompts import CLASSES, PROMPTS_VERSION
 from src.slides import blur_score, fat_aware_mask, get_mpp, get_thumbnail, open_slide
@@ -86,8 +87,8 @@ def tile_grid(slide):
 
 
 class Tiles(Dataset):
-    def __init__(self, slide_path, tiles, read_px, preprocess, preprocess_musk, preview_dir):
-        self.path, self.tiles, self.read_px = str(slide_path), tiles, read_px
+    def __init__(self, slide_path, tiles, read_px, preprocess, preprocess_musk, preview_dir, glass_rgb):
+        self.path, self.tiles, self.read_px, self.glass_rgb = str(slide_path), tiles, read_px, glass_rgb
         self.preprocess, self.preprocess_musk = preprocess, preprocess_musk
         self.preview_dir, self.slide = preview_dir, None
 
@@ -102,7 +103,8 @@ class Tiles(Dataset):
         tile = tile.resize((TILE_PX, TILE_PX), Image.BILINEAR)
         tile.resize((PREVIEW_PX, PREVIEW_PX), Image.BILINEAR).save(
             self.preview_dir / f"{int(t.row)}_{int(t.col)}.jpg", quality=85)
-        return self.preprocess(tile), self.preprocess_musk(tile), colorful_fraction(tile), blur_score(tile)
+        return (self.preprocess(tile), self.preprocess_musk(tile), colorful_fraction(tile), blur_score(tile),
+                np.array(texture_measures(tile, self.glass_rgb), dtype=np.float32))
 
 
 def slide_info(slide_path, slides_csv):
@@ -157,6 +159,7 @@ def process_one(slide_path, args, models):
     slide = open_slide(slide_path)
     tiles, thumb, mask, read_px, slide_mpp, downsample, grid = tile_grid(slide)
     thumb.save(out / "thumbnail.png")
+    glass_rgb = glass_color(thumb, mask)
     print(f"{slide_id}: slide {slide.dimensions}, {slide_mpp} µm/px, tile = {read_px} px at level 0, "
           f"grid {grid}, {len(tiles)} tissue tiles", flush=True)
 
@@ -170,7 +173,8 @@ def process_one(slide_path, args, models):
         todo = tiles[[(r, c) not in seen for r, c in zip(tiles.row, tiles.col)]].reset_index(drop=True)
         cov = dict(zip(zip(tiles.row, tiles.col), tiles.mask_coverage))
         old["mask_coverage"] = [cov.get(k, m) for k, m in zip(zip(old.row, old.col), old.mask_coverage)]
-        old = old[["row", "col", "x", "y", "mask_coverage", "colorful", "blur"]]
+        old = old[["row", "col", "x", "y", "mask_coverage", "colorful", "blur",
+                   *[c for c in TEXTURE_COLUMNS if c in old]]]       # folders made before the texture measures lack them
         n_added = len(todo)
         print(f"extend: {len(old)} tiles already done, {n_added} new cells to read", flush=True)
     else:
@@ -188,19 +192,21 @@ def process_one(slide_path, args, models):
                           musk=load_musk(device=device))
         device = models["device"]
         (model, preprocess), (musk, preprocess_musk) = models["conch"], models["musk"]
-        loader = DataLoader(Tiles(slide_path, todo, read_px, preprocess, preprocess_musk, out / "tiles"),
+        loader = DataLoader(Tiles(slide_path, todo, read_px, preprocess, preprocess_musk, out / "tiles", glass_rgb),
                             batch_size=args.batch_size, num_workers=args.workers)
-        embs, embs_musk, colorful, blur = [], [], [], []
+        embs, embs_musk, colorful, blur, texture = [], [], [], [], []
         with torch.inference_mode():
-            for x, xm, c, b in tqdm(loader, desc=slide_id):
+            for x, xm, c, b, tx in tqdm(loader, desc=slide_id):
                 embs.append(model.encode_image(x.to(device), proj_contrast=True, normalize=True).float().cpu().numpy())
                 for chunk in xm.split(MUSK_CHUNK):
                     embs_musk.append(musk.encode_image(chunk.to(device)).float().cpu().numpy())
                 colorful.append(c.numpy())
                 blur.append(b.numpy())
+                texture.append(tx.numpy())
         E_new = np.concatenate(embs).astype(np.float32)
         M_new = np.concatenate(embs_musk).astype(np.float32)
-        todo = todo.assign(colorful=np.concatenate(colorful), blur=np.concatenate(blur))
+        todo = todo.assign(colorful=np.concatenate(colorful), blur=np.concatenate(blur),
+                           **dict(zip(TEXTURE_COLUMNS, np.concatenate(texture).T.round(5))))
     tiles = pd.concat([d for d in (old, todo) if d is not None], ignore_index=True)
     E = np.concatenate([E_old, E_new]).astype(np.float32)
     E_musk = np.concatenate([M_old, M_new]).astype(np.float32)
@@ -214,7 +220,10 @@ def process_one(slide_path, args, models):
     tiles["p_blood"] = predict_blood(load_bundle(BLOOD_MODEL), E_musk).round(5)
     tiles["alt_label"] = np.array(CLASSES)[class_probs(load_bundle(ALT_MODEL), E_musk).argmax(1)]
 
-    background, blurry, blur_ref = quality_check(tiles.colorful, tiles.blur, tiles.label)
+    for c in TEXTURE_COLUMNS:                                   # extend on an old folder: old tiles have none
+        if c not in tiles:
+            tiles[c] = np.nan
+    background, blurry, blur_ref = quality_check(tiles.colorful, tiles.blur, tiles.label, texture=tiles)
     blood = is_blood(tiles.p_blood.to_numpy(), tiles.label.to_numpy()) & ~background
     blurry = blurry & ~blood
     tiles["qc_ok"] = ~(background | blood | blurry)
@@ -222,7 +231,8 @@ def process_one(slide_path, args, models):
     tiles["tile_size_px"] = TILE_PX
 
     cols = ["row", "col", "x", "y", "tile_size_px", "qc_ok", "qc_reason", *[f"p_{c}" for c in CLASSES],
-            "label", "confidence", "p_immune", "p_blood", "alt_label", "colorful", "blur", "mask_coverage"]
+            "label", "confidence", "p_immune", "p_blood", "alt_label", "colorful", "blur", "mask_coverage",
+            *TEXTURE_COLUMNS]
     tiles[cols].to_csv(out / "tiles.csv", index=False)
     np.save(out / "embeddings.npy", E)
     np.save(out / "embeddings_musk.npy", E_musk)
@@ -240,7 +250,10 @@ def process_one(slide_path, args, models):
                                 f"(local SD > {cutoffs.TISSUE_MASK_TEXTURE_SD}) within {cutoffs.TISSUE_MASK_NEAR_PX} px "
                                 f"of stained tissue, on the {DOWNSAMPLE}x thumbnail; cell >= 50% tissue",
                         "background_guard": f"< 10% colorful pixels and not labeled fat, or glass (blur < "
-                                            f"{cutoffs.GLASS_BLUR_MAX} and < {cutoffs.GLASS_COLORFUL_MAX:.0%} colorful)",
+                                            f"{cutoffs.GLASS_BLUR_MAX} and < {cutoffs.GLASS_COLORFUL_MAX:.0%} colorful), "
+                                            f"or glass / ink by texture (edges < {cutoffs.GLASS_EDGES_MAX} or "
+                                            f"structure_cov < {cutoffs.GLASS_STRUCTURE_MIN} or pen-ink colors)",
+                        "glass_rgb": [round(float(v), 1) for v in glass_rgb],
                         "tiles_added_by_extend": n_added},
         "blood_check": {"rule": f"MUSK p_blood >= {cutoffs.BLOOD_PROB} and not labeled {' or '.join(cutoffs.BLOOD_SPARE_LABELS)}", "file": BLOOD_MODEL},
         "model": {"name": "CONCH ViT-B/16 + logistic regression (tissue8_split_v1: NCT-CRC-HE-100K + STARC-9)",

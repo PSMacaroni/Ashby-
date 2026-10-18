@@ -1,7 +1,8 @@
 """
 Re-apply the quality check (glass / blood / blur) to already-processed slides with the CURRENT rules in src/cutoffs.py
-and src/detectors.py, using the numbers saved in tiles.csv (colorful, blur, label, p_blood). CPU only, no model,
-no slide file needed. Updates qc_ok / qc_reason in tiles.csv and the qc counts in summary.json; run
+and src/detectors.py, using the numbers saved in tiles.csv (colorful, blur, label, p_blood, and the texture measures
+edges / structure_cov / ink_* when present: older folders get them from scripts/add_texture_measures.py). CPU only,
+no model, no slide file needed. Updates qc_ok / qc_reason in tiles.csv and the qc counts in summary.json; run
 scripts/analyze_slide.py afterwards.
 
     python scripts/recheck_quality.py data/results/<slide_id> [more folders...]
@@ -23,7 +24,7 @@ from src.detectors import is_blood, quality_check
 def recheck(folder):
     tiles = pd.read_csv(folder / "tiles.csv")
     old = tiles.qc_reason.fillna("").astype(str)
-    background, blurry, blur_ref = quality_check(tiles.colorful, tiles.blur, tiles.label)
+    background, blurry, blur_ref = quality_check(tiles.colorful, tiles.blur, tiles.label, texture=tiles)
     blood = (is_blood(tiles.p_blood.to_numpy(), tiles.label.to_numpy()) & ~background) if "p_blood" in tiles \
         else np.zeros(len(tiles), bool)
     blurry = blurry & ~blood
