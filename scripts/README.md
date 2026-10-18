@@ -20,6 +20,7 @@ Run everything from the project folder (`python scripts/...`, `sbatch scripts/..
 | `pick_gdc_slides.py` | pick new TCGA slides (patients not used yet) + TCGA labels for all cases → `calibration/` | laptop |
 | `recheck_quality.py` | re-apply the glass / blood / blur rules to processed slides from saved tile numbers (after a cut-off change) | laptop / Delta, CPU |
 | `evaluate_slides.py` | score the analysis with the current settings (no tuning); `--ablation` = same tiles without MUSK | laptop / Delta, CPU |
+| `make_eye_sheets.py` | per-slide sheets for checking the front features by eye (`reports/front_check_v1/`) | Delta, CPU |
 | `make_label_sheets.py` | blind contact sheets of sampled tiles for labeling by eye (`reports/overnight_v4/`) | laptop / Delta, CPU |
 | `calibrate_analysis.py` | calibrate the depth hint / serosal flag against real pT (`docs/calibration.md`) | laptop / Delta, CPU |
 

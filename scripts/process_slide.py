@@ -61,9 +61,12 @@ ALT_MODEL = "models/tissue8_musk_v1.joblib"        # MUSK's tissue8 (same recipe
 MUSK_CHUNK = 128                                   # MUSK works at 384 px: embed at most this many tiles at once
 
 
-def tile_grid(slide):
+def tile_grid(slide, assume_mpp=None):
     """Tile positions on an exact grid (tiles touch, no overlap) + tissue coverage of each grid cell."""
-    mpp = get_mpp(slide) or 0.25
+    mpp = get_mpp(slide) or assume_mpp
+    if not mpp:   # guessing 0.25 tiled 5 small TCGA scans at the wrong scale (reports/overnight_v4, section 7)
+        raise ValueError("the slide file has no resolution (microns per pixel): skipped. Pass --assume-mpp only if "
+                         "you know the real value")
     read_px = int(round(TILE_PX * MPP / mpp))             # level-0 pixels per tile (e.g. 444 at 0.252 µm/px)
     thumb = get_thumbnail(slide, DOWNSAMPLE)
     W, H = slide.dimensions
@@ -126,6 +129,8 @@ def main():
     ap.add_argument("--batch-size", type=int, default=128, help="128: each tile also carries a 384 px MUSK copy")
     ap.add_argument("--extend", action="store_true", help="only read cells the current mask adds (see above)")
     ap.add_argument("--skip-done", action="store_true", help="skip slides whose summary.json already exists")
+    ap.add_argument("--assume-mpp", type=float, default=None,
+                    help="µm/px to use for slides whose file has none (default: skip those slides)")
     ap.add_argument("--stop-at", default=None, help="don't start another slide after this time, e.g. 2026-10-18T07:10")
     args = ap.parse_args()
 
@@ -155,7 +160,7 @@ def process_one(slide_path, args, models):
     (out / "tiles").mkdir(parents=True, exist_ok=True)
 
     slide = open_slide(slide_path)
-    tiles, thumb, mask, read_px, slide_mpp, downsample, grid = tile_grid(slide)
+    tiles, thumb, mask, read_px, slide_mpp, downsample, grid = tile_grid(slide, args.assume_mpp)
     thumb.save(out / "thumbnail.png")
     print(f"{slide_id}: slide {slide.dimensions}, {slide_mpp} µm/px, tile = {read_px} px at level 0, "
           f"grid {grid}, {len(tiles)} tissue tiles", flush=True)

@@ -213,7 +213,10 @@ stroma → necrosis 2.5%, normal mucosa ↔ tumor 2.3%, mucus → necrosis 0.9%,
    0.25 µm/px for slides without a resolution (section 7).
 1. **Glass on edges:** a small glass-vs-tissue check trained on raw TCGA tiles (the 76 glass tiles labeled here are a
    start), or a texture check that tells fat membranes from empty glass.
-2. **Mucin:** measure mucin in and around the tumor (e.g. mucus within the filled tumor outline plus a margin).
+2. ~~Mucin~~: done (Sun Oct 18): pools touching the tumor now count (`cutoffs.MUCIN_ATTACH_TILES`). AUROC vs TCGA
+   mucinous 0.54 → 0.70 (calibration) and 0.76 → 0.83 (held-out); plain mucus share 0.92 / 0.77. Mucinous tumors still
+   score only 2–4% (median), so the 50% "mucinous" cut-off almost never fires: pick a cut-off for this measure later.
+   The 5 slides without a resolution are now skipped by `process_slide.py` and were moved out of the result folders.
 3. ~~"Unsure here"~~: done (section 8).
 4. The 13 held-out slides that didn't fit (listed at the end of `calibration/manifest_holdout_v1.csv`) can be run
    later with `scripts/embed_slides_gpu.sbatch` (finished slides are skipped), about 40 GPU-minutes.

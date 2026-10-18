@@ -90,6 +90,9 @@ FAT_DEPTH_FLAG_UM = 5000           # doc / literature (rectal cancer, verify bef
                                    #   past the muscle carries a worse outlook
 NECROSIS_RIM_UM = 200              # doc: tumor within ~200 µm (2 tiles) of necrosis = likely low oxygen
 MUCINOUS_FRACTION = 0.5            # literature (WHO): >50% extracellular mucin = mucinous adenocarcinoma
+MUCIN_ATTACH_TILES = 1             # PLACEHOLDER: mucin pools within this many tiles of the tumor count as part of it.
+                                   #   Counting only enclosed holes missed TCGA mucinous tumors (AUROC 0.54, 7 of 9
+                                   #   said "no mucin"; plain mucus share of tissue: 0.92; reports/overnight_v4)
 POOL_RING_FAT = 0.5                # PLACEHOLDER: a mucin pool "sits in fat" if >= 50% of its ring is fat
 
 # --- Stroma ---------------------------------------------------------------------------------

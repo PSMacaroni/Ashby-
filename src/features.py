@@ -675,16 +675,25 @@ def necrosis_and_rim(tm, fr):
 
 
 def mucin(tm, fr):
-    """Mucin inside the tumor, and mucin pools out in the fat (past the muscle)."""
+    """
+    Mucin in the tumor, and mucin pools out in the fat (past the muscle). "In the tumor" = inside the filled tumor
+    outline PLUS mucin pools touching it (within cutoffs.MUCIN_ATTACH_TILES): in mucinous tumors the pools sit at the
+    edge of the tumor glands, not only in fully enclosed holes (measured against TCGA's mucinous label, see
+    reports/overnight_v4).
+    """
     mucus = tm.class_mask("mucus")
-    fraction = (mucus & fr.main_filled).sum() / max(int(fr.main_filled.sum()), 1)
+    pools_lab = measure.label(mucus & fr.in_section, connectivity=2)
+    near = dilate(fr.main_filled, cutoffs.MUCIN_ATTACH_TILES)
+    attached = np.isin(pools_lab, np.unique(pools_lab[near & (pools_lab > 0)]))
+    region = fr.main_filled | attached
+    fraction = (mucus & region).sum() / max(int(region.sum()), 1)
     if fraction > cutoffs.MUCINOUS_FRACTION:
-        label = (f"Mucinous: {fraction:.0%} of the tumor is mucin (over the "
+        label = (f"Mucinous: {fraction:.0%} of the tumor (with the mucin pools attached to it) is mucin (over the "
                  f"{cutoffs.MUCINOUS_FRACTION:.0%} cutoff for mucinous adenocarcinoma).")
     elif fraction > 0:
-        label = f"{fraction:.0%} of the tumor is mucin (mucinous features)."
+        label = f"{fraction:.0%} of the tumor (with the mucin pools attached to it) is mucin (mucinous features)."
     else:
-        label = "No mucin inside the tumor."
+        label = "No mucin in or next to the tumor."
 
     muscle = tm.class_mask("muscle") & fr.in_section
     to_muscle = ndimage.distance_transform_edt(~muscle) * tm.tile_um if muscle.any() else None
