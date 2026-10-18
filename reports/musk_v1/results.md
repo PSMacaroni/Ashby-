@@ -1,6 +1,6 @@
 # musk_v1: CONCH vs MUSK vs CONCH+MUSK
 
-Written 2026-10-17 by scripts/compare_backbones.py.
+Written 2026-10-17 by scripts/models/compare_backbones.py.
 
 ## tissue8 accuracy (balanced accuracy in brackets for the normalized sets)
 

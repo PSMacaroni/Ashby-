@@ -2,7 +2,7 @@
 Blood check, part 3: MUSK vs CONCH vs both on our own tiles (Delta job, GPU if available).
 
 For the same 2,237 tiles as part 2 (subset.csv), this embeds each tile as scanned with MUSK (the same way
-scripts/embed_tiles.py on musk-experiments does: MUSK's own preprocessing, 384 px), reuses the CONCH embeddings from
+scripts/models/embed_tiles.py does: MUSK's own preprocessing, 384 px), reuses the CONCH embeddings from
 part 1, and runs the models from the MUSK experiment (data/results/compare_backbones/musk_v1/):
 tissue8_{conch,musk,both} and structures_{conch,musk,both} ("both" = CONCH and MUSK side by side), plus zero-shot
 MUSK with a blood prompt added to our 8 classes.
