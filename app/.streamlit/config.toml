@@ -1,0 +1,39 @@
+# App look: near-black with one blue accent (Streamlit reads this because it sits next to
+# streamlit_app.py). Colors are repeated in common.py (THEME) for the parts we draw ourselves.
+
+[theme]
+base = "dark"
+primaryColor = "#1F6FEB"
+backgroundColor = "#0B0D10"
+secondaryBackgroundColor = "#1A1E24"
+textColor = "#E6E8EB"
+borderColor = "#262B33"
+linkColor = "#4C9AFF"
+linkUnderline = false
+font = "Segoe UI, -apple-system, BlinkMacSystemFont, Roboto, Helvetica Neue, sans-serif"
+codeFont = "Cascadia Mono, SFMono-Regular, Consolas, Menlo, monospace"
+baseFontSize = 15
+baseRadius = "0.5rem"
+buttonRadius = "0.5rem"
+showWidgetBorder = true
+codeBackgroundColor = "#14171C"
+blueColor = "#4C9AFF"
+redColor = "#F06A6A"
+yellowColor = "#E8B341"
+greenColor = "#3FB27F"
+
+[client]
+toolbarMode = "minimal"
+showErrorDetails = "full"
+
+[server]
+# Only this computer can open the app. Use the number, not "localhost": on some Windows laptops
+# "localhost" tries IPv6 first and waits ~0.2 s on every request, which made pages load in ~20 s.
+address = "127.0.0.1"
+port = 8501
+headless = true
+runOnSave = false
+fileWatcherType = "poll"     # notices edited files reliably (also inside OneDrive folders)
+
+[browser]
+gatherUsageStats = false
