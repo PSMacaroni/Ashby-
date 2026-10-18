@@ -131,7 +131,8 @@ def tumor_summary(tm, fr):
 
 def tumor_pieces(tm, fr, node_mask):
     """Every tumor piece that isn't the main tumor: satellites, possible deposits, node metastases."""
-    dist_to_main = ndimage.distance_transform_edt(~fr.main_filled) * tm.tile_um
+    dist_tiles, nearest_main = ndimage.distance_transform_edt(~fr.main_filled, return_indices=True)
+    dist_to_main = dist_tiles * tm.tile_um
     front = fr.border_type == BORDER_FRONT
     near_front = None
     if front.any():
@@ -145,6 +146,7 @@ def tumor_pieces(tm, fr, node_mask):
         mix = class_mix(tm, ring_of(m, tm))
         r, c = center_tile(p.coords)
         gap = max(0.0, float(dist_to_main[m].min()) - tm.tile_um)   # roughly edge to edge
+        through_tissue = tissue_between(tm, (r, c), (nearest_main[0][r, c], nearest_main[1][r, c]))
         in_node = bool((m & node_mask).any())
         direction = None
         if near_front is not None:
@@ -158,12 +160,21 @@ def tumor_pieces(tm, fr, node_mask):
             "distance_to_main_um": round(gap),
             "sits_in": max(mix, key=mix.get) if any(mix.values()) else "unknown",
             "fat_fraction_around": rnd(mix["fat"], 2),
-            "satellite": gap <= cutoffs.SATELLITE_MAX_UM,
+            "tissue_between": rnd(through_tissue, 2),
+            "satellite": gap <= cutoffs.SATELLITE_MAX_UM and through_tissue >= cutoffs.SATELLITE_MIN_TISSUE,
             "possible_deposit": mix["fat"] >= cutoffs.DEPOSIT_RING_FAT and not in_node,
             "in_lymph_node": in_node,
             "bearing_deg": rnd(direction, 1),
         })
     return pieces
+
+
+def tissue_between(tm, a, b, samples=32):
+    """Share of the straight line from tile a to tile b that runs through tissue (not glass, a tear or a gap)."""
+    t = np.linspace(0, 1, samples)
+    rr = np.rint(a[0] + (b[0] - a[0]) * t).astype(int)
+    cc = np.rint(a[1] + (b[1] - a[1]) * t).astype(int)
+    return float(tm.tissue[rr, cc].mean())
 
 
 # --- growth pattern -------------------------------------------------------------------------
@@ -299,6 +310,11 @@ def growth_pattern(tm, fr, pieces):
     pattern = "infiltrative" if infiltrative else "pushing"
     text = (f"{pattern.capitalize()}: solidity {solidity:.2f}, {len(fingers)} finger protrusions, "
             f"{len(satellites)} satellites within {mm(cutoffs.SATELLITE_MAX_UM)}.")
+    front_um = float(front.sum()) * tm.tile_um
+    if front_um < cutoffs.FRONT_MIN_UM:      # e.g. a tumor-only fragment: the "front" is a few tiles, nothing to judge
+        pattern, arcs, arc_masks = "not_assessable", [], {}
+        text = (f"Can't judge the growth pattern: only {mm(front_um)} of invasive front in this section (needs "
+                f"{mm(cutoffs.FRONT_MIN_UM)}); the tumor mostly meets the tissue edge, the lumen or the lining here.")
     summary = {"n_border_tiles": int((fr.border_type > 0).sum()), "n_front_tiles": int(front.sum()),
                "solidity": rnd(solidity), "irregularity": rnd(roughness, 1), "roughness_um": rnd(roughness, 1),
                "fractal_dimension": rnd(fractal), "n_fingers": len(fingers),
@@ -314,7 +330,7 @@ def direction(arcs, pieces):
     """Which way the most infiltrative part of the front faces, plus a 16-bin rose diagram."""
     if not arcs:
         return {"side": None, "clock": None, "bearing_deg": None, "vector_rc": None, "rose_16": [0.0] * 16,
-                "text": "No invasive front found."}
+                "text": "Can't judge the direction: no invasive front long enough in this section."}
     infiltrative = [a for a in arcs if a["infiltrative"]]
     use = infiltrative or arcs
     rose = np.zeros(16)

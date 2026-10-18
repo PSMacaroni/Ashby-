@@ -48,7 +48,7 @@ Published series put an infiltrative margin at roughly a quarter to a third of c
   F5-6813 and AG-3878.
 - Tumor-only fragments are mapped correctly as tumor.
 
-## Suggested fixes (not done)
+## Suggested fixes (1–4 done the same day, see "After the fix")
 
 1. **Main tumor:** join tumor pieces that are close (e.g. within 0.5–1 mm, or through stroma) before choosing the
    main tumor, instead of taking only the largest piece.
@@ -58,6 +58,48 @@ Published series put an infiltrative margin at roughly a quarter to a third of c
    not a split-off piece of the main tumor); hide satellites until that's fixed.
 4. **Minimum tumor:** if tumor is only scattered tiles (CA-5796), say "no main tumor found" instead of building a front.
 5. **Pen ink check** (also in overnight_v4).
+
+## After the fix (Sun Oct 18, afternoon)
+
+Fixes 1–4 above are in (`src/front.py`, `src/features.py`; new placeholders in `src/cutoffs.py`):
+- tumor pieces closer than `TUMOR_JOIN_UM` (500 µm) through tissue are one tumor, and its outline includes the gaps;
+- a border tile next to glass (cut edge, tear) is "surface", not front;
+- with less than `FRONT_MIN_UM` (2 mm) of front, pattern and direction say "can't judge";
+- a satellite must be separated from the tumor by tissue (`SATELLITE_MIN_TISSUE`), not glass;
+- less than `TUMOR_MIN_MM2` (1 mm²) of tumor = no main tumor.
+
+Same 20 slides, re-checked by eye (`notes_claude_after_fix.csv`; examples `05_..._after_fix_lobes_joined.jpg`,
+`17_..._after_fix_invasion_now_main.jpg`):
+
+| | before | after |
+|---|---|---|
+| main tumor right (yes / mostly) | 9 | **14** (12 yes, 2 mostly; 5 partly, 1 no) |
+| front right, or correctly "none / can't judge" | 4 | **15** (4 partly, 1 n/a) |
+| front wrong | 8 | **0** |
+| satellites reported on these 20 | 42 | **14** |
+| …tumor / truly separate | 34 / 0 | 11 / **8** |
+| direction right (yes / partly) | 5 | **8**, plus 8 honest "can't judge"; 1 wrong (was 3) |
+
+All 120 slides with tumor:
+
+| | before | after |
+|---|---|---|
+| "infiltrative" | 115 (96%) | 82 (68%) |
+| "pushing" | 5 | 6 |
+| "can't judge" (front < 2 mm) | 0 | 32 (27%) |
+| slides with satellites | 95 (79%) | 51 (42%) |
+| satellites, total | 362 | 84 |
+
+The depth hint and serosal flag are unchanged on both sets (15/16 and 11/11 claims true; 0 pT4 found).
+
+**Still not right:**
+- **Among slides where the pattern can be judged, 93% are still "infiltrative".** That is now the pattern rule's own
+  cut-offs (`SOLIDITY_INFILTRATIVE` 0.85, `INFILTRATIVE_MIN_PROTRUSIONS` 3, both placeholders): at 112 µm tiles most
+  real fronts are irregular, and joining pieces adds notches (solidity drops). Two polyps (AA-3877, F4-6808) are
+  still "infiltrative". This needs calibration (e.g. against my calls on more slides), not more rules.
+- **False tumor in normal mucosa (CA-5796):** joined specks pass the 1 mm² minimum, so it still has a "main tumor"
+  and a depth hint built on it. Needs a better tumor map or a density check.
+- Serial sections (A6-6138): the analysis still picks one copy; pen ink: no check yet.
 
 ## Limits
 

@@ -14,6 +14,11 @@ SMOOTH_SIZE = 3                    # doc: average probabilities over a 3x3 neigh
 TUMOR_PROB = 0.5                   # doc: tumor = smoothed P(tumor) >= 0.5
 SMALL_HOLE_TILES = 4               # PLACEHOLDER: fill holes in the tumor mask up to this many tiles
 SECTION_GAP_UM = 300               # PLACEHOLDER: tissue pieces closer than this are one section
+TUMOR_JOIN_UM = 500                # PLACEHOLDER: tumor pieces closer than this (through tissue) are one tumor. Using
+                                   #   only the largest piece split real tumors into "islands" on 9 of 20 TCGA slides
+                                   #   checked by eye; 0 of 42 "satellites" were separate (reports/front_check_v1)
+TUMOR_MIN_MM2 = 1.0                # PLACEHOLDER: less tumor than this in the main tumor = "no main tumor found"
+                                   #   (scattered false tumor tiles in normal mucosa made one on CA-5796)
 LOW_CONFIDENCE = 0.5               # PLACEHOLDER: top probability below this = "unsure here" (the only rule: MUSK's
                                    #   second opinion, alt_label, is no longer used; see ALT_OVERRULES)
 TISSUE_MASK_SAT = 12               # measured: on our 5 TCGA slides the old rule (saturation > Otsu, 31-70) dropped
@@ -56,6 +61,11 @@ ROUGHNESS_SMOOTH_UM = 1000         # PLACEHOLDER: "wide moving average" used to 
 FINGER_DISK_TILES = 3              # doc: fingers = tumor removed by an opening with a 3-tile disk
 MIN_FINGER_TILES = 3               # PLACEHOLDER: smaller leftovers are noise, not fingers
 SATELLITE_MAX_UM = 1000            # doc: satellites = tumor pieces within 1 mm of the main mass
+SATELLITE_MIN_TISSUE = 0.8         # PLACEHOLDER: a satellite must be separated from the main tumor by tissue (at least
+                                   #   this share of the straight line between them), not glass: pieces across a
+                                   #   tear or a gap between fragments are not satellites
+FRONT_MIN_UM = 2000                # PLACEHOLDER: with less invasive front than this, growth pattern and direction
+                                   #   are "can't judge" (tumor-only fragments: the "front" was a few edge tiles)
 ARC_LENGTH_UM = 1000               # doc: score the front in arcs of about 1 mm
 ARC_NEIGHBOR_UM = 1500             # PLACEHOLDER: fingers/satellites this close to an arc count for it
 ARC_ROUGHNESS_INFILTRATIVE_UM = 60 # PLACEHOLDER: arcs rougher than this count as infiltrative
