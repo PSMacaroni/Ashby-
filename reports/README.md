@@ -15,6 +15,7 @@ Per-tile prediction tables are not included (too big). They live in `data/result
 | `guard_check/` | background guard on our 5 TCGA slides: current mask vs looser mask (saturation > 12); example sheets | `docs/fixes_background_lymph.md` |
 | `provided_v1/` | both models on the provided datasets NCT-CRC-HE-100K and PathGen | `docs/eval_provided.md` |
 | `musk_v1/` | CONCH vs MUSK vs both for the tissue and structures models, same tiles and recipe | `docs/musk_experiment.md` |
+| `overnight_v4/` | **current pipeline on all 58 calibration slides** (+ held-out slides): depth / serosa vs pT, with vs without MUSK; 528 tiles labeled by eye (Claude, blind); TCGA mucinous / MSI checks | `overnight_v4/results.md` |
 | `blood_check_v1/` | why blood was mapped as necrosis (color, zoom), MUSK blood check, pipeline test on 2 slides | `docs/slide_pipeline.md` |
 
 The depth-hint calibration on 58 TCGA slides lives in `calibration/` (write-up: `docs/calibration.md`).

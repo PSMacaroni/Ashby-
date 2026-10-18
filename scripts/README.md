@@ -15,6 +15,11 @@ Run everything from the project folder (`python scripts/...`, `sbatch scripts/..
 | `analyze_slide.py` | tumor front, measurements, flags, risk map → `summary.json`, `tile_analysis.csv` | laptop / Delta, CPU |
 | `make_fake_slide.py` | fake slide folders for building and testing the analysis and the app | laptop |
 | `get_gdc_slides.py` | download open-access TCGA slides by manifest (`calibration/manifest_v1.csv`) | Delta |
+| `embed_slides_gpu.sbatch` | `process_slide.py` on a list of slides in one process (models loaded once; `--skip-done`, `--stop-at`) | Delta, GPU job |
+| `analyze_slides_cpu.sbatch` | `score_phrases.py` + `analyze_slide.py` for every processed slide, 8 at a time | Delta, CPU job |
+| `pick_gdc_slides.py` | pick new TCGA slides (patients not used yet) + TCGA labels for all cases → `calibration/` | laptop |
+| `evaluate_slides.py` | score the analysis with the current settings (no tuning); `--ablation` = same tiles without MUSK | laptop / Delta, CPU |
+| `make_label_sheets.py` | blind contact sheets of sampled tiles for labeling by eye (`reports/overnight_v4/`) | laptop / Delta, CPU |
 | `calibrate_analysis.py` | calibrate the depth hint / serosal flag against real pT (`docs/calibration.md`) | laptop / Delta, CPU |
 
 ## How the models were built and tested (`scripts/models/`)

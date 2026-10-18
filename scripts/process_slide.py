@@ -31,7 +31,8 @@ embeddings_musk.npy: then every tile is read again.
 import argparse
 import json
 import sys
-from datetime import date
+import traceback
+from datetime import date, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -118,15 +119,37 @@ def slide_info(slide_path, slides_csv):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--slide", required=True)
+    ap.add_argument("--slide", required=True, nargs="+", help="one or more .svs files (CONCH + MUSK are loaded once)")
     ap.add_argument("--out", default="data/results")
     ap.add_argument("--slides-csv", default=None, help="table with file_name, project, pT, pN, stage")
     ap.add_argument("--workers", type=int, default=14)
     ap.add_argument("--batch-size", type=int, default=128, help="128: each tile also carries a 384 px MUSK copy")
     ap.add_argument("--extend", action="store_true", help="only read cells the current mask adds (see above)")
+    ap.add_argument("--skip-done", action="store_true", help="skip slides whose summary.json already exists")
+    ap.add_argument("--stop-at", default=None, help="don't start another slide after this time, e.g. 2026-10-18T07:10")
     args = ap.parse_args()
 
-    slide_path = Path(args.slide)
+    stop_at = datetime.fromisoformat(args.stop_at) if args.stop_at else None
+    models, failed, n = {}, [], len(args.slide)
+    for i, path in enumerate(args.slide, 1):
+        slide_id = Path(path).name.split(".")[0]
+        if stop_at and datetime.now() >= stop_at:
+            print(f"stop-at {args.stop_at} reached: {n - i + 1} slides not started", flush=True)
+            break
+        if args.skip_done and (Path(args.out) / slide_id / "summary.json").exists():
+            print(f"[{i}/{n}] {slide_id}: already done, skipped", flush=True)
+            continue
+        print(f"[{i}/{n}] {datetime.now():%H:%M:%S} {slide_id}", flush=True)
+        try:
+            process_one(Path(path), args, models)
+        except Exception:                                      # one bad slide shouldn't stop the rest
+            traceback.print_exc()
+            failed.append(slide_id)
+    print(f"finished {datetime.now():%H:%M:%S}; failed: {', '.join(failed) or 'none'}", flush=True)
+
+
+def process_one(slide_path, args, models):
+    """One slide -> its result folder. `models` caches CONCH + MUSK across slides (filled on first use)."""
     slide_id = slide_path.name.split(".")[0]                   # TCGA-AA-3844-01Z-00-DX1
     out = Path(args.out) / slide_id
     (out / "tiles").mkdir(parents=True, exist_ok=True)
@@ -159,9 +182,12 @@ def main():
 
     E_new, M_new = np.zeros((0, E_old.shape[1]), np.float32), np.zeros((0, M_old.shape[1]), np.float32)
     if len(todo):
-        device = config.get_device()
-        model, preprocess = load_conch(device=device, image_size=TILE_PX)
-        musk, preprocess_musk = load_musk(device=device)
+        if not models:
+            device = config.get_device()
+            models.update(device=device, conch=load_conch(device=device, image_size=TILE_PX),
+                          musk=load_musk(device=device))
+        device = models["device"]
+        (model, preprocess), (musk, preprocess_musk) = models["conch"], models["musk"]
         loader = DataLoader(Tiles(slide_path, todo, read_px, preprocess, preprocess_musk, out / "tiles"),
                             batch_size=args.batch_size, num_workers=args.workers)
         embs, embs_musk, colorful, blur = [], [], [], []

@@ -1,0 +1,59 @@
+slide,frac_tumor,frac_normal_mucosa,frac_muscle,frac_fat,frac_lymphocytes,frac_mucus,frac_necrosis,frac_stroma,n_pools,mucin_label
+TCGA-A6-2674-01Z-00-DX1,0.142,0.002,0.0,0.0,0.003,0.613,0.129,0.111,0,No mucin inside the tumor.
+TCGA-A6-3809-01Z-00-DX1,0.733,0.0,0.0,0.0,0.0,0.164,0.093,0.009,0,No mucin inside the tumor.
+TCGA-A6-6138-01Z-00-DX1,0.498,0.002,0.063,0.056,0.023,0.002,0.004,0.352,1,No mucin inside the tumor.
+TCGA-A6-6140-01Z-00-DX1,0.575,0.001,0.08,0.0,0.0,0.188,0.045,0.111,0,No mucin inside the tumor.
+TCGA-A6-6653-01Z-00-DX1,0.505,0.003,0.041,0.0,0.001,0.287,0.004,0.159,0,No mucin inside the tumor.
+TCGA-AA-3495-01Z-00-DX1,0.345,0.399,0.0,0.0,0.0,0.0,0.257,0.0,0,No mucin inside the tumor.
+TCGA-AA-3522-01Z-00-DX1,0.868,0.046,0.0,0.0,0.001,0.001,0.072,0.012,0,No mucin inside the tumor.
+TCGA-AA-3680-01Z-00-DX1,0.79,0.164,0.004,0.0,0.001,0.004,0.036,0.001,0,0% of the tumor is mucin (mucinous features).
+TCGA-AA-3685-01Z-00-DX1,0.907,0.057,0.0,0.0,0.0,0.0,0.034,0.002,0,No mucin inside the tumor.
+TCGA-AA-3844-01Z-00-DX1,0.912,0.013,0.0,0.0,0.0,0.002,0.05,0.022,0,No mucin inside the tumor.
+TCGA-AA-3852-01Z-00-DX1,0.942,0.0,0.002,0.0,0.0,0.013,0.005,0.037,0,No mucin inside the tumor.
+TCGA-AA-3855-01Z-00-DX1,0.658,0.03,0.022,0.0,0.001,0.002,0.048,0.239,0,No mucin inside the tumor.
+TCGA-AA-3872-01Z-00-DX1,0.688,0.002,0.0,0.0,0.0,0.003,0.271,0.036,0,No mucin inside the tumor.
+TCGA-AA-3875-01Z-00-DX1,0.519,0.144,0.004,0.0,0.007,0.001,0.02,0.305,0,No mucin inside the tumor.
+TCGA-AA-3877-01Z-00-DX1,0.598,0.012,0.063,0.0,0.0,0.207,0.011,0.109,0,0% of the tumor is mucin (mucinous features).
+TCGA-AA-3941-01Z-00-DX1,0.806,0.032,0.059,0.0,0.0,0.0,0.011,0.091,0,No mucin inside the tumor.
+TCGA-AA-3947-01Z-00-DX1,0.378,0.211,0.044,0.0,0.006,0.076,0.143,0.142,0,No mucin inside the tumor.
+TCGA-AA-3949-01Z-00-DX1,0.301,0.0,0.0,0.0,0.0,0.067,0.604,0.028,0,No mucin inside the tumor.
+TCGA-AA-3973-01Z-00-DX1,0.643,0.0,0.077,0.004,0.003,0.0,0.012,0.261,0,No mucin inside the tumor.
+TCGA-AA-3975-01Z-00-DX1,0.696,0.083,0.085,0.0,0.0,0.008,0.014,0.114,0,No mucin inside the tumor.
+TCGA-AA-3979-01Z-00-DX1,0.804,0.071,0.004,0.0,0.0,0.002,0.019,0.1,0,No mucin inside the tumor.
+TCGA-AA-A00O-01Z-00-DX1,0.786,0.072,0.022,0.0,0.0,0.002,0.072,0.046,0,No mucin inside the tumor.
+TCGA-AA-A00W-01Z-00-DX1,0.927,0.064,0.006,0.0,0.0,0.002,0.001,0.0,0,0% of the tumor is mucin (mucinous features).
+TCGA-AD-5900-01Z-00-DX1,0.469,0.2,0.051,0.011,0.001,0.038,0.003,0.228,0,No mucin inside the tumor.
+TCGA-AD-6890-01Z-00-DX1,0.396,0.226,0.045,0.0,0.029,0.0,0.003,0.301,0,No mucin inside the tumor.
+TCGA-AD-A5EK-01Z-00-DX1,0.433,0.423,0.022,0.004,0.008,0.04,0.012,0.059,2,0% of the tumor is mucin (mucinous features).
+TCGA-AF-2690-01Z-00-DX1,0.309,0.008,0.007,0.328,0.0,0.002,0.016,0.329,2,No mucin inside the tumor.
+TCGA-AF-2691-01Z-00-DX1,0.624,0.231,0.01,0.007,0.0,0.012,0.092,0.024,0,No mucin inside the tumor.
+TCGA-AF-4110-01Z-00-DX1,0.922,0.052,0.0,0.0,0.001,0.001,0.013,0.01,0,No mucin inside the tumor.
+TCGA-AG-3580-01Z-00-DX1,0.985,0.001,0.0,0.0,0.0,0.001,0.013,0.0,0,0% of the tumor is mucin (mucinous features).
+TCGA-AG-3742-01Z-00-DX1,0.559,0.0,0.0,0.0,0.0,0.0,0.441,0.0,0,No mucin inside the tumor.
+TCGA-AG-3878-01Z-00-DX1,0.897,0.0,0.0,0.0,0.0,0.001,0.014,0.088,0,No mucin inside the tumor.
+TCGA-AG-3892-01Z-00-DX1,0.606,0.021,0.045,0.003,0.0,0.102,0.215,0.008,0,No mucin inside the tumor.
+TCGA-AG-3898-01Z-00-DX1,0.688,0.0,0.005,0.0,0.0,0.0,0.086,0.221,0,No mucin inside the tumor.
+TCGA-AG-A025-01Z-00-DX1,0.481,0.115,0.065,0.008,0.0,0.036,0.293,0.002,2,No mucin inside the tumor.
+TCGA-AG-A026-01Z-00-DX1,0.698,0.001,0.107,0.0,0.0,0.001,0.068,0.125,0,No mucin inside the tumor.
+TCGA-AG-A02X-01Z-00-DX1,0.896,0.038,0.0,0.0,0.0,0.02,0.046,0.0,0,No mucin inside the tumor.
+TCGA-AH-6547-01Z-00-DX1,0.912,0.017,0.0,0.0,0.001,0.0,0.001,0.069,0,No mucin inside the tumor.
+TCGA-AY-4071-01Z-00-DX1,0.847,0.021,0.0,0.016,0.0,0.088,0.004,0.024,2,No mucin inside the tumor.
+TCGA-AZ-4313-01Z-00-DX1,0.107,0.181,0.286,0.144,0.011,0.026,0.001,0.245,4,No mucin inside the tumor.
+TCGA-AZ-5407-01Z-00-DX1,0.606,0.091,0.097,0.044,0.004,0.001,0.0,0.158,0,0% of the tumor is mucin (mucinous features).
+TCGA-AZ-6603-01Z-00-DX1,0.504,0.065,0.346,0.003,0.0,0.006,0.025,0.053,0,No mucin inside the tumor.
+TCGA-AZ-6606-01Z-00-DX1,0.437,0.0,0.081,0.0,0.0,0.002,0.112,0.368,0,No mucin inside the tumor.
+TCGA-CA-5796-01Z-00-DX1,0.062,0.439,0.175,0.006,0.002,0.055,0.001,0.26,7,No mucin inside the tumor.
+TCGA-CK-6746-01Z-00-DX1,0.446,0.115,0.094,0.128,0.003,0.002,0.11,0.102,2,No mucin inside the tumor.
+TCGA-CM-4746-01Z-00-DX1,0.45,0.074,0.316,0.001,0.002,0.046,0.002,0.109,2,5% of the tumor is mucin (mucinous features).
+TCGA-CM-5868-01Z-00-DX1,0.282,0.05,0.137,0.348,0.006,0.003,0.029,0.146,1,No mucin inside the tumor.
+TCGA-CM-6163-01Z-00-DX1,0.254,0.204,0.124,0.006,0.003,0.014,0.004,0.392,1,No mucin inside the tumor.
+TCGA-DC-5337-01Z-00-DX1,0.29,0.066,0.2,0.326,0.003,0.005,0.003,0.107,9,No mucin inside the tumor.
+TCGA-DC-6154-01Z-00-DX1,0.304,0.0,0.03,0.233,0.0,0.0,0.058,0.374,0,No mucin inside the tumor.
+TCGA-DY-A1DF-01Z-00-DX1,0.487,0.119,0.174,0.012,0.003,0.003,0.086,0.115,0,No mucin inside the tumor.
+TCGA-F4-6808-01Z-00-DX1,0.547,0.126,0.029,0.001,0.002,0.01,0.073,0.212,0,No mucin inside the tumor.
+TCGA-F5-6464-01Z-00-DX1,0.345,0.032,0.243,0.005,0.01,0.031,0.026,0.308,0,No mucin inside the tumor.
+TCGA-G4-6307-01Z-00-DX1,0.522,0.065,0.291,0.006,0.001,0.001,0.014,0.1,0,0% of the tumor is mucin (mucinous features).
+TCGA-G4-6321-01Z-00-DX1,0.017,0.051,0.083,0.636,0.05,0.012,0.008,0.142,8,2% of the tumor is mucin (mucinous features).
+TCGA-G4-6323-01Z-00-DX1,0.394,0.202,0.119,0.004,0.109,0.001,0.003,0.169,0,No mucin inside the tumor.
+TCGA-G4-6628-01Z-00-DX1,0.136,0.026,0.228,0.207,0.037,0.008,0.003,0.357,16,No mucin inside the tumor.
+TCGA-G5-6641-01Z-00-DX1,0.289,0.112,0.153,0.24,0.001,0.088,0.002,0.114,2,1% of the tumor is mucin (mucinous features).
