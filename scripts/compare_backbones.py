@@ -21,7 +21,12 @@ Tests, all from patients never used for training:
 
 Needs data/embeddings/<backbone>/<set>.npz from scripts/embed_many.py. CPU only.
 
-    python scripts/compare_backbones.py --run musk_v1
+    python scripts/compare_backbones.py --run musk_v1                     # everything
+    python scripts/compare_backbones.py --run musk_v1 --parts tissue      # the two halves can run as
+    python scripts/compare_backbones.py --run musk_v1 --parts structures  #   separate jobs at the same time
+    python scripts/compare_backbones.py --run musk_v1 --parts report      # combine what's there (seconds)
+
+Each part saves metrics_<part>.json; every run then rebuilds metrics.json + results.md from whatever parts exist.
 """
 import argparse
 import json
@@ -319,16 +324,45 @@ def main():
     ap.add_argument("--spider-skin-manifest", default="data/datasets/spider_skin/manifest.csv")
     ap.add_argument("--Cs", nargs="+", type=float, default=[0.1, 1.0, 10.0])
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--skip-structures", action="store_true")
+    ap.add_argument("--parts", nargs="+", choices=["tissue", "structures", "report"], default=["tissue", "structures"],
+                    help="tissue / structures can run as separate jobs; 'report' only combines saved parts")
     args = ap.parse_args()
 
-    E = Embeddings(args.emb_root, args.backbones)
     feature_sets = list(args.backbones) + (["both"] if len(args.backbones) == 2 else [])
+    out = Path("data/results/compare_backbones") / args.run
+    out.mkdir(parents=True, exist_ok=True)
+    if args.parts != ["report"]:
+        run_parts(args, feature_sets, out)
+    write_report(out, feature_sets, args.run)
+
+
+def write_report(out, feature_sets, run):
+    """Combine metrics_tissue.json + metrics_structures.json (whichever exist) into metrics.json + results.md."""
+    results = {"tissue8": {}, "zero_shot": {}, "structures": {}}
+    for part in ("tissue", "structures"):
+        path = out / f"metrics_{part}.json"
+        if path.exists():
+            saved = json.loads(path.read_text(encoding="utf-8"))
+            for key in ("tissue8", "zero_shot", "structures"):
+                results[key].update(saved.get(key, {}))
+            results.setdefault("date", saved.get("date"))
+    if not results["tissue8"]:
+        print("no tissue results yet: report not written")
+        return
+    feature_sets = [f for f in feature_sets if f in results["tissue8"]]
+    results["decision"] = decide(results, feature_sets)
+    (out / "metrics.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
+    text = report(results, feature_sets, run)
+    (out / "results.md").write_text(text, encoding="utf-8")
+    print("\n" + text)
+    print(f"\nsaved {out}")
+
+
+def run_parts(args, feature_sets, out):
+    E = Embeddings(args.emb_root, args.backbones)
     for need in ("nct_100k", "starc9_train", "starc9_val_small"):
         if not E.has(need):
             sys.exit(f"missing {need} embeddings for {args.backbones} in {args.emb_root} (run scripts/embed_many.py)")
-    out = Path("data/results/compare_backbones") / args.run
-    out.mkdir(parents=True, exist_ok=True)
     rng = np.random.default_rng(args.seed)
 
     # same random choices for every feature set (and the same order of draws as split_v1)
@@ -343,57 +377,61 @@ def main():
         kather = {"labels": np.array(km["label_names"])[km["labels"]], "patients": kather_patients(km["paths"])}
         print(f"Kather 2016 patients: {sorted(set(kather['patients']))}")
 
-    results = {"date": str(date.today()), "backbones": args.backbones, "tissue8": {}, "zero_shot": {}, "structures": {}}
-    # zero-shot reference rows
-    zs_probs = {}
-    for b in args.backbones:
-        zs_probs[b] = {t: zero_shot(E, b, src, X_fn, y) for t, (X_fn, y, src) in tests.items()}
-        if kather:
-            zs_probs[b]["kather2016"] = zero_shot_probs(E.X(b, "kather2016"), E.npz(b, "kather2016"))
-    if len(args.backbones) == 2:
-        zs_probs["avg"] = {t: (zs_probs["conch"][t] + zs_probs["musk"][t]) / 2 for t in zs_probs["conch"]}
-    for key, by_test in zs_probs.items():
-        r = {}
-        for t, p in by_test.items():
-            if t == "kather2016":
-                r[t] = kather_score(kather["labels"], p.argmax(1), kather["patients"], np.random.default_rng(1))
-            else:
-                y = tests[t][1]
+    meta = {"date": str(date.today()), "backbones": args.backbones}
+
+    if "tissue" in args.parts:
+        results = {**meta, "tissue8": {}, "zero_shot": {}}
+        # zero-shot reference rows
+        zs_probs = {}
+        for b in args.backbones:
+            zs_probs[b] = {t: zero_shot(E, b, src, X_fn, y) for t, (X_fn, y, src) in tests.items()}
+            if kather:
+                zs_probs[b]["kather2016"] = zero_shot_probs(E.X(b, "kather2016"), E.npz(b, "kather2016"))
+        if len(args.backbones) == 2:
+            zs_probs["avg"] = {t: (zs_probs["conch"][t] + zs_probs["musk"][t]) / 2 for t in zs_probs["conch"]}
+        for key, by_test in zs_probs.items():
+            r = {}
+            for t, p in by_test.items():
+                if t == "kather2016":
+                    r[t] = kather_score(kather["labels"], p.argmax(1), kather["patients"], np.random.default_rng(1))
+                else:
+                    r[t] = score(tests[t][1], p.argmax(1), p)
+            results["zero_shot"][key] = r
+
+        # trained tissue models
+        for f in feature_sets:
+            print(f"\n== tissue8 [{f}]", flush=True)
+            clf, C = train_tissue8(E, f, hold, args.Cs)
+            joblib.dump({"clf": clf, "features": f, "classes": CLASSES, "C": C, "date": str(date.today())},
+                        out / f"tissue8_{f}.joblib")
+            r = {}
+            for t, (X_fn, y, _) in tests.items():
+                p = proba(clf, X_fn(f), N)
                 r[t] = score(y, p.argmax(1), p)
-        results["zero_shot"][key] = r
+                save_confusion(y, p.argmax(1), sorted(set(y)), list(range(N)), out / f"confusion_{f}_{t}",
+                               f"tissue8 [{f}] on {t}")
+            if kather:
+                p = proba(clf, E.X(f, "kather2016"), N)
+                r["kather2016"] = kather_score(kather["labels"], p.argmax(1), kather["patients"], np.random.default_rng(1))
+            results["tissue8"][f] = {"C": C, "tests": r}
+            print(f"  tissue8[{f}] C={C}: " + ", ".join(f"{t} {v['accuracy']:.3f}" for t, v in r.items()), flush=True)
+        (out / "metrics_tissue.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
 
-    # trained models
-    for f in feature_sets:
-        print(f"\n== {f}", flush=True)
-        clf, C = train_tissue8(E, f, hold, args.Cs)
-        joblib.dump({"clf": clf, "features": f, "classes": CLASSES, "C": C, "date": str(date.today())},
-                    out / f"tissue8_{f}.joblib")
-        r = {}
-        for t, (X_fn, y, _) in tests.items():
-            p = proba(clf, X_fn(f), N)
-            r[t] = score(y, p.argmax(1), p)
-            save_confusion(y, p.argmax(1), sorted(set(y)), list(range(N)), out / f"confusion_{f}_{t}",
-                           f"tissue8 [{f}] on {t}")
-        if kather:
-            p = proba(clf, E.X(f, "kather2016"), N)
-            r["kather2016"] = kather_score(kather["labels"], p.argmax(1), kather["patients"], np.random.default_rng(1))
-        results["tissue8"][f] = {"C": C, "tests": r}
-        print(f"  tissue8[{f}] C={C}: " + ", ".join(f"{t} {v['accuracy']:.3f}" for t, v in r.items()), flush=True)
-
+    if "structures" in args.parts:
         manifests = {"colon": args.spider_colon_manifest, "skin": args.spider_skin_manifest}
-        have_spider = all(E.has(f"spider_{o}_train") for o in manifests) and all(Path(m).exists() for m in manifests.values())
-        if have_spider and not args.skip_structures:
+        have_spider = (all(E.has(f"spider_{o}_train") for o in manifests)
+                       and all(Path(m).exists() for m in manifests.values()))
+        if not have_spider:
+            print("structures skipped: SPIDER embeddings or manifests are missing")
+            return
+        results = {**meta, "structures": {}}
+        for f in feature_sets:
+            print(f"\n== structures [{f}]", flush=True)
             sclf, sC = train_structures(E, f, other_idx, manifests, args.Cs)
             joblib.dump({"clf": sclf, "labels": STRUCT, "features": f, "C": sC, "date": str(date.today())},
                         out / f"structures_{f}.joblib")
             results["structures"][f] = {"C": sC, **test_structures(E, f, sclf, manifests)}
-
-    results["decision"] = decide(results, feature_sets)
-    (out / "metrics.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
-    text = report(results, feature_sets, args.run)
-    (out / "results.md").write_text(text, encoding="utf-8")
-    print("\n" + text)
-    print(f"\nsaved {out}")
+        (out / "metrics_structures.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
 
 
 if __name__ == "__main__":
