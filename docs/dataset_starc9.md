@@ -1,8 +1,8 @@
 # Second training dataset: STARC-9
 
 **Written:** Sat Oct 17 · **For:** the small-classifier work in `docs/handoff_small_classifier.md`
-**Scripts:** `scripts/get_starc9.py` (download), `scripts/embed_tiles.py` (CONCH embeddings),
-`scripts/train_classifier.py` (train + test), `src/classifier.py` (use in the pipeline)
+**Scripts:** `scripts/models/get_starc9.py` (download), `scripts/models/embed_tiles.py` (CONCH embeddings),
+`scripts/models/train_classifier.py` (train + test), `src/classifier.py` (use in the pipeline)
 **Output:** `data/datasets/starc9/`, `data/embeddings/`, `data/results/classifier/`, `data/models/` (all git-ignored)
 
 ## TL;DR
@@ -107,7 +107,7 @@ uv venv --python 3.12 .venv     # 3.12 like Delta; newer Pythons lack ready-made
 uv pip install --python .venv/Scripts/python.exe torch torchvision --index-url https://download.pytorch.org/whl/cu130
 uv pip install --python .venv/Scripts/python.exe pillow tqdm numpy pandas scikit-learn "matplotlib>=3.11.2" \
     python-dotenv huggingface_hub timm transformers "conch @ git+https://github.com/Mahmoodlab/CONCH.git"
-.venv/Scripts/python scripts/get_starc9.py --workers 32
+.venv/Scripts/python scripts/models/get_starc9.py --workers 32
 ```
 
 Quick test first (~30 s): `--train-per-class 5 --val-per-class 5 --out data/datasets/starc9_test`.
@@ -116,12 +116,12 @@ CONCH needs `HF_TOKEN` in `.env`.
 Embed (a few minutes per set on a laptop GPU, ~250–380 tiles/s), then train (seconds, CPU):
 
 ```bash
-.venv/Scripts/python scripts/embed_tiles.py --root data/datasets/starc9/train --name starc9_train
-.venv/Scripts/python scripts/embed_tiles.py --root data/datasets/starc9/val_stanford_small --name starc9_val_small
-.venv/Scripts/python scripts/embed_tiles.py --root data/datasets/starc9/val_stanford_large --name starc9_val_large
-.venv/Scripts/python scripts/embed_tiles.py --root data/datasets/starc9/val_tcga --name starc9_val_tcga
-.venv/Scripts/python scripts/embed_tiles.py --root data/datasets/CRC-VAL-HE-7K --name crc_val_7k
-.venv/Scripts/python scripts/train_classifier.py --train starc9_train --tune starc9_val_small \
+.venv/Scripts/python scripts/models/embed_tiles.py --root data/datasets/starc9/train --name starc9_train
+.venv/Scripts/python scripts/models/embed_tiles.py --root data/datasets/starc9/val_stanford_small --name starc9_val_small
+.venv/Scripts/python scripts/models/embed_tiles.py --root data/datasets/starc9/val_stanford_large --name starc9_val_large
+.venv/Scripts/python scripts/models/embed_tiles.py --root data/datasets/starc9/val_tcga --name starc9_val_tcga
+.venv/Scripts/python scripts/models/embed_tiles.py --root data/datasets/CRC-VAL-HE-7K --name crc_val_7k
+.venv/Scripts/python scripts/models/train_classifier.py --train starc9_train --tune starc9_val_small \
     --test starc9_val_large starc9_val_tcga crc_val_7k --run starc9_lr --Cs 0.1 1 10 100
 ```
 
@@ -130,7 +130,7 @@ random picks are seeded, so you get exactly the same tiles:
 
 ```bash
 cd ~/Ashby- && source scripts/delta_env.sh
-nohup python scripts/get_starc9.py --out /work/hdd/bfqi/$USER/datasets/starc9 --workers 32 > starc9.log 2>&1 &
+nohup python scripts/models/get_starc9.py --out /work/hdd/bfqi/$USER/datasets/starc9 --workers 32 > starc9.log 2>&1 &
 ```
 
 (Login nodes kill long commands, which is why this uses `nohup`. If it still gets cut off, just run it again: it skips

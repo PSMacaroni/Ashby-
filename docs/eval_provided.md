@@ -1,7 +1,7 @@
 # Report: our models on the two provided datasets (NCT-CRC-HE-100K and PathGen)
 
 **Written:** Sat Oct 17, 2026 · **Run:** `provided_v1` · **Compute:** Delta jobs 22956414 + 22956452 (A100, ~10 min, ≈0.17 GPU-hours)
-**Code:** `scripts/eval_provided.py`, `scripts/eval_provided_gpu.sbatch` · **Outputs:** `data/results/eval_provided/provided_v1/`
+**Code:** `scripts/models/eval_provided.py`, `scripts/models/eval_provided_gpu.sbatch` · **Outputs:** `data/results/eval_provided/provided_v1/`
 (on Delta and copied to the laptop: `metrics.json`, confusion matrices, per-tile/per-patch prediction CSVs, example image sheets)
 
 ---

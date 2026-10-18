@@ -1,5 +1,5 @@
 """
-Small tissue classifier: logistic regression on CONCH image embeddings (trained by scripts/train_classifier.py).
+Small tissue classifier: logistic regression on CONCH image embeddings (trained by scripts/models/train_classifier.py).
 
 It knows our 8 CLASSES plus "blood". Blood is not a map class: the classifier only recognizes it so
 the pipeline can ignore those tiles (qc_ok = False, qc_reason = "blood") instead of calling them

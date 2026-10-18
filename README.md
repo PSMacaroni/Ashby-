@@ -67,7 +67,7 @@ Activate it every time you open a new terminal (you'll see `(.venv)` at the star
    python scripts/check_setup.py
    ```
 
-Accounts, data paths and GPU budget are in [CLAUDE.md](CLAUDE.md) under "Delta specifics". **The whole team shares 10 GPU-hours**, so run GPU work as batch jobs that end when finished (`sbatch scripts/first_look_gpu.sbatch`), not as open sessions.
+Accounts, data paths and GPU budget are in [CLAUDE.md](CLAUDE.md) under "Delta specifics". **The whole team shares 10 GPU-hours**, so run GPU work as batch jobs that end when finished (`sbatch scripts/models/first_look_gpu.sbatch`), not as open sessions.
 
 **If Open OnDemand is down/slow:** use SSH instead: `ssh <netid>@login.delta.ncsa.illinois.edu` (password + Duo), then do steps 3–6 in that terminal and submit jobs with `sbatch`.
 
@@ -92,18 +92,24 @@ git push -u origin my-feature     # 5. upload it to GitHub, then open a Pull Req
 
 ## Folder layout
 
+Each folder has a README that lists what's inside.
+
 ```
 Ashby-/
-├── app/                 # Streamlit app (run: streamlit run app/streamlit_app.py)
-├── src/                 # shared Python code used by notebooks, scripts, and the app
+├── app/                 # Streamlit app (placeholder here; the full app is on the app-core branch)
+├── src/                 # shared Python code: models, tile map, analysis, cut-offs (src/cutoffs.py)
+├── scripts/             # the slide pipeline: process_slide.py (Delta, GPU) -> analyze_slide.py (laptop)
+│   └── models/          #   how the small classifiers were built and tested (finished experiments)
+├── models/              # our small trained classifiers (a few KB each) + model card (models/README.md)
+├── reports/             # evaluation numbers, confusion matrices, example tile sheets, one folder per run
+├── calibration/         # depth-hint calibration on 58 TCGA slides with known pT (docs/calibration.md)
+├── docs/                # write-ups (docs/README.md lists them) + summary_example.json (what the app reads)
 ├── notebooks/           # Jupyter notebooks for experiments
-├── scripts/             # command-line scripts (check_setup.py lives here)
-├── tests/               # automatic checks on fake slides (run: pytest -q)
-├── docs/                # handoff notes + summary_example.json (what the app reads)
-├── data/                # local data. Git-ignored, never committed
+├── tests/               # automatic checks (run: pytest -q)
+├── data/                # local data and results. Git-ignored, never committed
 ├── .env.example         # template for your private .env
 ├── requirements.txt     # Python packages to install
-└── README.md
+└── CLAUDE.md            # project plan, data contract, Delta details
 ```
 
 ## Slide analysis (laptop, no GPU)

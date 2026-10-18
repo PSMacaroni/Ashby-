@@ -1,6 +1,6 @@
 # Experiment: is MUSK worth adding to our tissue and structures classifiers?
 
-**Branch:** `musk-experiments` (built on `starc9-spider-classifiers`) · **Status:** running (results below when done)
+**Branch:** `musk-experiments` (built on `starc9-spider-classifiers`) · **Status:** done (run `musk_v1`, Sat Oct 17)
 
 ## Question
 
@@ -18,9 +18,9 @@ trained on top?
 
 ## What we compare (fair test)
 
-- **Same tiles** for every model: the exact STARC-9 tiles from `scripts/get_starc9.py` (seeded), NCT-CRC-HE-100K,
+- **Same tiles** for every model: the exact STARC-9 tiles from `scripts/models/get_starc9.py` (seeded), NCT-CRC-HE-100K,
   CRC-VAL-HE-7K, Kather 2016, SPIDER colon + skin.
-- **Same training recipe** as `split_v1` (`scripts/train_split_models.py`): logistic regression, class-balanced,
+- **Same training recipe** as `split_v1` (`scripts/models/train_split_models.py`): logistic regression, class-balanced,
   C from {0.1, 1, 10} picked on STARC-9 VAL-SMALL + a 10% NCT hold-out (same random seed and hold-out for everyone).
 - **Three feature sets:** `conch` (512 numbers per tile), `musk` (1024), `both` (side by side, 1536).
 - Zero-shot CONCH, zero-shot MUSK and their average are shown for reference.
@@ -36,14 +36,14 @@ have seen TCGA images during pretraining (from our features doc; not verified).
 
 ```bash
 # data (CPU / network only)
-python scripts/get_starc9.py --out data/datasets/starc9                       # same tiles as split_v1
-python scripts/get_public_tests.py --out data/datasets                        # CRC-VAL-HE-7K + Kather 2016
-sbatch scripts/get_spider_cpu.sbatch --organ colorectal --out data/datasets/spider_colorectal
-sbatch scripts/get_spider_cpu.sbatch --organ skin --out data/datasets/spider_skin --vessel-cap 3000 --other-per-class 250
+python scripts/models/get_starc9.py --out data/datasets/starc9                       # same tiles as split_v1
+python scripts/models/get_public_tests.py --out data/datasets                        # CRC-VAL-HE-7K + Kather 2016
+sbatch scripts/models/get_spider_cpu.sbatch --organ colorectal --out data/datasets/spider_colorectal
+sbatch scripts/models/get_spider_cpu.sbatch --organ skin --out data/datasets/spider_skin --vessel-cap 3000 --other-per-class 250
 # embeddings (GPU): CONCH + MUSK, each model loaded once, finished sets skipped
-sbatch scripts/embed_compare_gpu.sbatch
+sbatch scripts/models/embed_compare_gpu.sbatch
 # train + test (CPU)
-sbatch scripts/compare_cpu.sbatch --run musk_v1
+sbatch scripts/models/compare_cpu.sbatch --run musk_v1
 ```
 
 `data/datasets` and `data/embeddings` are links to `/work/hdd/bfqi/$USER/` (big storage, not the small home folder).
@@ -52,4 +52,15 @@ The SPIDER folders are `chmod 700` (gated dataset, CC-BY-NC). Results: `data/res
 
 ## Results
 
-_Pending._
+Full tables: `reports/musk_v1/results.md` (+ confusion matrices and `metrics*.json`).
+
+| average accuracy, decision tests | zero-shot CONCH | zero-shot MUSK | zero-shot avg | **CONCH** | **MUSK** | **both** |
+|---|---|---|---|---|---|---|
+| tissue8 | 80.5% | 81.6% | 82.4% | **92.1%** | 90.0% | 92.4% |
+
+- **Tissue map: keep CONCH.** "Both" is only +0.3 points, below the 2-point rule. MUSK alone is worse on every test set
+  (muscle on CRC-VAL-HE-7K is better, 87.7% vs 73.3%, but stroma drops to 67.2% from 91.4%).
+- **Blood: use MUSK.** The MUSK structures model finds 98.5% of STARC-9 TCGA blood and calls 0.1% of fat "blood"
+  (CONCH: 94.9% / 16%). On our own raw slides it found 98% of a blood clot (CONCH: 42%), so the pipeline now uses it
+  (`reports/blood_check_v1/`, `docs/slide_pipeline.md`).
+- On never-normalized Kather 2016 glass, MUSK calls 20% necrosis vs CONCH 87% (the pipeline's glass check handles this).

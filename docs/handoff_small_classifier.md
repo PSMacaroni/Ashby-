@@ -107,8 +107,8 @@ NCT-CRC folder → our class (`src/datasets.py` → `NCT_TO_CLASS`):
 - On Delta: `~natmakur/Ashby-/data/results/first_look/` (CONCH) and `.../first_look_musk/` (MUSK). These are in a
   private home folder, so ask whoever ran them (Delta user `natmakur`) for copies. Each has `metrics.json`, `nct_*_predictions.csv` (per-tile
   probabilities), confusion matrices, example grids, PathGen and slide results.
-- Reproduce them yourself (~1.5 min GPU each): `sbatch scripts/first_look_gpu.sbatch` (CONCH) or
-  `sbatch scripts/first_look_gpu.sbatch musk`.
+- Reproduce them yourself (~1.5 min GPU each): `sbatch scripts/models/first_look_gpu.sbatch` (CONCH) or
+  `sbatch scripts/models/first_look_gpu.sbatch musk`.
 
 ---
 
@@ -119,7 +119,7 @@ NCT-CRC folder → our class (`src/datasets.py` → `NCT_TO_CLASS`):
 | **NCT-CRC-HE-100K** | `/projects/bfqi/shared/datasets/NCT-CRC-HE-100K/data-samples/<CLASS>/*.tif` (on Delta) | ~89k labeled tiles (excluding BACK), 224×224 px at 0.5 µm/px, color-normalized, from 86 slides | **training** |
 | **CRC-VAL-HE-7K** | not on Delta; download (below) | 7,180 labeled tiles from **50 different patients** (no overlap with the 100K set), same size/classes | **testing** |
 | our TCGA slides | `/work/hdd/bfqi/natmakur/tcga_slides/` | 5 whole slides (+ `slides.csv` with stage) | stretch: real-slide check |
-| **STARC-9 subset** | `scripts/get_starc9.py` → `data/datasets/starc9/` | 90k training tiles (~200 Stanford patients, our 8 classes + blood) + 3 separate-patient test sets incl. TCGA | extra training + honest testing; see `docs/dataset_starc9.md` |
+| **STARC-9 subset** | `scripts/models/get_starc9.py` → `data/datasets/starc9/` | 90k training tiles (~200 Stanford patients, our 8 classes + blood) + 3 separate-patient test sets incl. TCGA | extra training + honest testing; see `docs/dataset_starc9.md` |
 
 Download the test set once, on a Delta **login node** (free, no GPU), into your own work folder:
 
@@ -176,7 +176,7 @@ Gotchas we already hit (already fixed in the repo, but good to know):
 
 ### Step 1: compute embeddings (GPU, one short job)
 
-Write `scripts/embed_tiles.py` that, for a folder of NCT-style tiles (`<CLASS>/*.tif`) and a `--model conch|musk`:
+Write `scripts/models/embed_tiles.py` that, for a folder of NCT-style tiles (`<CLASS>/*.tif`) and a `--model conch|musk`:
 1. loads the model once: `load_conch(image_size=224)` or `load_musk()` (both in `src/models.py`, both return
    `(model, preprocess)` with the same interface)
 2. reads tiles with a PyTorch `DataLoader` (`num_workers=8`) so file reading runs in parallel. **Don't** load all 89k
@@ -218,7 +218,7 @@ without spending GPU time (MUSK works on CPU too, just slowly). Then on GPU, run
 speed, then all of NCT-CRC-HE-100K (minus BACK) + all of CRC-VAL-HE-7K (minus BACK), for both models, in one job.
 MUSK is a bigger model at a bigger image size: expect it to take roughly **3–4× longer than CONCH**.
 
-Submit with a copy of `scripts/first_look_gpu.sbatch` (change the job name and the `python ...` line). That file already
+Submit with a copy of `scripts/models/first_look_gpu.sbatch` (change the job name and the `python ...` line). That file already
 has the right account (`bfqi-delta-gpu`), partition (`gpuA100x4`, hackathon reservation), 1 GPU, 8 CPUs, 32 GB.
 Bump `--time` to `01:00:00`. You're billed for the time actually used, not the limit.
 
@@ -230,7 +230,7 @@ should take well under 0.5 hours. **Tell the team before you submit anything on 
 
 ### Step 2: train + evaluate (CPU only, seconds; laptop or a CPU job)
 
-Write `scripts/train_classifier.py`. Train **three** classifiers on NCT-CRC-HE-100K:
+Write `scripts/models/train_classifier.py`. Train **three** classifiers on NCT-CRC-HE-100K:
 (a) CONCH embeddings, (b) MUSK embeddings, (c) both concatenated (`np.hstack([conch, musk])`, 1536 numbers).
 
 ```python
@@ -245,13 +245,13 @@ probs = clf.predict_proba(X_test)  # X_test = CRC-VAL-HE-7K
 - Then evaluate **once** on CRC-VAL-HE-7K and report all of these on the **same** test tiles:
   zero-shot CONCH, zero-shot MUSK, zero-shot average, LR-CONCH, LR-MUSK, LR-both. For each: overall accuracy,
   balanced accuracy, per-class accuracy, log-loss, confusion matrix (PNG + CSV; reuse `confusion_matrix` /
-  `save_confusion` from `scripts/first_look.py`).
+  `save_confusion` from `scripts/models/first_look.py`).
 - **Calibration** (is "0.9" right ~90% of the time?): report log-loss, and ideally a reliability plot
   (bin by confidence, plot accuracy per bin). The app shows these probabilities on hover, so this matters.
 - **Disagreement as uncertainty:** for zero-shot, how accurate are tiles where CONCH and MUSK agree vs disagree?
   (On our 400 tiles: agree 87% of the time, 96.8% accurate when they agree.)
 - Training on 89k × 1536 takes seconds to a few minutes on CPU. Don't run it on a login node; use your laptop
-  (copy the `.npz` files down) or a CPU job (`bfqi-delta-cpu`, see `scripts/first_look_cpu.sbatch`).
+  (copy the `.npz` files down) or a CPU job (`bfqi-delta-cpu`, see `scripts/models/first_look_cpu.sbatch`).
 
 Save the trained model(s) with `joblib.dump(clf, ...)` to `/projects/bfqi/$USER/models/` (e.g. `lr_conch_musk_v1.joblib`)
 and write down the exact settings (which embeddings, C, data, date) next to it.
@@ -292,7 +292,7 @@ Get a pathologist/mentor to check a few labels if possible.
 
 ## 4. What "done" looks like (report back with)
 
-- [ ] `scripts/embed_tiles.py`, `scripts/train_classifier.py`, `src/classifier.py` pushed on a branch + PR
+- [ ] `scripts/models/embed_tiles.py`, `scripts/models/train_classifier.py`, `src/classifier.py` pushed on a branch + PR
 - [ ] Table on CRC-VAL-HE-7K: zero-shot CONCH / MUSK / average vs LR-CONCH / LR-MUSK / LR-both: overall, balanced,
       per-class accuracy, log-loss
 - [ ] Confusion matrices (PNG). Did **tumor→normal** and **stroma→muscle** improve?
@@ -320,7 +320,7 @@ Get a pathologist/mentor to check a few labels if possible.
 | CONCH + MUSK loading, zero-shot, embeddings | `src/models.py` (`load_conch`, `load_musk`, `build_text_classifier`, `classify_images`) |
 | class list + prompts | `src/prompts.py` |
 | NCT-CRC / PathGen readers + class mapping | `src/datasets.py` |
-| example GPU / CPU job files | `scripts/first_look_gpu.sbatch` (`... musk` for MUSK), `scripts/first_look_cpu.sbatch` |
-| first-look script (confusion-matrix code to reuse) | `scripts/first_look.py` (`--model conch|musk`) |
+| example GPU / CPU job files | `scripts/models/first_look_gpu.sbatch` (`... musk` for MUSK), `scripts/models/first_look_cpu.sbatch` |
+| first-look script (confusion-matrix code to reuse) | `scripts/models/first_look.py` (`--model conch|musk`) |
 | Delta accounts, paths, rules | `CLAUDE.md` → "Delta specifics" |
 | project rules (honest limits, data contract) | `CLAUDE.md` |

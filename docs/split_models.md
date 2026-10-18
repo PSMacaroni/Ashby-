@@ -1,6 +1,6 @@
 # Two separate models: tissue (8 classes) + structures (nerve / vessel / blood)
 
-**Written:** Sat Oct 17 · **Run:** `split_v1` (trained on the laptop, CPU, a few minutes) · **Code:** `scripts/train_split_models.py`
+**Written:** Sat Oct 17 · **Run:** `split_v1` (trained on the laptop, CPU, a few minutes) · **Code:** `scripts/models/train_split_models.py`
 **Models:** `models/tissue8_split_v1.joblib`, `models/structures_split_v1.joblib` · **Results:** `reports/split_v1/`
 
 ## TL;DR
@@ -146,9 +146,9 @@ Write the 8 tissue probabilities to `tiles.csv` and the structure probabilities 
 
 ## Reproduce
 
-Needs CONCH embeddings (from `scripts/embed_tiles.py`) for `nct_100k`, `starc9_train/val_small/val_large/val_tcga`,
+Needs CONCH embeddings (from `scripts/models/embed_tiles.py`) for `nct_100k`, `starc9_train/val_small/val_large/val_tcga`,
 `crc_val_7k`, `spider_{colon,skin}_{train,test}`, plus the SPIDER `manifest.csv` files:
 
 ```bash
-python scripts/train_split_models.py --run split_v1
+python scripts/models/train_split_models.py --run split_v1
 ```

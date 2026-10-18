@@ -3,7 +3,7 @@ Side classifier for small structures that matter for risk but are not tissue-map
 nerves (perineural invasion) and blood vessels (venous / lymphovascular invasion).
 
 It works on the same CONCH image embeddings as the tissue map and gives, per tile:
-  p_nerve, p_vessel, p_other   logistic regression trained on SPIDER tiles (scripts/train_structures.py)
+  p_nerve, p_vessel, p_other   logistic regression trained on SPIDER tiles (scripts/models/train_structures.py)
   p_artery                     zero-shot CONCH, artery vs vein, only meaningful where p_vessel is high.
                                EXPERIMENTAL: no labeled artery/vein data exists to train or test it.
 Results go to structures.csv next to tiles.csv (see CLAUDE.md data contract), never into the 8 classes.

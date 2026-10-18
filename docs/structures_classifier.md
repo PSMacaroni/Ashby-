@@ -1,8 +1,8 @@
 # Side classifier: nerves and vessels (for perineural / venous invasion)
 
 **Written:** Sat Oct 17 · **Run:** `conch_structures_v1` (Delta job 22956230, A100, 4 min 39 s ≈ 0.08 GPU-hours)
-**Code:** `scripts/get_spider.py` (data), `scripts/embed_spider_gpu.sbatch` (embed + train),
-`scripts/train_structures.py`, `src/structures.py` (use in the pipeline)
+**Code:** `scripts/models/get_spider.py` (data), `scripts/models/embed_spider_gpu.sbatch` (embed + train),
+`scripts/models/train_structures.py`, `src/structures.py` (use in the pipeline)
 **Results:** `data/results/structures/conch_structures_v1/` · **Model:** `data/models/conch_structures_v1.joblib`
 
 ## TL;DR
@@ -87,9 +87,9 @@ s = predict_structures(bundle, image_embeddings)   # same CONCH embeddings as th
 ## Reproduce on Delta
 
 ```bash
-sbatch scripts/get_spider_cpu.sbatch --organ colorectal --out /projects/bfqi/$USER/datasets/spider_colorectal
-sbatch scripts/get_spider_cpu.sbatch --organ skin --out /projects/bfqi/$USER/datasets/spider_skin --vessel-cap 3000 --other-per-class 250
-sbatch scripts/embed_spider_gpu.sbatch     # after both finish: CONCH embeddings + training + test, ~5 min
+sbatch scripts/models/get_spider_cpu.sbatch --organ colorectal --out /projects/bfqi/$USER/datasets/spider_colorectal
+sbatch scripts/models/get_spider_cpu.sbatch --organ skin --out /projects/bfqi/$USER/datasets/spider_skin --vessel-cap 3000 --other-per-class 250
+sbatch scripts/models/embed_spider_gpu.sbatch     # after both finish: CONCH embeddings + training + test, ~5 min
 ```
 
 The download jobs stream 89 GB / 255 GB archives and keep only the ~25k needed tiles (2–4 min each on Delta). SPIDER is

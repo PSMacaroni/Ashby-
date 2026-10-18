@@ -1,0 +1,9 @@
+,tumor,normal_mucosa,muscle,fat,lymphocytes,mucus,necrosis,stroma
+tumor,2323,18,1,0,1,31,26,0
+normal_mucosa,14,2175,2,2,4,3,0,0
+muscle,1,0,1894,0,0,3,26,176
+fat,0,3,36,2020,0,241,0,0
+lymphocytes,9,2,2,0,2484,0,2,1
+mucus,0,2,0,6,0,2491,1,0
+necrosis,5,4,1,3,14,9,2064,0
+stroma,0,5,374,21,0,8,8,1984

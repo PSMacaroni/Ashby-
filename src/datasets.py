@@ -23,7 +23,7 @@ NCT_TO_CLASS = {
 }
 
 
-# STARC-9 folder name -> our class name (Stanford, 200 patients; see scripts/get_starc9.py).
+# STARC-9 folder name -> our class name (Stanford, 200 patients; see scripts/models/get_starc9.py).
 # BLD (blood) is not one of our 8 map classes yet: kept as its own label so the team can decide
 # later whether it becomes a 9th class or just an "ignore / not tumor" label.
 STARC_TO_CLASS = {

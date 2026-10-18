@@ -152,17 +152,20 @@ Update this contract here if it must change.
 - Login nodes: light work only (git, pip, file listing). Long commands there can get cut off.
 
 ## Repo layout
-`app/` Streamlit app · `src/` shared code · `scripts/` runnable steps · `tests/` pytest on fake slides ·
-`docs/` handoffs + `summary_example.json` · `notebooks/` experiments · `data/` git-ignored.
-- Models: `src/models.py` (CONCH, MUSK, zero-shot, `encode_texts`), `src/prompts.py`, `src/datasets.py`, `src/slides.py`
-- Analysis (CPU): `src/tilemap.py` (tiles.csv -> grids) -> `src/front.py` -> `src/features.py`, `src/flags.py`
-  (+ `src/phrases.py`), `src/risk.py`; `src/analysis.py` runs them all; `src/cutoffs.py`; `src/viz.py` (class colors)
-- Scripts: `first_look.py` (model bake-off), `analyze_slide.py`, `score_phrases.py`, `make_fake_slide.py`,
-  `check_setup.py`, `process_slide.py` (whole-slide pipeline: tissue mask + 224 px tiles + background guard + CONCH
-  + tissue model `models/tissue8_split_v1.joblib` + lymphocyte detector `models/immune_v1.joblib`; MUSK + blood check
-  `models/structures_musk_v1.joblib` + second opinion `models/tissue8_musk_v1.joblib` -> tiles.csv, embeddings.npy,
-  embeddings_musk.npy, tiles/, thumbnail.png, summary.json; `scripts/process_slides_gpu.sbatch` runs it + phrases +
-  analysis). Why MUSK for blood: `docs/slide_pipeline.md`.
+`app/` Streamlit app · `src/` shared code · `scripts/` the slide pipeline · `scripts/models/` how the classifiers were
+built and tested · `models/` trained heads + model card · `reports/` evaluation outputs (one folder per run) ·
+`calibration/` depth-hint calibration · `docs/` write-ups (index: `docs/README.md`) · `tests/` pytest ·
+`notebooks/` experiments · `data/` git-ignored.
+- Models: `src/models.py` (CONCH, MUSK, zero-shot, `encode_texts`), `src/prompts.py`, `src/datasets.py`, `src/slides.py`,
+  `src/classifier.py` (tissue8), `src/detectors.py` (glass / blur check, immune, blood), `src/structures.py`
+- Analysis (CPU): `src/tilemap.py` (tiles.csv -> grids, CONCH/MUSK overrule) -> `src/front.py` -> `src/features.py`,
+  `src/flags.py` (+ `src/phrases.py`), `src/risk.py`; `src/analysis.py` runs them all; `src/cutoffs.py`; `src/viz.py`
+- Scripts (`scripts/README.md`): `process_slide.py` (whole-slide pipeline: fat-aware tissue mask + 224 px tiles + CONCH
+  tissue model `models/tissue8_split_v1.joblib` + lymphocyte detector `models/immune_v1.joblib` + MUSK blood check
+  `models/structures_musk_v1.joblib` + second opinion `models/tissue8_musk_v1.joblib` + glass / blur check ->
+  tiles.csv, embeddings.npy, embeddings_musk.npy, tiles/, thumbnail.png, summary.json), `process_slides_gpu.sbatch`
+  (it + phrases + analysis), `score_phrases.py`, `analyze_slide.py`, `make_fake_slide.py`, `check_setup.py`,
+  `get_gdc_slides.py`, `calibrate_analysis.py`. Why MUSK for blood: `docs/slide_pipeline.md`.
 
 ## Validation we want for judges
 Normal (-11) slides → near-zero tumor; tissue accuracy on ~100 hand-checked tiles (zero-shot vs small classifier);

@@ -1,7 +1,7 @@
 # Two problems found on Kather 2016, and how we fixed them
 
 **Written:** Sat Oct 17 · **Test data:** Kather 2016 textures (5,000 non-normalized tiles, 10 Mannheim patients, never used
-for training) plus CRC-VAL-HE-7K · **Code:** `src/detectors.py`, `scripts/train_immune.py`
+for training) plus CRC-VAL-HE-7K · **Code:** `src/detectors.py`, `scripts/models/train_immune.py`
 **Model:** `models/immune_v1.joblib` · **Numbers:** `reports/immune_v1/metrics.json`, `reports/fixes/necrosis_guard_stats.csv`
 
 Both problems come from the same root cause: **asking one 8-class tissue model a question it wasn't built for.** Both

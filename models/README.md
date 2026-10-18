@@ -1,6 +1,6 @@
 # Trained models
 
-Small classifiers that sit **on top of frozen CONCH image embeddings** (CONCH ViT-B/16, 224 px input, tiles at ~0.5 µm/px,
+Small classifiers that sit **on top of frozen CONCH (or MUSK) image embeddings** (CONCH ViT-B/16, 224 px input, tiles at ~0.5 µm/px,
 `encode_image(..., proj_contrast=True, normalize=True)`). They are scikit-learn logistic regressions, a few KB each.
 This is **not** foundation-model weights; those stay on Hugging Face (gated). To use a model, load CONCH as usual,
 embed the tiles, then call the matching helper in `src/`.
@@ -8,7 +8,17 @@ embed the tiles, then call the matching helper in `src/`.
 Saved with scikit-learn 1.9.1 (laptop) and Delta's `pytorch-conda/2.12` environment. Load them with the same major
 scikit-learn version.
 
-**Recommended (split models, `docs/split_models.md`):**
+**Used by the slide pipeline (`scripts/process_slide.py`):** `tissue8_split_v1` (the map), `immune_v1` (`p_immune`),
+`structures_musk_v1` (blood check, `p_blood`) and `tissue8_musk_v1` (second opinion, `alt_label`).
+
+**MUSK models (MUSK experiment, run `musk_v1`, `docs/musk_experiment.md`; MUSK large embeddings, 1024 numbers, 384 px):**
+
+| file | what it predicts | trained on | code | details |
+|---|---|---|---|---|
+| `structures_musk_v1.joblib` | **nerve / vessel / blood / other** | same data as `structures_split_v1` | `src/detectors.py` (`predict_blood`) | blood found 98.5% on STARC-9 TCGA, fat → blood 0.1%; 98% of a clot on our raw slides vs 42% for the CONCH version (`reports/blood_check_v1/`) |
+| `tissue8_musk_v1.joblib` | 8 tissue classes | same data as `tissue8_split_v1` | `src/detectors.py` (`class_probs`) | 90.0% average vs CONCH 92.1% (`reports/musk_v1/`); used only as a second opinion |
+
+**CONCH split models (`docs/split_models.md`):**
 
 | file | what it predicts | trained on | code | details |
 |---|---|---|---|---|
@@ -92,8 +102,8 @@ cross-validation grouped by slide.
 
 | model | steps |
 |---|---|
-| tissue | `scripts/get_starc9.py` → `scripts/embed_tiles.py` (4 STARC-9 sets + CRC-VAL-HE-7K) → `scripts/train_classifier.py --run starc9_lr` |
-| structures | Delta: `scripts/get_spider_cpu.sbatch` (colon, skin) → `scripts/embed_spider_gpu.sbatch` (embeds + trains) |
-| provided-data test | Delta: `scripts/eval_provided_gpu.sbatch` |
+| tissue | `scripts/models/get_starc9.py` → `scripts/models/embed_tiles.py` (4 STARC-9 sets + CRC-VAL-HE-7K) → `scripts/models/train_classifier.py --run starc9_lr` |
+| structures | Delta: `scripts/models/get_spider_cpu.sbatch` (colon, skin) → `scripts/models/embed_spider_gpu.sbatch` (embeds + trains) |
+| provided-data test | Delta: `scripts/models/eval_provided_gpu.sbatch` |
 
 Scripts write to `data/models/` and `data/results/` (git-ignored). Copies of the models and reports are kept here and in `reports/`.
