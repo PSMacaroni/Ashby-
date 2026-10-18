@@ -41,7 +41,11 @@ with st.spinner("Getting the slides ready (first start only)..."):
 
 view = ui.current_view()
 slide = slide_data.get_slide(view["key"]) if view["name"] == "slide" else None
-if view["name"] == "slide" and slide is not None:
+if view["name"] == "results":
+    ui.top_bar("Model results")
+    import view_results
+    view_results.show()
+elif view["name"] == "slide" and slide is not None:
     ui.top_bar(f"Slide Box  ›  {slide.name}")
     import view_slide
     view_slide.show(slide)

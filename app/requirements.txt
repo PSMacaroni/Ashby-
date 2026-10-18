@@ -11,3 +11,4 @@ scikit-image  # the team's slide analysis (src/analysis.py), run when a slide ha
 python-dotenv
 openai        # NCSA Lumen summaries
 fpdf2         # PDF export
+matplotlib>=3.11.2  # the team's analysis figure for demo slides (src/viz.py); older versions crash on Delta

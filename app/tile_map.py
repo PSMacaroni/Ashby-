@@ -8,13 +8,13 @@ import io
 import threading
 
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 
 import slide_data
 from common import (CERTAINTY, CLASS_COLORS, CLASSES, NAMES, NOT_ANALYZED, RISK_RAMP, THEME, ZONES,
                     risk_color)
 
-MODES = {"tissue": "Tissue", "certainty": "Certainty", "risk": "Risk", "zones": "Zones"}
+MODES = {"tissue": "Tissue", "certainty": "Certainty", "risk": "Risk", "zones": "Zones"}   # "match" = search
 FAINT = 0.12          # how much of a class's color stays when another class is highlighted
 RULE = "─" * 30       # fixed-width line: keeps every hover box the same size
 NB = " "         # non-breaking space (normal spaces would be squeezed together)
@@ -29,8 +29,9 @@ def hex_rgb(color):
 
 # ---------------------------------------------------------------- overlay picture
 
-def tile_rgba(data, mode, focus=None):
-    """[rows, cols, 4] overlay colors for one coloring mode. focus = a class to highlight."""
+def tile_rgba(data, mode, focus=None, values=None):
+    """[rows, cols, 4] overlay colors for one coloring mode. focus = a class to highlight;
+    values = per-tile 0-1 match scores for the "match" mode."""
     g = data.geom
     out = np.zeros((g["rows"], g["cols"], 4), np.uint8)
     colors = np.zeros((len(data.rows), 4), np.uint8)
@@ -46,6 +47,13 @@ def tile_rgba(data, mode, focus=None):
     elif mode == "risk":
         for p in range(1, int(data.risk_points.max(initial=0)) + 1):
             colors[data.risk_points == p] = hex_rgb(risk_color(p)) + (255,)
+    elif mode == "match" and values is not None:
+        ramp = np.array([hex_rgb(c) for c in RISK_RAMP], float)
+        v = np.clip(np.asarray(values, float), 0, 1)
+        shown = v > 0
+        step = np.minimum((v * len(RISK_RAMP)).astype(int), len(RISK_RAMP) - 1)
+        colors[shown, :3] = ramp[step[shown]].astype(np.uint8)
+        colors[shown, 3] = (90 + 165 * v[shown]).astype(np.uint8)
     elif mode == "zones":
         for z, (_, color) in ZONES.items():
             colors[data.zone == z] = hex_rgb(color) + (255,)
@@ -59,32 +67,46 @@ _pictures = {}
 _pic_lock = threading.Lock()
 
 
-def _compose(slide, data, mode, opacity, show_overlay, focus):
+def _compose(slide, data, mode, opacity, show_overlay, focus, values=None, dark_glass=False):
     g = data.geom
     thumb = slide_data.thumbnail(slide.folder)
     base = (thumb if thumb is not None else Image.new("RGB", (g["width"], g["height"]), (236, 236, 240))).convert("RGBA")
+    size = (max(1, round(g["cols"] * g["step"])), max(1, round(g["rows"] * g["step"])))
+    at = (round(g["x0"]), round(g["y0"]))
+    if dark_glass:
+        # dim the empty glass around the tissue (where there are no tiles), so the tissue sits on the
+        # dark page like in a slide viewer. Tissue pixels are untouched (fat looks white too!)
+        grid = ((data.index_grid >= 0) * 255).astype(np.uint8)
+        tissue = Image.new("L", base.size, 0)
+        tissue.paste(Image.fromarray(grid).resize(size, Image.NEAREST), at)
+        tissue = tissue.filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.GaussianBlur(3))
+        dark = Image.new("RGBA", base.size, hex_rgb(THEME["surface"]) + (255,))
+        base = Image.composite(base, Image.blend(base, dark, 0.88), tissue)
     if show_overlay:
-        rgba = tile_rgba(data, mode, focus)
+        rgba = tile_rgba(data, mode, focus, values)
         rgba[..., 3] = (rgba[..., 3] * opacity).astype(np.uint8)
-        size = (max(1, round(g["cols"] * g["step"])), max(1, round(g["rows"] * g["step"])))
         layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
-        layer.paste(Image.fromarray(rgba, "RGBA").resize(size, Image.NEAREST), (round(g["x0"]), round(g["y0"])))
+        layer.paste(Image.fromarray(rgba, "RGBA").resize(size, Image.NEAREST), at)
         base = Image.alpha_composite(base, layer)
     return base.convert("RGB")
 
 
-def map_image(slide, mode, opacity, show_overlay=True, focus=None):
-    """The thumbnail with the colored map blended on top (PIL image), e.g. for exports."""
-    return _compose(slide, slide_data.load(slide), mode, opacity, show_overlay, focus)
+def map_image(slide, mode, opacity, show_overlay=True, focus=None, values=None):
+    """The thumbnail with the colored map blended on top (PIL image, white glass), for exports."""
+    return _compose(slide, slide_data.load(slide), mode, opacity, show_overlay, focus, values)
 
 
-def map_jpeg(slide, mode, opacity, show_overlay, focus):
-    """Same picture as JPEG bytes for the interactive map; remembered per setting."""
-    key = (str(slide.folder), slide_data.stamp(slide.folder), mode, round(opacity, 2), show_overlay, focus)
+def map_jpeg(slide, mode, opacity, show_overlay, focus, values=None, values_key=None):
+    """The picture for the interactive map (dark glass) as JPEG bytes; remembered per setting.
+    values: per-tile 0-1 scores for the "match" mode (search), named by values_key."""
+    key = (str(slide.folder), slide_data.stamp(slide.folder), mode, round(opacity, 2), show_overlay, focus, values_key)
     with _pic_lock:
         if key not in _pictures:
             buf = io.BytesIO()
-            map_image(slide, mode, opacity, show_overlay, focus).save(buf, "JPEG", quality=88)
+            _compose(slide, slide_data.load(slide), mode, opacity, show_overlay, focus, values,
+                     dark_glass=True).save(buf, "JPEG", quality=88)
+            if len(_pictures) > 60:          # keep memory in check: forget the oldest pictures
+                _pictures.pop(next(iter(_pictures)))
             _pictures[key] = buf.getvalue()
         return _pictures[key]
 
@@ -134,7 +156,8 @@ def hover_data(data):
             second = np.full(n, "—", dtype=object)
         zone = np.array([ZONE_SHORT.get(z, z) for z in data.zone], dtype=object)
         zone[data.on_front] = "Front edge"
-        risk = np.where(data.risk_points > 0, np.char.add(data.risk_points.astype(str), " points"), "—").astype(object)
+        unit = np.where(data.risk_points == 1, " point", " points")
+        risk = np.where(data.risk_points > 0, np.char.add(data.risk_points.astype(str), unit), "—").astype(object)
         reason = data.tiles["qc_reason"].to_numpy(dtype=object)
         bad = ~data.ok
         cls[bad], score[bad] = "Not analyzed", ""
@@ -150,19 +173,27 @@ def label(text):
 
 HOVER_TEMPLATE = (
     "<b>%{customdata[0]}</b>" + NB * 2 + "%{customdata[1]}<br>"
-    f"<span style='color:#3A404A'>{RULE}</span><br>"
+    f"<span style='color:#545C68'>{RULE}</span><br>"
     + label("Certainty") + "%{customdata[2]}<br>"
     + label("2nd model") + "%{customdata[3]}<br>"
     + label("Zone") + "%{customdata[4]}<br>"
     + label("Risk") + "%{customdata[5]}<br>"
-    f"<span style='color:#3A404A'>{RULE}</span><br>"
+    f"<span style='color:#545C68'>{RULE}</span><br>"
     f"<span style='color:{THEME['muted']}'>Click for details</span><extra></extra>"
 )
 
 
 # ---------------------------------------------------------------- the figure
 
-def figure(data, jpeg, selected=None, markers=(), zoom=None, arrow=None, uirevision="map", height=600):
+def growth_layer(summary):
+    """Where the tumor is pushing out: arrows on the infiltrative arcs of the front (from the team's
+    analysis, border.arcs) and rings on the tumor islands (satellites)."""
+    arcs = [a for a in (summary.get("border") or {}).get("arcs", []) if a.get("infiltrative")]
+    sats = [p for p in summary.get("satellites") or [] if p.get("satellite")]
+    return arcs, sats
+
+
+def figure(data, jpeg, selected=None, markers=(), zoom=None, arrow=None, uirevision="map", height=600, growth=None):
     """
     The interactive map (plotly). Hover: the fixed-size box above. Click: Streamlit returns the
     clicked point; on the tile layer (curve 1) its point_index is the tile's index. markers: [{"r", "c", "label", "color", "hover"}] pointers.
@@ -197,6 +228,26 @@ def figure(data, jpeg, selected=None, markers=(), zoom=None, arrow=None, uirevis
                                bgcolor=THEME["surface"], bordercolor=m["color"], borderwidth=1.5, borderpad=3,
                                font=dict(color=THEME["text"], size=12))
 
+    if growth:
+        arcs, sats = growth
+        reach = max(g["rows"], g["cols"]) * 0.07
+        for a in arcs:
+            (r, c), (dr, dc) = a["center_rc"], a["normal_rc"]
+            fig.add_annotation(x=c + 0.5 + dc * reach, y=r + 0.5 + dr * reach, ax=c + 0.5, ay=r + 0.5,
+                               axref="x", ayref="y", showarrow=True, arrowhead=2, arrowsize=1, arrowwidth=2.2,
+                               arrowcolor=THEME["accent"], text="",
+                               hovertext=f"Infiltrative arc · faces {a.get('clock', '?')} o'clock · roughness "
+                                         f"{a.get('roughness_um', '?')} µm")
+        if sats:
+            fig.add_trace(go.Scatter(
+                x=[p["col"] + 0.5 for p in sats], y=[p["row"] + 0.5 for p in sats], mode="markers",
+                marker=dict(symbol="circle-open", size=18, color=THEME["accent"], line=dict(width=2)),
+                hovertemplate="%{text}<extra></extra>", showlegend=False, name="",
+                text=[f"Tumor island · {p.get('diameter_um', '?')} µm · {p.get('distance_to_main_um', '?')} µm from the "
+                      f"main tumor · in {p.get('sits_in', '?')}" + (" · possible deposit" if p.get("possible_deposit") else "")
+                      for p in sats],
+                customdata=[[-1] for _ in sats]))
+
     if arrow:
         (r, c), (dr, dc), text = arrow
         length = max(g["rows"], g["cols"]) * 0.16
@@ -217,10 +268,10 @@ def figure(data, jpeg, selected=None, markers=(), zoom=None, arrow=None, uirevis
     else:
         xr, yr = [-X0 / S, (g["width"] - X0) / S], [(g["height"] - Y0) / S, -Y0 / S]
     fig.update_xaxes(visible=False, range=xr, constrain="domain")
-    fig.update_yaxes(visible=False, range=yr, scaleanchor="x", constrain="domain")
+    fig.update_yaxes(visible=False, range=yr, scaleanchor="x", constrain="domain", constraintoward="top")
     fig.update_layout(
         margin=dict(l=0, r=0, t=0, b=0), height=height, dragmode="pan", hovermode="closest",
-        clickmode="event+select", uirevision=uirevision, paper_bgcolor=THEME["bg"], plot_bgcolor=THEME["bg"],
+        clickmode="event+select", uirevision=uirevision, paper_bgcolor=THEME["surface"], plot_bgcolor=THEME["surface"],
         hoverlabel=dict(bgcolor=THEME["surface"], bordercolor="#3A404A", align="left",
                         font=dict(family=THEME["mono"], size=12, color=THEME["text"])))
     return fig

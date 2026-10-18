@@ -21,9 +21,12 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from common import BOX_STATE_FILE, CLASSES, DEMO_DIR, HIGH_CONF, NAMES, RESULTS_DIR, get
+from common import APP_DIR, BOX_STATE_FILE, CLASSES, DEMO_DIR, HIGH_CONF, NAMES, RESULTS_DIR, get
 
 ANALYSIS_KEYS = ("tumor", "border", "invasion", "risk", "uncertainty")
+# optional per-tile scores from the side models (tiles.csv or structures.csv): nerve / vessel /
+# artery detectors and the immune ("lymphocytes present?") detector
+EXTRA_COLUMNS = ("p_nerve", "p_vessel", "p_artery", "p_immune")
 
 
 _stamps = {}
@@ -222,7 +225,9 @@ class SlideData:
 
 
 _loaded = {}
-_lock = threading.Lock()
+# One lock for loading slides AND the heavy libraries: two threads importing scipy at the same time
+# breaks it ("partially initialized module"), e.g. the background warm-up and a user opening a slide.
+_lock = threading.RLock()
 
 
 def load(slide):
@@ -282,7 +287,12 @@ def _load(folder):
         same[m] = ndimage.convolve(m.astype(float), kernel, mode="constant")[m]
     share = np.where(n_nb > 0, same / np.maximum(n_nb, 1), 0)[rows, cols]
 
-    extra = {c: tiles[c].to_numpy(float) for c in ("p_nerve", "p_artery") if c in tiles}
+    extra = {c: tiles[c].to_numpy(float) for c in EXTRA_COLUMNS if c in tiles}
+    if (folder / "structures.csv").exists():      # the side classifier (nerve / vessel), CLAUDE.md
+        st_df = pd.read_csv(folder / "structures.csv").set_index(["row", "col"]).reindex(list(zip(rows, cols)))
+        for c in EXTRA_COLUMNS:
+            if c in st_df and c not in extra:
+                extra[c] = st_df[c].to_numpy(float)
     return SlideData(summary=summary, tiles=tiles, rows=rows, cols=cols, ok=ok, probs=probs, label=label,
                      conf=conf, alt=alt, unsure=unsure, certainty=certainty, risk_points=risk_points, zone=zone,
                      on_front=on_front, dist_um=dist_um, share=share, index_grid=index_grid, geom=geom,
@@ -325,15 +335,35 @@ def geometry(tiles, summary, thumb):
             "tile_um": tile_um, "width": width, "height": height}
 
 
+def real_examples(cls=None):
+    """Real H&E tiles cut from the team's evaluation sheets (app/assets/real_tiles/index.json)."""
+    path = APP_DIR / "assets" / "real_tiles" / "index.json"
+    try:
+        items = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    return [t for t in items if cls is None or t["class"] == cls]
+
+
 def tile_picture(slide, data, i):
-    """(image, caption) for tile i: the saved preview, a fake one for demos, or (None, why)."""
+    """
+    (image, caption) for tile i: the saved preview from Delta if there is one. Demo slides have no
+    tiles of their own, so they show a REAL example tile of the same class from our tests (or a
+    painted stand-in when we have no real example), labeled as such.
+    """
     r, c = int(data.rows[i]), int(data.cols[i])
     path = slide.folder / "tiles" / f"{r}_{c}.jpg"
     if path.exists():
-        return Image.open(path).convert("RGB"), "Tile preview"
+        return Image.open(path).convert("RGB"), "Tile preview from the slide"
     if slide.is_demo:
+        cls = CLASSES[data.label[i]]
+        examples = real_examples(cls)
+        if examples:
+            ex = examples[(r * 31 + c) % len(examples)]
+            img = Image.open(APP_DIR / "assets" / "real_tiles" / ex["file"]).convert("RGB")
+            return img, f"Real example of {NAMES[cls].lower()} ({ex['note']}). Not this square: demo slides have no tiles."
         from make_demo_data import fake_preview
-        return fake_preview(CLASSES[data.label[i]], r * 1000 + c), "Painted stand-in (demo slide)"
+        return fake_preview(cls, r * 1000 + c), "Painted stand-in (demo slide; no real example of this class yet)"
     return None, "No preview saved for this tile."
 
 
@@ -342,11 +372,12 @@ def warm_up(delay_s=0):
     import time
     time.sleep(delay_s)          # let the first screen finish drawing before we compete for the CPU
     try:
-        import pandas  # noqa: F401
-        import plotly.graph_objects  # noqa: F401
-        import scipy.ndimage  # noqa: F401
-        for s in list_slides():
-            load(s)
+        with _lock:
+            import pandas  # noqa: F401
+            import plotly.graph_objects  # noqa: F401
+            import scipy.ndimage  # noqa: F401
+            for s in list_slides():
+                load(s)
         import tile_map
         for s in list_slides():
             tile_map.map_jpeg(s, "tissue", 0.55, True, None)

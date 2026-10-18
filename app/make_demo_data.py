@@ -67,7 +67,21 @@ def make_demo(variant, out_dir):
     tile_table.to_csv(out_dir / "tile_analysis.csv", index=False)
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     paint_thumbnail(truth["label"], np.random.default_rng(1)).save(out_dir / "thumbnail.png")
+    overview_figure(tm, summary, tile_table, out_dir / "analysis_overview.png")
     return summary
+
+
+def overview_figure(tm, summary, tile_table, path):
+    """The team's four-panel check picture (src/viz.py): tissue map, zones + front + growth arrows,
+    risk points, flags. scripts/analyze_slide.py makes the same file for real slides."""
+    try:
+        from src.front import find_front
+        from src.viz import overview_figure as draw
+        points = np.zeros(tm.shape, int)
+        points[tile_table["row"], tile_table["col"]] = tile_table["risk_points"]
+        draw(tm, find_front(tm), summary, points, path)
+    except Exception as e:      # needs matplotlib; the app works without the picture
+        print(f"[demo] no analysis_overview.png: {type(e).__name__}: {e}")
 
 
 def paint_thumbnail(labels, rng):
@@ -158,7 +172,8 @@ def make_all():
 
 def ensure_demo_data():
     """Make the demo slides if they aren't there yet (first launch, or after an update)."""
-    if not all((DEMO_DIR / f"demo_{v}" / "tile_analysis.csv").exists() for v in DEMOS):
+    if not all((DEMO_DIR / f"demo_{v}" / name).exists() for v in DEMOS
+               for name in ("tile_analysis.csv", "analysis_overview.png")):
         make_all()
 
 

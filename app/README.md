@@ -36,13 +36,15 @@ The first start makes 3 demo slides in `app/demo_data/` (about a minute). To rem
 | Level | Screen | What you can do |
 |---|---|---|
 | 1 | **Slide Box** | A grid of slide cards (three per row). Hover a card for tumor % and flag count; click it to open. **⋯** opens its options: rename (and copy the details), export (PDF report, map picture, summary JSON, tiles CSV), duplicate, remove. Search and sort above the grid. |
-| 2 | **Slide** | Left: the map. Color it by **Tissue**, **Certainty**, **Risk** points or **Zones** (core / front band / peritumoral). In Tissue mode the legend is clickable: pick a class to highlight it. Hover any square for a fixed-size info box; click it to open it in the panel. Scroll to zoom, drag to move, double-click (or the fit button) to reset. Right: the panel (below), with PDF and map-picture downloads at the bottom. |
+| — | **Model results** | Top bar → Model results: what our models scored in testing (tissue model 94.6% vs 81.1% untrained, nerve/vessel detector, immune detector, background guard), an accuracy table per test set, before/after confusion charts, and real tiles and slides from our tests. Figures are read from the repo's `reports/` and `docs/img/` when present, otherwise from `app/assets/results/` (copies, see `SOURCES.md`). |
+| 2 | **Slide** | Top: search this slide, and a switch between the **Live map** and the team's **Figure** (`analysis_overview.png`: tissue map, zones with the front and growth arrows, risk points, flags). Left: the map. Color it by **Tissue**, **Certainty**, **Risk** points or **Zones** (core / front band / peritumoral; Zones also shows arrows where the front is infiltrative and rings on tumor islands, from `border.arcs` and `satellites`). In Tissue mode the legend is clickable: pick a class to highlight it. Hover any square for a fixed-size info box; click it to open it in the panel. Scroll to zoom, drag to move, double-click (or the fit button) to reset. Right: the panel (below), with PDF and map-picture downloads at the bottom. |
 
 Panel sections on Level 2:
 - **Summary**: flags to check, then the findings (growth, depth, direction, what the front faces, fat,
   immune, necrosis; "Show everything" adds stroma, mucin, spread, outer edge, lymph nodes, tissue mix,
   caveats). With Lumen set up, a short plain-language paragraph comes first.
-- **Spot**: the clicked square: picture, where it sits, top class and score, certainty and why, the
+- **Search** (appears while searching): what the words matched, the best spots (pointers S1-S5), and a switch to color the map by match.
+- **Spot**: the clicked square: picture (on demo slides, a REAL example tile of the same class cut from our test sheets, labeled with its source; painted only for classes we have no real example of), where it sits, top class and score, certainty and why, the
   second model's answer, zone and distance to the front, what to check by eye, all 8 scores.
 - **Unsure**: the analysis's unsure areas, with pointers on the map.
 - **Risk**: risk regions by level (filterable), with pointers, and the points table.
@@ -60,9 +62,22 @@ The app reads what the team's analysis writes: `summary.json` (every section has
 `text`), `tile_analysis.csv` (zones, risk points, unsure per square), `tiles.csv` (scores, `alt_label`,
 `p_nerve`, `p_artery`), `thumbnail.png`, and `tiles/<row>_<col>.jpg` previews if saved. If a slide has
 `tiles.csv` but no analysis yet, the app runs `src/analysis.py` in memory (nothing is written to the folder).
+Optional side-model scores are shown when present: `p_nerve`, `p_vessel`, `p_artery`, `p_immune` (in
+`tiles.csv` or `structures.csv`), and `analysis_overview.png` (from `scripts/analyze_slide.py`).
 
 **Real slides: none exist yet.** The whole-slide pipeline (tile + embed + classify on Delta) is still
 to build. Once a folder lands in `data/results/`, it shows up in the Slide Box with no app changes.
+
+## Search in a slide
+
+Type in the box above the map, e.g. "lymphocytes at the border", "budding", "tumor in a vein",
+"necrosis in the core". Two ways (`search.py`):
+- **Known words** (works now): words are matched to the 8 tissue classes, the nerve/vessel/immune
+  detectors and the analysis's flag phrases (`phrase_scores.csv`); "border", "core", "around" limit
+  it to that zone. The panel says exactly what was matched.
+- **Live text search** (turns on by itself when a slide has `embeddings.npy` and CONCH is installed
+  on the laptop): CONCH text vs tile image embeddings. Not tested yet; no slide has embeddings.
+Single-cell searches (mitoses, CD8, ...) get an honest "the map can't see that" answer.
 
 ## Lumen summaries
 
@@ -78,6 +93,10 @@ number that wasn't in the input, the app ignores it and shows the findings as co
 | `streamlit_app.py` | Entry point: page setup, demo slides, background warm-up, picks the screen |
 | `view_box.py` | Level 1, the Slide Box grid and the options window |
 | `view_slide.py` | Level 2: map and panel as separate fragments (a click on one side doesn't redraw the other) |
+| `view_results.py` | Model results page (numbers + the team's figures) |
+| `search.py` | Search in the open slide (known words now, CONCH text search when embeddings exist) |
+| `assets/real_tiles/` | Real H&E tiles cut from the team's test sheets (`index.json` says where each came from) |
+| `assets/results/` | Copies of the team's result figures (`SOURCES.md`) |
 | `tile_map.py` | Map picture, hover box, clickable points, pointers, legend |
 | `slide_data.py` | Finds slides, loads them once into memory, remembers renames/copies/removed slides |
 | `explain.py` | Picks and orders the analysis sentences; explains a single square |
@@ -109,5 +128,6 @@ never changed.
 
 ## Not built yet
 
-- Text search in the open slide (needs `embeddings.npy` + the CONCH text encoder)
+- Live CONCH text search is written but untested (no slide has `embeddings.npy` yet)
+- Real slide results: none exist yet (the whole-slide pipeline on Delta is still to build)
 - Level 3 tile deep dive (stitched previews)

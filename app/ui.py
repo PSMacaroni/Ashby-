@@ -51,7 +51,7 @@ CSS = f"""
   .item {{ display: flex; gap: 10px; padding: 9px 2px; border-bottom: 1px solid {T['border']};
            font-size: 0.9rem; line-height: 1.45; }}
   .item .dot {{ flex: 0 0 8px; height: 8px; border-radius: 50%; margin-top: 7px; }}
-  .item .t {{ color: {T['text']}; font-weight: 600; }}
+  .item .t {{ color: {T['text']}; font-weight: 500; }}
   .item .s {{ color: {T['text2']}; font-size: 0.84rem; }}
   .sec {{ font-size: 0.74rem; font-weight: 700; color: {T['muted']}; text-transform: uppercase;
           letter-spacing: 0.08em; margin: 14px 0 4px; }}
@@ -69,10 +69,20 @@ CSS = f"""
   button[kind="tertiary"] {{ color: {T['accent']} !important; padding: 0 !important; min-height: 26px !important; }}
   button[kind="tertiary"]:hover {{ text-decoration: underline; }}
 
+  /* phones: icon-only navigation so the top bar stays on one line */
+  @media (max-width: 640px) {{
+    .st-key-nav_box [data-testid="stMarkdownContainer"], .st-key-nav_results [data-testid="stMarkdownContainer"] {{ display: none; }}
+    .tb .crumb, .st-key-nav_forward {{ display: none; }}
+    .tb img {{ width: 28px; height: 28px; }}
+    .tb .name {{ font-size: 0.92rem; }}
+    .block-container {{ padding-left: 1rem !important; padding-right: 1rem !important; }}
+  }}
+
   /* map + panel cards on the slide screen */
   .st-key-mapcard, .st-key-panelcard {{ background: {T['surface']}; border: 1px solid {T['border']};
           border-radius: 12px; padding: 14px 16px 12px; }}
   .st-key-mapcard [data-testid="stPlotlyChart"] {{ border-radius: 8px; overflow: hidden; }}
+  .st-key-mapcard [data-testid="stSliderThumbValue"], .st-key-mapcard [data-testid="stSliderTickBar"] {{ display: none; }}
 </style>
 """
 
@@ -116,6 +126,11 @@ def top_bar(crumb):
         st.html(f'<div class="tb"><img src="{LOGO_URI}" alt="">'
                 f'<div><div class="name">Tumor Front Analyzer</div><div class="crumb">{html.escape(crumb)}</div></div></div>')
         st.space("stretch")
+        here = current_view()["name"]
+        st.button("Slide Box", icon=":material/grid_view:", key="nav_box", type="tertiary",
+                  on_click=go, args=({"name": "box"},), disabled=here == "box")
+        st.button("Model results", icon=":material/insights:", key="nav_results", type="tertiary",
+                  on_click=go, args=({"name": "results"},), disabled=here == "results")
         i, n = st.session_state.hist_i, len(_history())
         st.button("", icon=":material/arrow_back:", key="nav_back", help="Back", on_click=back, disabled=i == 0)
         st.button("", icon=":material/arrow_forward:", key="nav_forward", help="Forward", on_click=forward,

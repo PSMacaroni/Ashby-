@@ -12,12 +12,13 @@ import streamlit as st
 import explain
 import export
 import lumen
+import search
 import slide_data
 import tile_map
 import ui
 from common import CLASS_COLORS, CLASSES, NAMES, RISK_RAMP, THEME, get, pct, risk_color
 
-TABS = ["Summary", "Spot", "Unsure", "Risk", "Flags"]
+TABS = ["Summary", "Spot", "Search", "Unsure", "Risk", "Flags"]
 PANEL_HEIGHT = 600
 FLAG_COLOR = "#E5534B"
 UNSURE_COLOR = "#E8B341"
@@ -60,6 +61,23 @@ def show(slide):
 def map_area(slide, data):
     k, mem, g = slide.key, memory(slide.key), data.geom
     with st.container(key="mapcard"):
+        top = st.columns([0.66, 0.34], vertical_alignment="center")
+        query = top[0].text_input("Search this slide", key=f"q_{k}", label_visibility="collapsed",
+                                  icon=":material/search:",
+                                  placeholder="Search this slide, e.g. lymphocytes at the border, budding, nerve")
+        view = top[1].segmented_control("View", ["Live map", "Figure"], default="Live map", key=f"view_{k}",
+                                        label_visibility="collapsed", width="stretch") or "Live map"
+        if query.strip() != (mem.get("search") or {}).get("query", ""):
+            mem["search"] = search.search(slide, data, query) if query.strip() else None
+            mem["match_on"] = True
+            mem["want_tab"] = "Search" if query.strip() else "Summary"
+            st.rerun()      # whole screen: the panel shows the results, the map the pointers
+        found = mem.get("search") or {}
+        matching = found.get("values") is not None and mem.get("match_on", True)
+        if view == "Figure":
+            overview_figure(slide)
+            return
+
         with st.container(horizontal=True, vertical_alignment="center"):
             mode = st.segmented_control("Color by", list(tile_map.MODES), format_func=tile_map.MODES.get,
                                         default="tissue", key=f"mode_{k}", label_visibility="collapsed") or "tissue"
@@ -72,20 +90,47 @@ def map_area(slide, data):
                 mem["zoom_rev"] += 1
 
         focus = st.session_state.get(f"focus_{k}") if mode == "tissue" else None
-        jpeg = tile_map.map_jpeg(slide, mode, opacity, overlay, focus)
+        if matching:        # a search is on: color by how well each square matches it
+            jpeg = tile_map.map_jpeg(slide, "match", opacity, True, None, found["values"], found["query"])
+        else:
+            jpeg = tile_map.map_jpeg(slide, mode, opacity, overlay, focus)
         height = int(min(640, max(360, 780 * g["height"] / max(g["width"], 1))))
+        # phones: the map is narrow, so cap its height to the slide's shape (the picture sits at the top)
+        ratio = g["height"] / max(g["width"], 1)
+        st.html(f"<style>@media (max-width: 640px) {{ .st-key-mapcard [data-testid='stPlotlyChart'] {{"
+                f" max-height: calc((100vw - 4rem) * {ratio:.3f} + 8px); overflow: hidden; }} }}</style>")
+        growth = tile_map.growth_layer(data.summary) if (mode == "zones" and overlay and not matching) else None
         fig = tile_map.figure(data, jpeg, selected=mem["selected"], markers=mem["markers"], zoom=mem["zoom"],
-                              arrow=mem["arrow"], uirevision=f"{k}-{mem['zoom_rev']}", height=height)
+                              arrow=mem["arrow"], uirevision=f"{k}-{mem['zoom_rev']}", height=height, growth=growth)
         event = st.plotly_chart(fig, key=f"map_{k}", on_select="rerun", selection_mode="points",
                                 config={"displayModeBar": False, "scrollZoom": True, "doubleClick": "reset"})
         handle_click(event, k)
 
-        if overlay and mode == "tissue":
+        if matching:
+            ui.legend([("Weaker match", RISK_RAMP[1]), ("Stronger match", RISK_RAMP[-1])])
+            ui.note(f"Colored by your search “{found['query']}”. Turn it off in the Search tab.")
+        elif overlay and mode == "tissue":
             class_filter(data, k)
         elif overlay:
-            ui.legend(tile_map.legend_items(data, mode))
+            items = tile_map.legend_items(data, mode)
+            if growth and (growth[0] or growth[1]):
+                items += [("Arrows: infiltrative arcs (where the front pushes out)", THEME["accent"]),
+                          ("Rings: tumor islands", THEME["accent"])]
+            ui.legend(items)
         ui.note("Hover for details · click a spot to open it · scroll to zoom · drag to move · "
                 "double-click to reset")
+
+
+def overview_figure(slide):
+    """The team's four-panel analysis picture (src/viz.py), made by scripts/analyze_slide.py."""
+    path = slide.folder / "analysis_overview.png"
+    if path.exists():
+        st.image(str(path), width="stretch")
+        ui.note("The team's analysis figure: tissue map · zones with the invasive front (black) and arrows where "
+                "the front is infiltrative · risk points (1 mm neighborhood) · flags to look at. Made by "
+                "scripts/analyze_slide.py from the same results as the live map.")
+    else:
+        ui.note("No analysis figure for this slide yet. Run: python scripts/analyze_slide.py " + str(slide.folder))
 
 
 def handle_click(event, k):
@@ -134,6 +179,8 @@ def class_filter(data, k):
 @st.fragment
 def panel(slide, data):
     k, mem, s = slide.key, memory(slide.key), data.summary
+    if mem.pop("clear_rerun", False):      # the search was cleared: redraw the whole screen
+        st.rerun()
     tab_key = f"tab_{k}"
     want = mem.pop("want_tab", None)
     if want:
@@ -145,12 +192,17 @@ def panel(slide, data):
         st.html(f'<div style="font-weight:650;font-size:1.1rem">{ui.esc(slide.name)}</div>'
                 f'<div class="note">Case {ui.esc(slide.case_id)} · {ui.esc(slide.entered)} · '
                 f'{int(data.ok.sum()):,} squares of {data.geom["tile_um"]:.0f} µm · {ui.esc(model)}</div>')
-        tab = st.segmented_control("Section", TABS, key=tab_key, required=True, label_visibility="collapsed",
+        tabs = TABS if mem.get("search") else [t for t in TABS if t != "Search"]
+        if st.session_state.get(tab_key) not in tabs:
+            st.session_state[tab_key] = "Summary"
+        tab = st.segmented_control("Section", tabs, key=tab_key, required=True, label_visibility="collapsed",
                                    width="stretch")
         markers, arrow = [], None
         with st.container(height=PANEL_HEIGHT, border=False):
             if tab == "Spot":
                 spot_tab(slide, data)
+            elif tab == "Search":
+                markers = search_tab(slide, data)
             elif tab == "Unsure":
                 markers = unsure_tab(slide, data)
             elif tab == "Risk":
@@ -259,7 +311,7 @@ def spot_tab(slide, data):
         d = data.dist_um[i]
         where = "" if np.isnan(d) else f", {abs(d) / 1000:.1f} mm {'inside' if d < 0 else 'outside'} the front"
         pairs.append(("Zone", tile_map.ZONE_SHORT.get(zone, zone) + where))
-    for col, name in (("p_nerve", "Nerve"), ("p_artery", "Artery")):
+    for col, name in (("p_nerve", "Nerve"), ("p_vessel", "Vessel"), ("p_artery", "Artery"), ("p_immune", "Immune cells")):
         if col in data.extra and data.extra[col][i] >= 0.5:
             pairs.append((name, f"Detector score {data.extra[col][i]:.0%}"))
     pairs.append(("Position", f"Row {int(data.rows[i])}, column {int(data.cols[i])}"))
@@ -276,6 +328,41 @@ def spot_tab(slide, data):
         if e["mixup"]:
             ui.note(e["mixup"])
     ui.note("One answer per square (many cells across); the map can't see single cells.")
+
+
+def clear_search(k):
+    st.session_state[f"q_{k}"] = ""
+    mem = memory(k)
+    mem["search"], mem["clear_rerun"] = None, True
+
+
+def search_tab(slide, data):
+    k, mem = slide.key, memory(slide.key)
+    found = mem.get("search") or {}
+    st.html(f'<div class="lead">Results for “{ui.esc(found.get("query", ""))}”</div>')
+    how = ("Live text search (CONCH)" if found.get("how") == "live" else
+           "Known-words search: matched to tissue classes, detectors and the analysis's flag phrases")
+    used = ", ".join(found.get("used") or []) or "nothing"
+    zone = search.ZONE_NAMES.get(found.get("zone"), "")
+    ui.rows([("How", how), ("Matched", used)] + ([("Limited to", zone)] if zone else []))
+    if found.get("message"):
+        ui.note(found["message"])
+    markers = []
+    if found.get("spots"):
+        ui.section("Best matching spots")
+        for spot in found["spots"]:
+            ui.item(f"{spot['label']} · match {spot['score']:.0%}", "", THEME["accent"])
+            show_button(f"Show {spot['label']} on map", k, spot["r"], spot["c"], data, f"s_{k}_{spot['label']}")
+            markers.append({"r": spot["r"], "c": spot["c"], "label": spot["label"], "color": THEME["accent"],
+                            "hover": f"{spot['label']}: match {spot['score']:.0%}"})
+    if found.get("values") is not None:
+        on = st.toggle("Color the map by match", value=mem.get("match_on", True), key=f"match_{k}")
+        if on != mem.get("match_on", True):
+            mem["match_on"] = on
+            st.rerun()
+    st.button("Clear search", key=f"clear_{k}", icon=":material/close:", on_click=clear_search, args=(k,))
+    ui.note("Matches are hints about where to look. The map can't see single cells (e.g. CD8 vs CD4, mitoses).")
+    return markers
 
 
 def unsure_tab(slide, data):
