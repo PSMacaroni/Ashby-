@@ -35,6 +35,17 @@ TISSUE_MASK_NEAR_PX = 40           #   within this many thumbnail px of stained 
 GLASS_BLUR_MAX = 0.0003            # measured on 480k tiles from 58 slides: tiles this flat AND this pale are glass
 GLASS_COLORFUL_MAX = 0.30          #   (often tinted, so the < 10% colorful guard misses them; labeled necrosis).
                                    #   Real fat almost never qualifies (18 of 12,401 fat tiles)
+GLASS_EDGES_MAX = 0.02             # measured (docs/preprocessing_test.md; 980 tiles from 123 TCGA slides, labeled by
+GLASS_STRUCTURE_MIN = 0.4          #   eye at full resolution, not by a pathologist): glass = fewer than 2% of pixels
+                                   #   on a sharp edge, or structure in fewer than 40% of the tile's 4x4 sub-blocks.
+                                   #   Fat has a net of thin membranes, glass is flat. With the ink rule: 71% of glass
+                                   #   and ink removed (5% before), 0 of 62 real fat lost, 7 of 427 tissue tiles lost.
+                                   #   Applied regardless of the tissue label (incl. fat), only when tiles.csv has the
+                                   #   columns (scripts/process_slide.py or scripts/add_texture_measures.py)
+INK_BLUEGREEN_MIN = 0.2            # pen ink = more than this share of blue/green pixels, or of near-black pixels,
+INK_BLACK_MIN = 0.3                #   or of flat, fully saturated red ones. Ink is skipped as "background" BEFORE
+INK_RED_MIN = 0.5                  #   the blood check (the "blood" MUSK found on F4-6808 / F5-6813 was red ink).
+                                   #   On the labeled tiles: 0 of 54 real blood tiles hit
 BLUR_REL = 0.1                     # blurry = blur score < 10% of the slide's own typical sharpness (median blur of
                                    #   its clearly stained tiles). A fixed cut-off failed: soft scans (AG-A025,
                                    #   median 0.00027) have readable tissue far below sharp scans' junk

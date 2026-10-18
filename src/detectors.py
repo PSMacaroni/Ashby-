@@ -44,10 +44,66 @@ def is_background(colorful, tissue_label, max_colorful=BACKGROUND_MAX_COLORFUL):
     return (np.asarray(colorful) < max_colorful) & (np.asarray(tissue_label) != "fat")
 
 
-def quality_check(colorful, blur, tissue_label):
+TEXTURE_COLUMNS = ("edges", "structure_cov", "ink_bluegreen", "ink_black", "ink_red")
+EDGE_MIN = 0.06            # Sobel magnitude (0-1 gray) above this = a pixel on a sharp edge
+GLASS_DIST = 30            # a pixel is "tissue" if its RGB distance from the slide's glass color is above this
+
+
+def glass_color(thumbnail, mask):
+    """This slide's glass color (often tinted): the median color of thumbnail pixels well outside the tissue mask."""
+    from scipy import ndimage
+    rgb = np.asarray(thumbnail.convert("RGB")).reshape(-1, 3).astype(float)
+    far = ~ndimage.binary_dilation(mask, iterations=10).ravel()
+    if far.sum() > 100:
+        return np.median(rgb[far], 0)
+    bright = rgb.mean(1)
+    return np.median(rgb[bright >= np.percentile(bright, 95)], 0)
+
+
+def texture_measures(tile, glass_rgb):
+    """
+    Measures that tell glass and pen ink from tissue, incl. pale fat (docs/preprocessing_test.md). Returns a tuple in
+    TEXTURE_COLUMNS order:
+      edges          share of pixels on a sharp edge: fat has thin membranes everywhere, glass is flat
+      structure_cov  share of the tile's 4x4 sub-blocks with tissue or edges: an edge tile has structure on one side
+      ink_*          shares of blue/green, near-black and fully saturated flat red pixels (pen marks)
+    tile: a 224 px RGB tile at 0.5 µm/px (the measures were tuned at that size).
+    """
+    from skimage.filters import sobel
+    img = tile if isinstance(tile, Image.Image) else Image.fromarray(np.asarray(tile, dtype=np.uint8))
+    a = np.asarray(img.convert("RGB")).astype(float)
+    hsv = np.asarray(img.convert("RGB").convert("HSV")).astype(float)
+    h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+    edge = sobel(a.mean(-1) / 255) > EDGE_MIN
+    tissue = np.linalg.norm(a - np.asarray(glass_rgb, float), axis=-1) > GLASS_DIST
+    n = a.shape[0] // 4
+    blocks = [edge[i:i + n, j:j + n].mean() > 0.02 or tissue[i:i + n, j:j + n].mean() > 0.3
+              for i in range(0, 4 * n, n) for j in range(0, 4 * n, n)]
+    return (float(edge.mean()), float(np.mean(blocks)), float(((h >= 60) & (h <= 175) & (s > 80)).mean()),
+            float((v < 40).mean()), float((((h < 12) | (h > 240)) & (s > 200)).mean()))
+
+
+def texture_glass(texture):
+    """
+    True where the texture measures say glass or pen ink (cutoffs.GLASS_EDGES_MAX, GLASS_STRUCTURE_MIN, INK_*).
+    texture: a DataFrame / dict with TEXTURE_COLUMNS. Missing values (tiles made before these measures) -> False.
+    """
+    col = {c: np.asarray(texture[c], float) for c in TEXTURE_COLUMNS}
+    ink = ((col["ink_bluegreen"] > cutoffs.INK_BLUEGREEN_MIN) | (col["ink_black"] > cutoffs.INK_BLACK_MIN)
+           | (col["ink_red"] > cutoffs.INK_RED_MIN))
+    flat = (col["edges"] < cutoffs.GLASS_EDGES_MAX) | (col["structure_cov"] < cutoffs.GLASS_STRUCTURE_MIN)
+    return ink | flat          # comparisons with NaN are False, so tiles without the measures are kept
+
+
+def has_texture(tiles):
+    return all(c in tiles for c in TEXTURE_COLUMNS)
+
+
+def quality_check(colorful, blur, tissue_label, texture=None):
     """
     Per-tile quality check for a whole slide -> (background, blurry, blur_reference), boolean arrays + a number.
-    background = the colorless guard above OR glass (very flat and pale; cutoffs.GLASS_*).
+    background = the colorless guard above OR glass (very flat and pale; cutoffs.GLASS_*) OR, when `texture` is given
+    (a DataFrame / dict with TEXTURE_COLUMNS), glass or pen ink by texture (texture_glass).
     blurry = blur score below cutoffs.BLUR_REL x this slide's typical sharpness (median blur of tiles with >= 50%
     colorful pixels), so soft but readable scans aren't thrown away.
     """
@@ -55,6 +111,8 @@ def quality_check(colorful, blur, tissue_label):
     colorful, blur = np.asarray(colorful, float), np.asarray(blur, float)
     glass = (blur < cutoffs.GLASS_BLUR_MAX) & (colorful < cutoffs.GLASS_COLORFUL_MAX)
     background = is_background(colorful, tissue_label) | glass
+    if texture is not None and has_texture(texture):
+        background = background | texture_glass(texture)
     stained = colorful >= 0.5
     reference = float(np.median(blur[stained] if stained.sum() >= 20 else blur)) if len(blur) else 0.0
     blurry = (blur < cutoffs.BLUR_REL * reference) & ~background

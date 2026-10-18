@@ -90,8 +90,10 @@ Made on Delta by the whole-slide pipeline (GPU):
   only for the blood check, "unsure here" = low confidence only), `p_immune` (lymphocyte detector,
   0-1; `features.immune()` uses it instead of P(lymphocytes) when present), `p_blood` (MUSK blood check, 0-1).
   `scripts/process_slide.py` writes `p_immune`, `p_blood`, `alt_label` (MUSK's tissue8), and also `colorful`
-  (share of stained pixels), `blur` (Laplacian variance), `mask_coverage`; `qc_reason` is `background`
-  (src/detectors.quality_check: colorless and not fat, or glass), `blood` (src/detectors.is_blood: p_blood >=
+  (share of stained pixels), `blur` (Laplacian variance), `mask_coverage`, and texture measures `edges,
+  structure_cov, ink_bluegreen, ink_black, ink_red` (src/detectors.texture_measures; older folders get them from
+  `scripts/add_texture_measures.py`, CPU); `qc_reason` is `background` (src/detectors.quality_check: colorless and
+  not fat, or glass, or glass / pen ink by texture when those columns exist; docs/preprocessing_test.md), `blood` (src/detectors.is_blood: p_blood >=
   cutoffs.BLOOD_PROB, not labeled fat) or `blur` (src/detectors.quality_check: < cutoffs.BLUR_REL x the
   slide's typical sharpness). `scripts/recheck_quality.py` re-applies these rules to saved tiles (CPU).
 - `embeddings.npy`: float32 [n_tiles, dim], rows in the same order as tiles.csv (CONCH 512, MUSK 1024)
