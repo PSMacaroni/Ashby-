@@ -4,6 +4,7 @@ Write-ups, in the order the work happened. Numbers behind them are in `reports/`
 
 | doc | what it covers |
 |---|---|
+| `project_timeline.md` | **start here:** the whole project in order, with the test, result and reasoning behind every decision |
 | `handoff_small_classifier.md` | first zero-shot test of CONCH and MUSK on NCT-CRC tiles; the plan for a small trained classifier |
 | `dataset_starc9.md` | STARC-9, the second training dataset (Stanford, + a TCGA test set) |
 | `structures_classifier.md` | nerve / vessel side classifier (SPIDER) for perineural / venous invasion |
