@@ -1,54 +1,96 @@
 """
-Level 2: one slide. Left: the slide with the tissue map on top (hover a spot = tooltip, click =
-details). Right: four panels: the slide summary, the clicked spot, "look here" spots where the AI
-is unsure, and risk regions by level.
+Level 2: one slide, laid out like a photo post: the map on the left, a details panel on the right
+(Summary · Spot · Unsure · Risk · Flags).
+
+Speed: the panel and the map are separate fragments. Clicking inside the panel reruns only the
+panel; changing the map's coloring reruns only the map. The whole screen reruns only when one side
+must change the other (a click on the map opens that spot; "Show on map" moves the map).
 """
-import pandas as pd
-import plotly.graph_objects as go
+import numpy as np
 import streamlit as st
 
 import explain
 import export
+import lumen
 import slide_data
 import tile_map
 import ui
-from common import CAVEATS, CLASSES, COLORS, KNOWN_MIXUPS, NAMES, RISK_LEVELS, SHORT_NAMES, pct
+from common import CLASS_COLORS, CLASSES, NAMES, RISK_RAMP, THEME, get, pct, risk_color
 
-PANELS = ["Summary", "Selected spot", "Look here", "Risk regions"]
-COLOR_BY = {"Tissue type": "tissue", "How sure the AI is": "confidence", "Risk level": "risk"}
-LOOK_COLOR = "#D55E00"
-MAX_CARDS = 12
-CHART_CONFIG = {"displayModeBar": False}
+TABS = ["Summary", "Spot", "Unsure", "Risk", "Flags"]
+PANEL_HEIGHT = 600
+FLAG_COLOR = "#E5534B"
+UNSURE_COLOR = "#E8B341"
+MAX_ITEMS = 12
 
-
-# ---------------------------------------------------------------- per-slide memory + callbacks
 
 def memory(key):
-    """What a slide's screen remembers between clicks: clicked tile, zoom box, last click seen."""
+    """What a slide's screen remembers between clicks."""
     store = st.session_state.setdefault("slide_memory", {})
-    return store.setdefault(key, {"selected": None, "zoom": None, "zoom_rev": 0, "last_click": None})
+    return store.setdefault(key, {"selected": None, "zoom": None, "zoom_rev": 0, "last_click": None,
+                                  "markers": [], "arrow": None, "marker_sig": None, "panel_run": None})
 
 
-def focus(key, zoom, idx):
-    """'Show on map': zoom the map to a box of tiles and select one tile."""
+def focus_on(key, r, c, data, select=True):
+    """Zoom the map around tile (r, c) and select it."""
     mem = memory(key)
-    mem.update(zoom=zoom, selected=idx)
+    mem["zoom"] = tile_map.zoom_box(r, c, data)
     mem["zoom_rev"] += 1
+    i = int(data.index_grid[r, c]) if 0 <= r < data.geom["rows"] and 0 <= c < data.geom["cols"] else -1
+    if select and i >= 0:
+        mem["selected"] = i
 
 
-def reset_view(key):
-    mem = memory(key)
-    mem["zoom"] = None
-    mem["zoom_rev"] += 1
+def show(slide):
+    with st.spinner("Loading slide..."):
+        data = slide_data.load(slide)
+    st.session_state["_run"] = st.session_state.get("_run", 0) + 1     # counts full-screen runs
+    if slide.is_demo:
+        st.html('<div class="banner">Demo slide: made-up data used to build the app. Every number here is fake.</div>')
+    left, right = st.columns([0.6, 0.4], gap="medium")
+    with right:
+        panel(slide, data)          # first: it decides which pointers the map shows
+    with left:
+        map_area(slide, data)
 
 
-def read_click(slide):
-    """
-    A click on the map reruns the app; the clicked tile arrives in the chart's state. Handle it
-    before anything is drawn, so the side panel shows the new tile in this same run.
-    """
-    mem = memory(slide.key)
-    event = st.session_state.get(f"map_{slide.key}")
+# ---------------------------------------------------------------- the map (left)
+
+@st.fragment
+def map_area(slide, data):
+    k, mem, g = slide.key, memory(slide.key), data.geom
+    with st.container(key="mapcard"):
+        with st.container(horizontal=True, vertical_alignment="center"):
+            mode = st.segmented_control("Color by", list(tile_map.MODES), format_func=tile_map.MODES.get,
+                                        default="tissue", key=f"mode_{k}", label_visibility="collapsed") or "tissue"
+            st.space("stretch")
+            overlay = st.toggle("Overlay", value=True, key=f"overlay_{k}")
+            opacity = st.slider("Opacity", 0.15, 1.0, 0.55, 0.05, key=f"opacity_{k}", disabled=not overlay,
+                                label_visibility="collapsed", width=110)
+            if st.button("", icon=":material/fit_screen:", key=f"reset_{k}", help="Show the whole slide"):
+                mem["zoom"] = None
+                mem["zoom_rev"] += 1
+
+        focus = st.session_state.get(f"focus_{k}") if mode == "tissue" else None
+        jpeg = tile_map.map_jpeg(slide, mode, opacity, overlay, focus)
+        height = int(min(640, max(360, 780 * g["height"] / max(g["width"], 1))))
+        fig = tile_map.figure(data, jpeg, selected=mem["selected"], markers=mem["markers"], zoom=mem["zoom"],
+                              arrow=mem["arrow"], uirevision=f"{k}-{mem['zoom_rev']}", height=height)
+        event = st.plotly_chart(fig, key=f"map_{k}", on_select="rerun", selection_mode="points",
+                                config={"displayModeBar": False, "scrollZoom": True, "doubleClick": "reset"})
+        handle_click(event, k)
+
+        if overlay and mode == "tissue":
+            class_filter(data, k)
+        elif overlay:
+            ui.legend(tile_map.legend_items(data, mode))
+        ui.note("Hover for details · click a spot to open it · scroll to zoom · drag to move · "
+                "double-click to reset")
+
+
+def handle_click(event, k):
+    """A click on the map: open that spot in the panel (needs a full rerun so the panel updates)."""
+    mem = memory(k)
     try:
         points = event["selection"]["points"]
     except (TypeError, KeyError):
@@ -60,277 +102,248 @@ def read_click(slide):
     if sig == mem["last_click"]:
         return
     mem["last_click"] = sig
-    idx = p.get("customdata")
-    if isinstance(idx, (list, tuple)):
-        idx = idx[0] if idx else None
-    if idx is None:
-        return
-    mem["selected"] = int(idx)
-    st.session_state[f"panel_{slide.key}"] = "Selected spot"
+    if p.get("curve_number") == 1:              # the tile layer: point order = tile order
+        idx = p.get("point_index", p.get("point_number"))
+    else:                                       # a pointer: its tile index is in customdata
+        idx = p.get("customdata")
+        while isinstance(idx, (list, tuple)):
+            idx = idx[0] if idx else None
+    if idx is not None and int(idx) >= 0:
+        mem["selected"] = int(idx)
+        mem["want_tab"] = "Spot"
+        st.rerun()
 
 
-# ---------------------------------------------------------------- the screen
+def class_filter(data, k):
+    """The tissue legend doubles as a filter: pick a class to highlight it on the map."""
+    ok = data.ok
+    share = {c: np.mean(data.label[ok] == i) for i, c in enumerate(CLASSES)}
+    dots = "".join(f'[class*="st-key-focus_"] button:nth-of-type({n})::before {{ background: {CLASS_COLORS[c]}; }}'
+                   for n, c in enumerate(CLASSES, 1))
+    st.html(f"""<style>
+      [class*="st-key-focus_"] button::before {{ content: ""; width: 9px; height: 9px; border-radius: 3px;
+          display: inline-block; margin-right: 7px; }}
+      {dots}
+    </style>""")
+    st.pills("Highlight a class", CLASSES, key=f"focus_{k}", label_visibility="collapsed",
+             format_func=lambda c: f"{NAMES[c]} {share[c] * 100:.0f}%")
 
-def show(slide):
-    data = tile_map.prepare(slide)
-    st.session_state.setdefault(f"panel_{slide.key}", "Summary")
-    read_click(slide)
 
-    if slide.is_demo:
-        ui.demo_banner()
-    header(slide, data)
-    left, right = st.columns([0.6, 0.4], gap="medium")
-    with right:
-        panel = st.segmented_control("Panel", PANELS, key=f"panel_{slide.key}", required=True,
-                                     label_visibility="collapsed", width="stretch")
+# ---------------------------------------------------------------- the panel (right)
+
+@st.fragment
+def panel(slide, data):
+    k, mem, s = slide.key, memory(slide.key), data.summary
+    tab_key = f"tab_{k}"
+    want = mem.pop("want_tab", None)
+    if want:
+        st.session_state[tab_key] = want
+    st.session_state.setdefault(tab_key, "Summary")
+
+    with st.container(key="panelcard"):
+        model = get(s, "model.name", "model not recorded")
+        st.html(f'<div style="font-weight:650;font-size:1.1rem">{ui.esc(slide.name)}</div>'
+                f'<div class="note">Case {ui.esc(slide.case_id)} · {ui.esc(slide.entered)} · '
+                f'{int(data.ok.sum()):,} squares of {data.geom["tile_um"]:.0f} µm · {ui.esc(model)}</div>')
+        tab = st.segmented_control("Section", TABS, key=tab_key, required=True, label_visibility="collapsed",
+                                   width="stretch")
         markers, arrow = [], None
-        with st.container(height=720, border=False):   # scrolls on its own, so the map stays in view
-            if panel == "Selected spot":
-                spot_panel(slide, data)
-            elif panel == "Look here":
-                markers = look_here_panel(slide, data)
-            elif panel == "Risk regions":
-                markers = risk_panel(slide, data)
+        with st.container(height=PANEL_HEIGHT, border=False):
+            if tab == "Spot":
+                spot_tab(slide, data)
+            elif tab == "Unsure":
+                markers = unsure_tab(slide, data)
+            elif tab == "Risk":
+                markers = risk_tab(slide, data)
+            elif tab == "Flags":
+                markers = flags_tab(slide, data)
             else:
-                arrow = summary_panel(slide, data)
-    with left:
-        map_panel(slide, data, markers, arrow)
+                arrow = summary_tab(slide, data)
+
+        a, b = st.columns(2)
+        a.download_button("PDF report", lambda: export.pdf_report(slide), file_name=f"{slide.slide_id}_report.pdf",
+                          mime="application/pdf", key=f"dl_pdf_{k}", type="primary", width="stretch",
+                          on_click="ignore", icon=":material/picture_as_pdf:")
+        mode = st.session_state.get(f"mode_{k}") or "tissue"
+        b.download_button("Map picture", lambda: export.map_png(slide, mode, st.session_state.get(f"opacity_{k}", 0.55)),
+                          file_name=f"{slide.slide_id}_{mode}_map.png", mime="image/png", key=f"dl_png_{k}",
+                          width="stretch", on_click="ignore", icon=":material/image:")
+
+    # if this tab wants different pointers on the map, redraw the whole screen once
+    sig = (tuple((m["r"], m["c"], m["label"]) for m in markers), arrow is not None)
+    fragment_only = mem["panel_run"] == st.session_state.get("_run")
+    mem["panel_run"] = st.session_state.get("_run")
+    if sig != mem["marker_sig"]:
+        mem.update(markers=markers, arrow=arrow, marker_sig=sig)
+        if fragment_only:
+            st.rerun()
 
 
-def header(slide, data):
-    s, g = data["summary"], data["geom"]
-    st.markdown(f"### {slide.name}")
-    model = explain.get(s, "model.name", "not recorded")
-    st.caption(f"Case {slide.case_id} · Slide {slide.slide_id} · Entered {slide.entered} · "
-               f"{int(data['ok'].sum()):,} analyzed squares of about {g['tile_um']:.0f} µm · Model: {model}")
+def show_button(label, k, r, c, data, key):
+    if st.button(label, key=key, type="tertiary", icon=":material/my_location:"):
+        focus_on(k, r, c, data)
+        st.rerun()
 
 
-def map_panel(slide, data, markers, arrow):
-    k = slide.key
-    mem = memory(k)
-    c1, c2, c3, c4 = st.columns([0.2, 0.33, 0.29, 0.18], vertical_alignment="bottom")
-    show_overlay = c1.toggle("Tissue map", value=True, key=f"overlay_{k}")
-    mode_name = c2.selectbox("Color by", list(COLOR_BY), key=f"colorby_{k}", disabled=not show_overlay)
-    opacity = c3.slider("Map opacity", 0.1, 1.0, 0.5, 0.05, key=f"opacity_{k}", disabled=not show_overlay)
-    c4.button("Reset view", key=f"reset_{k}", on_click=reset_view, args=(k,), width="stretch",
-              help="Zoom back out to the whole slide")
-    mode = COLOR_BY[mode_name]
+def summary_tab(slide, data):
+    s = data.summary
+    facts = explain.plain_summary(s, slide.name)
+    if lumen.available():
+        with st.spinner("Writing the summary with Lumen..."):
+            text, source = lumen.summarize(facts)
+        if source == "Lumen":
+            st.html(f'<div class="lead">{ui.esc(text)}</div>')
+            ui.note("Written by Lumen from the findings below. It only rewords them; check before use.")
+        else:
+            ui.note(f"Lumen summary unavailable ({source}); showing the findings as computed.")
 
-    jpeg = tile_map.map_jpeg(slide, mode, opacity, show_overlay)
-    g = data["geom"]
-    height = int(min(720, max(380, 800 * g["height"] / g["width"])))   # roughly the slide's shape
-    fig = tile_map.figure(data, jpeg, selected=mem["selected"], markers=markers, zoom=mem["zoom"],
-                          arrow=arrow, uirevision=f"{k}-{mem['zoom_rev']}", height=height)
-    st.plotly_chart(fig, key=f"map_{k}", on_select="rerun", selection_mode="points",
-                    config={"scrollZoom": True, "displaylogo": False,
-                            "modeBarButtonsToRemove": ["select2d", "lasso2d", "autoScale2d"]})
-    if show_overlay:
-        legend(data, mode)
-    st.caption("Hover a spot to see what the AI thinks it is; click it for details. "
-               "Scroll to zoom, drag to move.")
-
-    # downloads are made only when clicked; the picture uses the coloring chosen above
-    a, b, _ = st.columns([0.32, 0.32, 0.36])
-    shown = mode if show_overlay else "tissue"
-    a.download_button("Download map picture", lambda: export.map_png(slide, shown, opacity),
-                      file_name=f"{slide.slide_id}_{shown}_map.png", mime="image/png", key=f"dl_png_{k}",
-                      on_click="ignore", icon="🖼️", width="stretch")
-    b.download_button("Download PDF report", lambda: export.pdf_report(slide),
-                      file_name=f"{slide.slide_id}_report.pdf", mime="application/pdf", key=f"dl_pdf_{k}",
-                      on_click="ignore", icon="📄", width="stretch")
-
-
-def legend(data, mode):
-    ui.legend(tile_map.legend_items(data, mode))
-
-
-# ---------------------------------------------------------------- right-hand panels
-
-def summary_panel(slide, data):
-    s = data["summary"]
     flags = s.get("high_risk_flags") or []
-    tumor = explain.get(s, "tumor.fraction_of_tissue")
-
-    st.markdown("**Top risk flags**")
+    ui.section(f"To check ({len(flags)})" if flags else "To check")
     if flags:
-        for f in flags[:3]:
-            ui.flag(f)
-        if len(flags) > 3:
-            st.caption(f"+ {len(flags) - 3} more in the full summary")
-    elif tumor == 0:
-        st.caption("No tumor found, so no tumor flags.")
+        for f in flags:
+            ui.item(f, color=FLAG_COLOR)
+    elif get(s, "tumor.found", True):
+        ui.note("No high-risk features flagged by the map. Vessel and nerve invasion still need a look by eye.")
     else:
-        st.caption("None flagged by the map. That isn't proof they're absent: vessel and nerve "
-                   "invasion still need a look by eye.")
+        ui.note("No tumor found, so there is nothing to flag.")
 
-    st.markdown("**Key findings**")
-    top, frac = explain.most_common_tissue(s)
-    lines = ([f"Top AI prediction for the slide: mostly {NAMES[top].lower()} ({pct(frac)} of tissue)."]
-             if top else []) + explain.key_findings(s)
-    st.markdown("\n".join(f"- {line}" for line in lines))
+    ui.section("Findings")
+    more = st.toggle("Show everything", key=f"more_{slide.key}")
+    ui.rows(explain.findings(s, more=more))
+    if more:
+        ui.section("Tissue mix")
+        fr = s.get("tissue_fractions") or {}
+        ui.legend([(f"{NAMES[c]} {pct(fr.get(c, 0))}", CLASS_COLORS[c]) for c in sorted(CLASSES, key=lambda c: -(fr.get(c) or 0))])
+        ui.section("Caveats")
+        for c in s.get("caveats") or []:
+            ui.item(c, color=THEME["muted"])
+        ui.note(f"Model: {get(s, 'model.name', 'n/a')} · prompts {get(s, 'model.prompts_version', 'n/a')}"
+                + (" · analysis run by the app (no tile_analysis.csv)" if data.analyzed_here else ""))
+    if not lumen.available():
+        ui.note("Lumen summaries turn on when LUMEN_API_KEY, LUMEN_BASE_URL and LUMEN_MODEL are in .env.")
 
-    if st.toggle("Expand summary", key=f"expand_summary_{slide.key}"):
-        if len(flags) > 3:
-            st.markdown("**All flags**")
-            for f in flags[3:]:
-                ui.flag(f)
-        for title, section in explain.full_report(s).items():
-            st.markdown(f"**{title}**")
-            st.markdown("\n".join(f"- {line}" for line in section))
-        st.markdown("**All 8 tissue classes (share of tissue)**")
-        st.plotly_chart(tissue_chart(s), config=CHART_CONFIG, key=f"tissue_chart_{slide.key}")
-        st.markdown("**Caveats**")
-        st.markdown("\n".join(f"- {c}" for c in (s.get("caveats") or CAVEATS)))
-        st.caption(f"Model: {explain.get(s, 'model.name', 'n/a')} · prompts "
-                   f"{explain.get(s, 'model.prompts_version', 'n/a')}")
-    st.caption("Decision support only, not a diagnosis.")
-
-    vec, cen = explain.get(s, "invasion.direction.vector_rc"), explain.get(s, "tumor.centroid_rc")
+    vec, cen = get(s, "invasion.direction.vector_rc"), get(s, "tumor.centroid_rc")
     if vec and cen:
-        side, clock = explain.get(s, "invasion.direction.side", ""), explain.get(s, "invasion.direction.clock")
-        label = f"front faces {side}" + (f" ({clock} o'clock)" if clock else "")
-        return (cen, vec, label)
+        return (cen, vec, get(s, "invasion.direction.side", "front"))
     return None
 
 
-def tissue_chart(summary):
-    fr = explain.get(summary, "tissue_fractions", {}) or {}
-    classes = [c for c in CLASSES if c in fr][::-1]
-    fig = go.Figure(go.Bar(x=[fr[c] for c in classes], y=[SHORT_NAMES[c] for c in classes], orientation="h",
-                           marker_color=[COLORS[c] for c in classes],
-                           text=[pct(fr[c]) for c in classes], textposition="outside", hoverinfo="skip"))
-    fig.update_layout(height=260, margin=dict(l=0, r=30, t=0, b=0), xaxis=dict(visible=False),
-                      paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
-    return fig
-
-
-def spot_panel(slide, data):
-    idx = memory(slide.key)["selected"]
-    if idx is None:
-        st.info("Click any spot on the slide to see what the AI thinks it is, how sure it is, and why.")
+def spot_tab(slide, data):
+    i = memory(slide.key)["selected"]
+    if i is None:
+        ui.note("Click any spot on the map to see what the AI thinks it is, how sure it is, and why.")
         return
-    t = data["tiles"].iloc[idx]
-    e = explain.tile_explanation(data, idx)
-    conf = f" {e['conf']:.0%}" if e["conf"] is not None else ""
-    st.html(f'<span class="ctfa-big">{e["headline"]}{conf}</span> &nbsp;'
-            f'{ui.sure_badge(e["sure"])}{ui.risk_badge(e["risk_level"])}')
-    st.caption(f"Square at row {int(t['row'])}, column {int(t['col'])} · "
-               f"about {data['geom']['tile_um']:.0f} µm wide")
+    e = explain.tile_explanation(data, i)
+    tone = {"Sure": "blue", "Check": "amber", "Unsure": "red"}.get(e["sure"], "")
+    chips = ui.chip(e["sure"], tone)
+    if e["risk_points"]:
+        chips += ui.chip(f"Risk {e['risk_points']} points", dot=risk_color(e["risk_points"]))
+    conf = f" · {e['conf']:.0%}" if e["conf"] is not None else ""
+    st.html(f'<div style="font-size:1.25rem;font-weight:650">{ui.esc(e["headline"])}{conf}</div>'
+            f'<div style="margin-top:4px">{chips}</div>')
 
-    pic, caption = slide_data.tile_picture(slide, t)
+    pic, caption = slide_data.tile_picture(slide, data, i)
     a, b = st.columns(2)
     if pic is not None:
         a.image(pic, caption=caption, width="stretch")
     else:
-        a.info(caption)
-    b.image(tile_map.neighborhood(slide, data, idx), caption="Where it sits on the slide", width="stretch")
+        a.html(f'<div class="note">{ui.esc(caption)}</div>')
+    b.image(tile_map.neighborhood(slide, data, i), caption="Where it sits", width="stretch")
 
-    st.markdown("**Why the AI thinks so**")
-    st.write(e["why"][0])
-    st.markdown("**How sure it is**")
-    st.write(explain.sure_sentence(e))
+    pairs = [("Why", e["why"][0])]
+    if e["how"]:
+        pairs.append(("Certainty", f"{e['sure']}: " + "; ".join(e["how"]) + "."))
+    pairs += [(label, line) for label, line in zip(("Second model", "Neighbors", "Looks like"), e["why"][1:])]
+    zone = data.zone[i]
+    if zone:
+        d = data.dist_um[i]
+        where = "" if np.isnan(d) else f", {abs(d) / 1000:.1f} mm {'inside' if d < 0 else 'outside'} the front"
+        pairs.append(("Zone", tile_map.ZONE_SHORT.get(zone, zone) + where))
+    for col, name in (("p_nerve", "Nerve"), ("p_artery", "Artery")):
+        if col in data.extra and data.extra[col][i] >= 0.5:
+            pairs.append((name, f"Detector score {data.extra[col][i]:.0%}"))
+    pairs.append(("Position", f"Row {int(data.rows[i])}, column {int(data.cols[i])}"))
+    ui.rows(pairs)
     if e["advice"]:
-        st.warning(e["advice"], icon="🔎")
-    if e["risk_level"]:
-        name = RISK_LEVELS[e["risk_level"]][0]
-        st.markdown(f"**Risk level {e['risk_level']} ({name})**" +
-                    (f": {e['risk_flags']}" if e["risk_flags"] else ""))
+        st.html(f'<div class="banner" style="margin-top:10px">{ui.esc(e["advice"])}</div>')
 
-    if st.toggle("Expand spot details", key=f"expand_spot_{slide.key}"):
-        st.markdown("**All 8 probabilities**")
-        st.dataframe(prob_table(data, idx), hide_index=True, width="stretch",
-                     column_config={"Combined": st.column_config.ProgressColumn(
-                         "Combined", min_value=0, max_value=100, format="%.0f%%")})
-        st.markdown("**Full reasoning**")
-        st.markdown("\n".join(f"- {line}" for line in e["why"]))
+    if st.toggle("All 8 scores", key=f"scores_{slide.key}"):
+        import pandas as pd
+        df = pd.DataFrame({"Class": [NAMES[c] for c in CLASSES], "Score": data.probs[i] * 100})
+        st.dataframe(df.sort_values("Score", ascending=False), hide_index=True, width="stretch",
+                     column_config={"Score": st.column_config.ProgressColumn("Score", min_value=0, max_value=100,
+                                                                             format="%.0f%%")})
         if e["mixup"]:
-            st.caption(e["mixup"])
-        st.caption("These are guesses for the whole square (many cells across); the AI can't see single cells.")
+            ui.note(e["mixup"])
+    ui.note("One answer per square (many cells across); the map can't see single cells.")
 
 
-def prob_table(data, idx):
-    rows = {"Class": [NAMES[c] for c in CLASSES], "Combined": data["probs"][idx] * 100}
-    if data["has_models"]:
-        rows["CONCH"] = [pct(p) for p in data["model"]["conch"]["probs"][idx]]
-        rows["MUSK"] = [pct(p) for p in data["model"]["musk"]["probs"][idx]]
-    return pd.DataFrame(rows).sort_values("Combined", ascending=False)
-
-
-def look_here_panel(slide, data):
-    spots = data["spots"]
-    n_ok = max(1, int(data["ok"].sum()))
-    n_unsure = int((data["sure"] == "Unsure").sum())
-    st.markdown("**Where the AI is unsure**")
-    rule = "the top score is under 60% or CONCH and MUSK disagree" if data["has_models"] \
-        else "the top score is under 60%"
-    st.caption(f"{n_unsure / n_ok:.0%} of tissue squares are unsure ({rule}). "
-               "These are the biggest clumps of them, worth a look by eye.")
-    if not spots:
-        st.success("No clumps of unsure squares on this slide.")
-        return []
-    tile_mm2 = (data["geom"]["tile_um"] / 1000) ** 2
+def unsure_tab(slide, data):
+    s = data.summary
+    st.html(f'<div class="lead">{ui.esc(get(s, "uncertainty.text", "Uncertainty not computed."))}</div>')
+    ui.note("Unsure = a low top score or the two models disagree. Color the map by Certainty to see every square.")
+    regions = get(s, "uncertainty.regions", []) or []
     markers = []
-    for i, sp in enumerate(spots, 1):
-        a, b = sp["pair"]
-        body = (f"{sp['n_tiles']} squares ({sp['n_tiles'] * tile_mm2:.2f} mm²) · average score "
-                f"{sp['mean_conf']:.0%}<br>Mostly <b>{SHORT_NAMES[a]}</b> vs <b>{SHORT_NAMES[b]}</b>")
-        if data["has_models"]:
-            body += f" · the models disagree on {pct(sp['disagree_share'])} of it"
-        mix = KNOWN_MIXUPS.get(frozenset((a, b)))
-        if mix:
-            body += f"<br><small>{mix}</small>"
-        ui.card(f"#{i}: {SHORT_NAMES[a]} or {SHORT_NAMES[b]}?", body, LOOK_COLOR)
-        st.button(f"Show #{i} on the map", key=f"look_{slide.key}_{i}", type="tertiary", icon="📍",
-                  on_click=focus, args=(slide.key, tile_map.zoom_box(sp["bbox_rc"], data), sp["center_idx"]))
-        markers.append({"idx": sp["center_idx"], "label": str(i), "color": LOOK_COLOR,
-                        "hover": f"Unsure spot #{i}: {SHORT_NAMES[a]} or {SHORT_NAMES[b]}?"})
+    ui.section("Biggest unsure areas")
+    if not regions:
+        ui.note("No unsure areas.")
+    for n, reg in enumerate(regions, 1):
+        ui.item(f"U{n} · {reg['n_tiles']} squares", reg.get("why", ""), UNSURE_COLOR)
+        show_button(f"Show U{n} on map", slide.key, reg["row"], reg["col"], data, f"u_{slide.key}_{n}")
+        markers.append({"r": reg["row"], "c": reg["col"], "label": f"U{n}", "color": UNSURE_COLOR,
+                        "hover": f"Unsure area U{n}: {reg.get('why', '')}"})
     return markers
 
 
-def risk_panel(slide, data):
-    s = data["summary"]
-    regions = s.get("risk_regions") or []
-    if not regions:
-        if explain.get(s, "tumor.fraction_of_tissue") == 0:
-            st.info("No tumor found, so there are no risk regions.")
-        else:
-            st.info("Risk regions haven't been computed for this slide yet.")
+def risk_tab(slide, data):
+    s = data.summary
+    cards = get(s, "risk.cards", []) or []
+    if not cards:
+        ui.note("No risk regions on this slide." if not get(s, "tumor.found", True) else
+                "No risk regions (no area collected enough points).")
         return []
-
-    levels = st.segmented_control(
-        "Show levels", [4, 3, 2, 1], selection_mode="multi", default=[4, 3, 2], key=f"levels_{slide.key}",
-        format_func=lambda lvl: f"L{lvl} {RISK_LEVELS[lvl][0]}")
-    with st.expander("How risk levels work"):
-        st.markdown(
-            "Each tissue square gets points for risk features found within about 0.5 mm of it "
-            "(for example an infiltrative front +1, a possible venous invasion candidate +2). "
-            "Its level is its points, capped at 4. Neighboring squares with the same level form a region.\n\n"
-            "These are places to look first, not findings. The points table is a placeholder until the "
-            "team's version is final" + (f" (version: {s.get('risk_points_version')})." if s.get("risk_points_version") else "."))
-
-    shown = [r for r in regions if r.get("level") in (levels or [])]
-    counts = {lvl: sum(r.get("level") == lvl for r in regions) for lvl in RISK_LEVELS}
-    st.caption(" · ".join(f"Level {lvl}: {n} region{'s' if n != 1 else ''}" for lvl, n in counts.items()))
-    tile_mm2 = (data["geom"]["tile_um"] / 1000) ** 2
+    levels = sorted({c["level"] for c in cards}, reverse=True)
+    min_level = st.select_slider("Show levels from", options=sorted(levels), value=min(levels),
+                                 key=f"minlevel_{slide.key}")
+    ui.note("Every risk feature adds points to the squares within 1 mm; a region's level is its highest total. "
+            "Color the map by Risk to see the points.")
     markers = []
-    for r in shown[:MAX_CARDS]:
-        name, color = RISK_LEVELS[r["level"]]
-        body = (ui.risk_badge(r["level"]) + f" {r.get('n_tiles', 0)} squares "
-                f"({r.get('n_tiles', 0) * tile_mm2:.2f} mm²)")
-        if r.get("reasons"):
-            body += "<br>Nearby: " + "; ".join(r["reasons"])
-        if r.get("suggested_actions"):
-            body += f"<br><i>Check: {r['suggested_actions'][0]}</i>"
-        ui.card(f"Region {r['id']}: {r.get('title', '')}", body, color)
-        r0c0r1c1 = r.get("bbox_rc") or (r["center_rc"] * 2)
-        center = int(data["index_grid"][r["center_rc"][0], r["center_rc"][1]])
-        st.button(f"Show region {r['id']} on the map", key=f"risk_{slide.key}_{r['id']}", type="tertiary",
-                  icon="📍", on_click=focus, args=(slide.key, tile_map.zoom_box(r0c0r1c1, data),
-                                                   center if center >= 0 else None))
-        if center >= 0:
-            markers.append({"idx": center, "label": f"R{r['id']}", "color": color,
-                            "hover": f"Region {r['id']} · level {r['level']}: {r.get('title', '')}"})
-    if len(shown) > MAX_CARDS:
-        st.caption(f"+ {len(shown) - MAX_CARDS} smaller regions not listed.")
-    st.caption("Tip: set Color by → Risk level to see every square's level.")
+    for n, card in enumerate([c for c in cards if c["level"] >= min_level][:MAX_ITEMS], 1):
+        color = risk_color(card["level"])
+        feats = "; ".join(card.get("features", []))
+        ui.item("", feats, color, title_html=f'Level {card["level"]} · {card["n_tiles"]} squares')
+        show_button(f"Show R{n} on map", slide.key, card["row"], card["col"], data, f"r_{slide.key}_{n}")
+        markers.append({"r": card["row"], "c": card["col"], "label": f"R{n}", "color": color,
+                        "hover": f"R{n} · level {card['level']}"})
+    with st.expander("Points table"):
+        for row in get(s, "risk.points_table", []) or []:
+            ui.item(row["key"].replace("_", " "), f"{row['points']} point(s) · {row['bin']} · {row['source']}")
+        ui.note("PLACEHOLDER rows are the team's stand-ins until the features doc's points table is final.")
+    return markers
+
+
+def flags_tab(slide, data):
+    s = data.summary
+    flags = s.get("flags") or []
+    if not flags:
+        ui.note("No flags computed for this slide." if get(s, "tumor.found", True) else "No tumor, so no flags.")
+        return []
+    ui.note("Look-here hints from text matching, detectors and shape rules. Expect false alarms.")
+    markers = []
+    for f in flags:
+        if f.get("status") == "skipped":
+            ui.item(f["title"], f"Not computed: {f.get('why_skipped')}", THEME["muted"])
+            continue
+        strong = [c for c in f.get("candidates", []) if c.get("strong")]
+        sub = f"{len(strong)} strong of {len(f.get('candidates', []))} spots · {f.get('source', '')} · {f.get('trust', '')}"
+        ui.item(f["title"], sub + (f" · {f['action']}" if f.get("action") else ""), FLAG_COLOR if strong else THEME["muted"])
+        for c in strong[:3]:
+            n = len(markers) + 1
+            if n > MAX_ITEMS:
+                break
+            markers.append({"r": c["row"], "c": c["col"], "label": f"F{n}", "color": FLAG_COLOR,
+                            "hover": f"F{n} · {f['title']}: {c.get('why', '')}"})
+        if strong:
+            show_button(f"Show {f['title'].lower()} on map", slide.key, strong[0]["row"], strong[0]["col"], data,
+                        f"f_{slide.key}_{f['key']}")
     return markers

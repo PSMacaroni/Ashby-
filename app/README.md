@@ -1,7 +1,8 @@
-# The app (Colon Tumor Front Analyzer)
+# The app (Tumor Front Analyzer)
 
-A Streamlit app that runs on a laptop and shows results made on Delta. It never runs CONCH or MUSK
-on slides itself; it only reads small result files, so it keeps working after Delta access ends.
+A Streamlit app that runs on a laptop and shows slide results made by the team's pipeline. It never
+runs CONCH or MUSK on slides itself; it only reads result files, so it keeps working after Delta
+access ends.
 
 ## Run it
 
@@ -22,127 +23,91 @@ Every time (activate first, as above):
 streamlit run app/streamlit_app.py
 ```
 
-It opens at http://localhost:8501. The first load after starting takes 10-20 seconds.
+Open **http://127.0.0.1:8501** (use the number, not `localhost`: on some Windows laptops
+`localhost` adds ~0.2 s to every request and pages took ~20 s to load). Only this computer can open
+it. Server settings and the look live in `app/.streamlit/config.toml`. Starting the server takes
+10-40 s on a slow laptop (loading Python libraries); after that pages load in about a second.
 
-The first launch makes 3 fake demo slides in `app/demo_data/` (takes about a minute).
-To remake them: `python app/make_demo_data.py`.
+The first start makes 3 demo slides in `app/demo_data/` (about a minute). To remake them:
+`python app/make_demo_data.py`.
 
 ## Screens
 
 | Level | Screen | What you can do |
 |---|---|---|
-| 1 | **Slide Box** | A card per processed slide (thumbnail, name, case ID, date, risk flags). **Open** goes to Level 2. The **⋮** button opens the slide's menu: rename (and copy its details), duplicate, export (one-page PDF report, map picture, summary JSON, tile CSV), remove. Streamlit can't catch right-clicks, so this button replaces the right-click menu. |
-| 2 | **Slide explorer** | Left: the slide with the tissue map on top. Turn the map on or off, color it by **tissue type**, **how sure the AI is**, or **risk level**. **Hover** any spot for a tooltip; **click** it for details. Scroll to zoom, drag to move. Under the map: **Download map picture** (in the current coloring) and **Download PDF report**. Right: four panels (below). |
+| 1 | **Slide Box** | A grid of slide cards (three per row). Hover a card for tumor % and flag count; click it to open. **⋯** opens its options: rename (and copy the details), export (PDF report, map picture, summary JSON, tiles CSV), duplicate, remove. Search and sort above the grid. |
+| 2 | **Slide** | Left: the map. Color it by **Tissue**, **Certainty**, **Risk** points or **Zones** (core / front band / peritumoral). In Tissue mode the legend is clickable: pick a class to highlight it. Hover any square for a fixed-size info box; click it to open it in the panel. Scroll to zoom, drag to move, double-click (or the fit button) to reset. Right: the panel (below), with PDF and map-picture downloads at the bottom. |
 
-Right-hand panels on Level 2:
-- **Summary**: top risk flags and key findings; **Expand summary** shows everything (border, depth, direction, immune, necrosis, stroma, all 8 tissue classes, caveats). An arrow on the map shows which way the front faces *in this slice*.
-- **Selected spot**: the clicked square: its picture, where it sits, its top class and score, *why* the AI thinks so, *how sure* it is and why, and what to check by eye when it's unsure. **Expand spot details** shows all 8 probabilities for the combined model, CONCH and MUSK.
-- **Look here**: clumps of squares where the AI is unsure (top score under 60%, or CONCH and MUSK disagree), with numbered pointers on the map and a "Show on the map" button for each.
-- **Risk regions**: regions grouped by risk level (1 Low to 4 Very high), filterable by level, each with the features nearby and a suggested check.
+Panel sections on Level 2:
+- **Summary**: flags to check, then the findings (growth, depth, direction, what the front faces, fat,
+  immune, necrosis; "Show everything" adds stroma, mucin, spread, outer edge, lymph nodes, tissue mix,
+  caveats). With Lumen set up, a short plain-language paragraph comes first.
+- **Spot**: the clicked square: picture, where it sits, top class and score, certainty and why, the
+  second model's answer, zone and distance to the front, what to check by eye, all 8 scores.
+- **Unsure**: the analysis's unsure areas, with pointers on the map.
+- **Risk**: risk regions by level (filterable), with pointers, and the points table.
+- **Flags**: perineural, venous, lymphatic, budding, etc.: strong spots get pointers; skipped flags say why.
 
 The ← → arrows at the top work like a browser's back and forward.
+
+## Where slides come from
+
+Every folder with `summary.json` + `tiles.csv` in:
+- `data/results/<slide_id>/`: real slides, copied down from Delta (format: `CLAUDE.md` → Data contract)
+- `app/demo_data/<slide_id>/`: demo slides made from the team's fake slides (`src/fake_slide.py`)
+
+The app reads what the team's analysis writes: `summary.json` (every section has a ready sentence in
+`text`), `tile_analysis.csv` (zones, risk points, unsure per square), `tiles.csv` (scores, `alt_label`,
+`p_nerve`, `p_artery`), `thumbnail.png`, and `tiles/<row>_<col>.jpg` previews if saved. If a slide has
+`tiles.csv` but no analysis yet, the app runs `src/analysis.py` in memory (nothing is written to the folder).
+
+**Real slides: none exist yet.** The whole-slide pipeline (tile + embed + classify on Delta) is still
+to build. Once a folder lands in `data/results/`, it shows up in the Slide Box with no app changes.
+
+## Lumen summaries
+
+Put these in the project's `.env` (never commit it, never paste keys in chat):
+`LUMEN_API_KEY`, `LUMEN_BASE_URL`, `LUMEN_MODEL`. Lumen only gets the analysis sentences (no images,
+no patient data) and must not add numbers, diagnoses or treatment advice; if its answer contains a
+number that wasn't in the input, the app ignores it and shows the findings as computed (`lumen.py`).
 
 ## Files
 
 | File | What it does |
 |---|---|
-| `streamlit_app.py` | Entry point: page setup, picks the screen to show |
-| `view_box.py` | Level 1, the Slide Box |
-| `view_slide.py` | Level 2, the map and the four right-hand panels |
-| `tile_map.py` | Map picture, hover text, clickable points, "unsure" spots |
-| `explain.py` | Plain-language text built from the numbers (templates, no AI) |
-| `export.py` | Map picture (PNG with title and color key) and the one-page PDF report |
-| `slide_data.py` | Finds slides, reads result files, remembers renames/copies/removed slides |
-| `ui.py` | Top bar, back/forward history, badges, page style |
-| `common.py` | Folders, the 8 classes, colors, known model mix-ups, caveats |
-| `make_demo_data.py` | Makes the fake DEMO slides |
-| `assets/logo.svg` | The slide-box logo |
+| `streamlit_app.py` | Entry point: page setup, demo slides, background warm-up, picks the screen |
+| `view_box.py` | Level 1, the Slide Box grid and the options window |
+| `view_slide.py` | Level 2: map and panel as separate fragments (a click on one side doesn't redraw the other) |
+| `tile_map.py` | Map picture, hover box, clickable points, pointers, legend |
+| `slide_data.py` | Finds slides, loads them once into memory, remembers renames/copies/removed slides |
+| `explain.py` | Picks and orders the analysis sentences; explains a single square |
+| `lumen.py` | Plain-language summary from NCSA Lumen, with a number check |
+| `export.py` | Map picture (PNG) and the one-page PDF report |
+| `ui.py` | Page style, top bar, back/forward history, small HTML pieces |
+| `common.py` | Folders, class names, colors (tissue colors come from `src/viz.py`) |
+| `make_demo_data.py` | Builds the demo slides with the team's fake slides + analysis |
+| `.streamlit/config.toml` | Theme (near-black, one blue accent) and server settings |
 
-The app writes only two things: `app/demo_data/` (fake slides) and `app/slide_box.json` (your renames,
-copies and removed slides). Both are git-ignored. Result files are never changed.
+The app writes only `app/demo_data/` and `app/slide_box.json` (both git-ignored). Result files are
+never changed.
 
-## Exports
+## Design notes
 
-- **Map picture (.png)**: the map with the slide name above and a color key below, ready for a slide deck.
-- **PDF report (1 page)**: map, tissue breakdown, how sure the AI is, top risk flags, key findings, top risk
-  regions, where the AI is unsure, and the caveats (always printed in full). Longer lists end with "+ N more in the app".
-
-Both are made only when the button is clicked; the picture takes a few seconds.
-
-## Where slides come from
-
-The app shows every folder that has a `summary.json` and a `tiles.csv`, from:
-- `data/results/<slide_id>/`: real slides, copied down from Delta (`scp -r delta:~/Ashby-/data/results/<slide_id> data/results/`)
-- `app/demo_data/<slide_id>/`: fake DEMO slides
-
-## What the app expects from Delta
-
-The base format is the data contract in `CLAUDE.md`. The app also reads these **extra** fields when
-present, and still works (showing "not computed yet") when they're missing. **Pipeline owners: please
-add these, and copy them into the contract in `CLAUDE.md`.**
-
-`tiles.csv`, extra columns:
-
-| Column | Meaning | Used for |
-|---|---|---|
-| `p_conch_<class>` ×8 | CONCH's own probabilities | "the models disagree" = unsure; side-by-side table |
-| `p_musk_<class>` ×8 | MUSK's own probabilities | same |
-| `risk_points` | points from risk features near this tile | risk coloring |
-| `risk_level` | 0-4 (points capped at 4) | risk coloring, hover |
-| `risk_flags` | short names of the features near it, `; `-separated | hover text |
-
-`p_<class>`, `label` and `confidence` stay the **final** answer (e.g. the classifier on CONCH + MUSK).
-Keep `label` as the raw argmax of `p_<class>` so the hover matches the numbers; smooth only for the analysis.
-
-`summary.json`, extra fields:
-
-```json
-{
-  "display_name": "Optional nicer name for the card",
-  "case_id": "TCGA-AA-3844",
-  "processed_at": "2026-10-18",
-  "slide_mpp": 0.25,
-  "invasion": {"direction": {"side": "bottom-right", "clock": 4, "vector_rc": [0.8, 0.6]}},
-  "stroma": {"worst_field_stroma_fraction": 0.64, "worst_field_center_rc": [56, 83], "stroma_high": true},
-  "satellites": [{"center_rc": [69, 95], "n_tiles": 8, "distance_mm": 0.6, "surrounded_by": "fat"}],
-  "risk_regions": [{"id": 1, "level": 4, "points": 5, "n_tiles": 38,
-                    "title": "Possible venous invasion candidate",
-                    "reasons": ["Possible venous invasion candidate", "Tumor front touches fat"],
-                    "suggested_actions": ["Look for a vein wall around this tumor island; consider an elastin stain."],
-                    "center_rc": [73, 104], "bbox_rc": [70, 100, 76, 108]}],
-  "risk_points_version": "v1"
-}
-```
-
-Notes:
-- `mpp` is read as the microns per pixel **of the tiles** (0.5), so one tile = `tile_size_px × mpp` µm.
-  Where a tile sits on the thumbnail comes from its `x`, `y` and `thumbnail_downsample`.
-- `*_rc` values are `[row, col]` in the tile grid.
-- **Tile previews** `tiles/<row>_<col>.jpg`: please save one for **every** tissue tile (128 px is fine, about 100 MB per
-  slide). The Selected spot panel shows it, and the planned Level 3 deep dive will stitch them into a zoomed view.
-  Without them, real slides show "no preview".
-- If a field isn't computed, leave it out or set it to `null`; don't write 0 for "unknown".
-
-## Demo data
-
-The demo slides are fake: a cartoon colon wall plus a tumor, and fake CONCH/MUSK probabilities with the
-mix-ups we measured on NCT-CRC (CONCH: stroma→muscle, tumor→normal; MUSK: normal→mucus, muscle→stroma).
-The summary numbers come from simple stand-ins for the analysis code, run on that fake map. They exist
-only to build and test the app. Every demo slide carries a DEMO badge and banner.
-
-The risk points table in `make_demo_data.py` (`RISK_FEATURES`) is a **placeholder** until the team's
-version (features doc, section 7) is final.
+- Dark, near-black background with one blue accent; system font; thin borders; generous spacing.
+- Tissue colors are the team's (`src/viz.py`) so the app matches the analysis figures. A color check
+  flags that muscle/mucus and stroma/muscle are hard to tell apart (especially with color blindness),
+  so the hover box always names the class and the legend can highlight one class.
+- Risk uses one blue scale (more points = darker); certainty colors only the doubtful squares.
 
 ## Honest limits shown in the app
 
 - Decision support, not a diagnosis. T stage is a "consistent with" hint from one slide.
-- The map gives one answer per square (112 µm with 224 px tiles, 10-15 cells across), so single cells are invisible to it.
+- The map gives one answer per 112 µm square (10-15 cells across), so single cells are invisible to it.
 - Immune results show where lymphocytes sit, not what they do; H&E can't tell T-cell types apart.
 - Direction means where the tumor is invading in this slice, not where it will grow.
-- Flags (venous invasion, budding, deposits) are places to check, not findings.
+- Flags are places to check, not findings; risk points include the team's PLACEHOLDER rows.
 
 ## Not built yet
 
-- Text search in the open slide (CONCH text encoder on the laptop, with a list of precomputed queries as fallback)
-- Lumen rewording of the summaries (template text is shown until then)
-- Level 3 tile deep dive (stitched previews), after the core is done
+- Text search in the open slide (needs `embeddings.npy` + the CONCH text encoder)
+- Level 3 tile deep dive (stitched previews)

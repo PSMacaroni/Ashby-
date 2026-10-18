@@ -1,11 +1,13 @@
 # What the app needs on a laptop (much smaller than the full requirements.txt for Delta).
 #   pip install -r app/requirements.txt
-streamlit>=1.50
+streamlit>=1.66
 plotly
+orjson        # makes sending the map to the browser faster (plotly uses it automatically)
 pandas
 numpy
 pillow
 scipy
+scikit-image  # the team's slide analysis (src/analysis.py), run when a slide has no tile_analysis.csv
 python-dotenv
-openai    # NCSA Lumen (optional plain-language rewording)
-fpdf2     # PDF export
+openai        # NCSA Lumen summaries
+fpdf2         # PDF export

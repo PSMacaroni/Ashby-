@@ -1,39 +1,78 @@
 """
-Small pieces of UI shared by every screen: page style, the top bar with the logo and the
-back/forward arrows, and colored badges.
+Shared look and pieces for every screen: page style, the top bar with back/forward, and small
+HTML building blocks (chips, rows, list items) so all screens look the same.
 
-Navigation works like a web browser's history: every screen we open is added to a list, and
-the arrows move back and forward through it.
+Navigation works like a browser's history: each screen we open is added to a list; the arrows
+move back and forward through it.
 """
 import base64
 import html
 
 import streamlit as st
 
-from common import APP_DIR, RISK_LEVELS
+from common import APP_DIR, THEME
 
 LOGO_SVG = (APP_DIR / "assets" / "logo.svg").read_text(encoding="utf-8")
 LOGO_URI = "data:image/svg+xml;base64," + base64.b64encode(LOGO_SVG.encode()).decode()
+T = THEME
 
-CSS = """
+CSS = f"""
 <style>
-  .block-container { padding-top: 3.6rem !important; padding-bottom: 2rem; }
-  .ctfa-title { font-size: 1.45rem; font-weight: 700; line-height: 1.2; margin: 0; }
-  .ctfa-crumb { font-size: 0.9rem; opacity: 0.75; margin-top: 2px; }
-  .ctfa-badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 0.78rem;
-                font-weight: 600; margin: 0 4px 4px 0; border: 1px solid transparent; white-space: nowrap; }
-  .ctfa-flag { border-left: 4px solid #E63946; padding: 6px 10px; margin: 0 0 6px 0; border-radius: 4px;
-               background: rgba(230, 57, 70, 0.08); font-size: 0.92rem; }
-  .ctfa-card { border-left: 5px solid #999; padding: 8px 12px; margin-bottom: 8px; border-radius: 6px;
-               background: rgba(128, 128, 128, 0.07); }
-  .ctfa-card h5 { margin: 0 0 4px 0; font-size: 0.98rem; }
-  .ctfa-legend span.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px;
-                         margin: 0 5px -1px 0; border: 1px solid rgba(0,0,0,0.25); }
-  .ctfa-legend { font-size: 0.82rem; line-height: 1.9; }
-  .ctfa-legend .item { display: inline-block; margin-right: 12px; white-space: nowrap; }
-  .ctfa-demo { background: rgba(255, 193, 7, 0.16); border: 1px solid rgba(255, 193, 7, 0.6);
-               border-radius: 6px; padding: 4px 10px; font-size: 0.85rem; margin-bottom: 8px; }
-  .ctfa-big { font-size: 1.25rem; font-weight: 700; }
+  /* page frame: no Streamlit decoration, centered content */
+  [data-testid="stDecoration"] {{ display: none; }}
+  header[data-testid="stHeader"] {{ background: transparent; }}
+  .block-container {{ max-width: 1380px; padding-top: 1.1rem !important; padding-bottom: 2.5rem; }}
+  h1, h2, h3, h4 {{ letter-spacing: -0.01em; font-weight: 650 !important; }}
+  hr {{ margin: 0.6rem 0 !important; border-color: {T['border']} !important; }}
+  [data-testid="stCaptionContainer"] {{ color: {T['muted']}; }}
+
+  /* top bar */
+  .tb {{ display: flex; align-items: center; gap: 12px; }}
+  .tb img {{ width: 34px; height: 34px; }}
+  .tb .name {{ font-weight: 650; font-size: 1.02rem; color: {T['text']}; line-height: 1.15; }}
+  .tb .crumb {{ font-size: 0.82rem; color: {T['muted']}; }}
+  .st-key-topbar {{ border-bottom: 1px solid {T['border']}; padding-bottom: 10px; margin-bottom: 6px; }}
+  .st-key-topbar button {{ min-height: 34px; padding: 0 10px; }}
+
+  /* chips, rows, list items */
+  .chip {{ display: inline-flex; align-items: center; gap: 6px; padding: 1px 9px; border-radius: 999px;
+          font-size: 0.75rem; font-weight: 600; border: 1px solid {T['border']}; color: {T['text2']};
+          background: {T['surface2']}; margin: 0 4px 4px 0; white-space: nowrap; }}
+  .chip i {{ width: 7px; height: 7px; border-radius: 50%; display: inline-block; }}
+  .chip.blue {{ color: #CFE3FF; border-color: #24467A; background: #12213A; }}
+  .chip.red {{ color: #FFD7D5; border-color: #6B2A27; background: #2A1414; }}
+  .chip.amber {{ color: #FBE7B5; border-color: #6A5320; background: #251E0D; }}
+  .rows {{ border-top: 1px solid {T['border']}; }}
+  .row {{ display: grid; grid-template-columns: 112px 1fr; gap: 12px; padding: 9px 2px;
+          border-bottom: 1px solid {T['border']}; font-size: 0.9rem; line-height: 1.45; }}
+  .row .k {{ color: {T['muted']}; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em;
+             padding-top: 2px; }}
+  .row .v {{ color: {T['text']}; }}
+  .item {{ display: flex; gap: 10px; padding: 9px 2px; border-bottom: 1px solid {T['border']};
+           font-size: 0.9rem; line-height: 1.45; }}
+  .item .dot {{ flex: 0 0 8px; height: 8px; border-radius: 50%; margin-top: 7px; }}
+  .item .t {{ color: {T['text']}; font-weight: 600; }}
+  .item .s {{ color: {T['text2']}; font-size: 0.84rem; }}
+  .sec {{ font-size: 0.74rem; font-weight: 700; color: {T['muted']}; text-transform: uppercase;
+          letter-spacing: 0.08em; margin: 14px 0 4px; }}
+  .lead {{ font-size: 0.95rem; line-height: 1.55; color: {T['text']}; }}
+  .note {{ font-size: 0.8rem; color: {T['muted']}; line-height: 1.45; }}
+  .legend {{ display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.8rem; color: {T['text2']}; }}
+  .legend span {{ display: inline-flex; align-items: center; gap: 6px; }}
+  .legend i {{ width: 10px; height: 10px; border-radius: 3px; display: inline-block; }}
+  .banner {{ font-size: 0.8rem; color: #FBE7B5; background: #251E0D; border: 1px solid #6A5320;
+             border-radius: 8px; padding: 6px 10px; }}
+  .stat b {{ color: {T['text']}; font-weight: 650; }}
+  .stat {{ color: {T['text2']}; font-size: 0.92rem; margin-right: 18px; }}
+
+  /* buttons that act like links ("Show on map") */
+  button[kind="tertiary"] {{ color: {T['accent']} !important; padding: 0 !important; min-height: 26px !important; }}
+  button[kind="tertiary"]:hover {{ text-decoration: underline; }}
+
+  /* map + panel cards on the slide screen */
+  .st-key-mapcard, .st-key-panelcard {{ background: {T['surface']}; border: 1px solid {T['border']};
+          border-radius: 12px; padding: 14px 16px 12px; }}
+  .st-key-mapcard [data-testid="stPlotlyChart"] {{ border-radius: 8px; overflow: hidden; }}
 </style>
 """
 
@@ -72,60 +111,50 @@ def forward():
     st.session_state.hist_i = min(len(_history()) - 1, st.session_state.hist_i + 1)
 
 
-def top_bar(crumbs):
-    """Logo, app name, breadcrumb (e.g. ['Slide Box', 'Demo 1']) and the back/forward arrows."""
-    logo, title, nav = st.columns([0.06, 0.74, 0.20], vertical_alignment="center")
-    logo.html(f'<img src="{LOGO_URI}" width="58" alt="Slide box logo">')
-    crumb = " &rsaquo; ".join(html.escape(c) for c in crumbs)
-    title.html(f'<p class="ctfa-title">Colon Tumor Front Analyzer</p><div class="ctfa-crumb">{crumb}</div>')
-    b, f = nav.columns(2)
-    i, n = st.session_state.hist_i, len(_history())
-    b.button("←", key="nav_back", help="Back to the previous screen", on_click=back,
-             disabled=i == 0, width="stretch")
-    f.button("→", key="nav_forward", help="Forward again (after going back)", on_click=forward,
-             disabled=i >= n - 1, width="stretch")
+def top_bar(crumb):
+    with st.container(key="topbar", horizontal=True, vertical_alignment="center"):
+        st.html(f'<div class="tb"><img src="{LOGO_URI}" alt="">'
+                f'<div><div class="name">Tumor Front Analyzer</div><div class="crumb">{html.escape(crumb)}</div></div></div>')
+        st.space("stretch")
+        i, n = st.session_state.hist_i, len(_history())
+        st.button("", icon=":material/arrow_back:", key="nav_back", help="Back", on_click=back, disabled=i == 0)
+        st.button("", icon=":material/arrow_forward:", key="nav_forward", help="Forward", on_click=forward,
+                  disabled=i >= n - 1)
 
 
-# ---------------------------------------------------------------- badges and cards
+# ---------------------------------------------------------------- HTML pieces (escape inputs!)
 
-def badge(text, color="#6c757d", filled=False):
-    """A small rounded label. Colors are hex like '#E63946'."""
-    if filled:
-        style = f"background:{color};color:#fff;"
-    else:
-        style = f"background:{color}22;border-color:{color}88;"
-    return f'<span class="ctfa-badge" style="{style}">{html.escape(text)}</span>'
+def esc(text):
+    return html.escape(str(text))
 
 
-def risk_badge(level):
-    if not level:
-        return badge("No risk points", "#6c757d")
-    name, color = RISK_LEVELS[level]
-    return badge(f"Level {level} · {name}", color, filled=level >= 3)
+def chip(text, tone="", dot=None):
+    d = f'<i style="background:{dot}"></i>' if dot else ""
+    return f'<span class="chip {tone}">{d}{esc(text)}</span>'
 
 
-def sure_badge(level):
-    color = {"Sure": "#2b83ba", "Somewhat sure": "#E69F00", "Unsure": "#D55E00"}.get(level, "#6c757d")
-    return badge(level, color, filled=level == "Unsure")
+def rows(pairs):
+    """Label/sentence rows, like a clean settings list."""
+    body = "".join(f'<div class="row"><div class="k">{esc(k)}</div><div class="v">{esc(v)}</div></div>'
+                   for k, v in pairs)
+    st.html(f'<div class="rows">{body}</div>')
 
 
-def flag(text):
-    st.html(f'<div class="ctfa-flag">{html.escape(text)}</div>')
+def item(title, sub="", color=None, title_html=None):
+    dot = f'<span class="dot" style="background:{color}"></span>' if color else ""
+    t = title_html if title_html is not None else esc(title)
+    s = f'<div class="s">{esc(sub)}</div>' if sub else ""
+    st.html(f'<div class="item">{dot}<div><div class="t">{t}</div>{s}</div></div>')
 
 
-def card(title, body_html, color="#999"):
-    """A box with a colored left edge. body_html must already be escaped."""
-    st.html(f'<div class="ctfa-card" style="border-left-color:{color}"><h5>{html.escape(title)}</h5>'
-            f'{body_html}</div>')
+def section(text):
+    st.html(f'<div class="sec">{esc(text)}</div>')
 
 
 def legend(items):
-    """items: list of (label, hex color)."""
-    parts = [f'<span class="item"><span class="sw" style="background:{c}"></span>{html.escape(t)}</span>'
-             for t, c in items]
-    st.html(f'<div class="ctfa-legend">{"".join(parts)}</div>')
+    parts = "".join(f'<span><i style="background:{c}"></i>{esc(t)}</span>' for t, c in items)
+    st.html(f'<div class="legend">{parts}</div>')
 
 
-def demo_banner():
-    st.html('<div class="ctfa-demo"><b>DEMO slide:</b> fake data made to build the app. '
-            'Every number here is made up.</div>')
+def note(text):
+    st.html(f'<div class="note">{esc(text)}</div>')
