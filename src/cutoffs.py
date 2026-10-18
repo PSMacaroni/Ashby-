@@ -14,7 +14,8 @@ SMOOTH_SIZE = 3                    # doc: average probabilities over a 3x3 neigh
 TUMOR_PROB = 0.5                   # doc: tumor = smoothed P(tumor) >= 0.5
 SMALL_HOLE_TILES = 4               # PLACEHOLDER: fill holes in the tumor mask up to this many tiles
 SECTION_GAP_UM = 300               # PLACEHOLDER: tissue pieces closer than this are one section
-LOW_CONFIDENCE = 0.5               # PLACEHOLDER: top probability below this = "unsure here"
+LOW_CONFIDENCE = 0.5               # PLACEHOLDER: top probability below this = "unsure here" (the only rule: MUSK's
+                                   #   second opinion, alt_label, is no longer used; see ALT_OVERRULES)
 TISSUE_MASK_SAT = 12               # measured: on our 5 TCGA slides the old rule (saturation > Otsu, 31-70) dropped
                                    #   pale real tissue (submucosa, loose stroma, fat); > 12 keeps it. Glass that
                                    #   slips in is removed per tile by the background guard (src/detectors.py)
@@ -29,14 +30,18 @@ GLASS_COLORFUL_MAX = 0.30          #   (often tinted, so the < 10% colorful guar
 BLUR_REL = 0.1                     # blurry = blur score < 10% of the slide's own typical sharpness (median blur of
                                    #   its clearly stained tiles). A fixed cut-off failed: soft scans (AG-A025,
                                    #   median 0.00027) have readable tissue far below sharp scans' junk
-ALT_OVERRULES = (("necrosis", "muscle"),)  # measured: where CONCH says necrosis and MUSK (alt_label) says muscle,
-                                   #   the analysis uses muscle (src/tilemap.py). On CM-4746, 16 of 20 such tiles
-                                   #   were plainly muscle, none necrosis; on labeled tests MUSK calls real
-                                   #   necrosis muscle 0-6.8% of the time (docs/slide_pipeline.md)
+ALT_OVERRULES = ()                 # team decision (Oct 18): MUSK is used only for the blood check. Its second opinion
+                                   #   (alt_label) changed little on 125 TCGA slides and its disagreements marked 20-28%
+                                   #   of the tissue "unsure" (reports/overnight_v4). To bring back the old overrule
+                                   #   (CONCH necrosis + MUSK muscle -> muscle; by eye 16 muscle / 0 necrosis):
+                                   #   (("necrosis", "muscle"),)
 BLOOD_PROB = 0.5                  # PLACEHOLDER: MUSK p_blood at or above this = blood tile, skipped as
                                    #   qc_reason "blood" (src/detectors.py). On CM-4746's clot, 0.5 finds 98% of 376
-                                   #   blood tiles and flags 0.5% of random tiles; 0.9 finds 91% and flags 0%. Our
-                                   #   only check is that one clot: confirm with the pathologist's labeled tiles
+                                   #   blood tiles and flags 0.5% of random tiles; 0.9 finds 91% and flags 0%
+BLOOD_SPARE_LABELS = ("fat",)     # never skip a tile as blood when the tissue model says one of these. Fat: blood
+                                   #   models confuse it with blood (16% on TCGA fat). Muscle is NOT spared: the
+                                   #   "muscle" MUSK called blood on 125 TCGA slides was pen ink (reports/overnight_v4,
+                                   #   section 6), and MUSK called 0 of 200 real CM-4746 muscle tiles blood
 
 # --- Zones around the invasive front --------------------------------------------------------
 CORE_UM = 500                      # doc: core = more than 500 µm inside the front

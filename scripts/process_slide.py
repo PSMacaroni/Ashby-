@@ -12,10 +12,10 @@ Steps:
   5. tissue model (models/tissue8_split_v1.joblib, CONCH) -> p_<class>, label (raw argmax), confidence
   6. lymphocyte detector (models/immune_v1.joblib, CONCH) -> p_immune (used by features.immune when present)
   7. blood check (models/structures_musk_v1.joblib, MUSK) -> p_blood; MUSK's own tissue model
-     (models/tissue8_musk_v1.joblib) -> alt_label, a second opinion: CONCH and MUSK disagreeing = "unsure here"
+     (models/tissue8_musk_v1.joblib) -> alt_label, a second opinion kept for reference (the analysis doesn't use it)
   8. quality check (src/detectors.quality_check + is_blood): qc_reason "background" (colorless and not fat, or
-     glass: very flat and pale), "blood" (p_blood >= cutoffs.BLOOD_PROB and not fat) or "blur" (< cutoffs.BLUR_REL x
-     the slide's typical sharpness)
+     glass: very flat and pale), "blood" (p_blood >= cutoffs.BLOOD_PROB and not labeled fat) or "blur"
+     (< cutoffs.BLUR_REL x the slide's typical sharpness). scripts/recheck_quality.py re-applies this to saved tiles
 
 Writes data/results/<slide_id>/: thumbnail.png, tiles.csv, embeddings.npy, embeddings_musk.npy, tiles/<row>_<col>.jpg,
 summary.json
@@ -242,7 +242,7 @@ def process_one(slide_path, args, models):
                         "background_guard": f"< 10% colorful pixels and not labeled fat, or glass (blur < "
                                             f"{cutoffs.GLASS_BLUR_MAX} and < {cutoffs.GLASS_COLORFUL_MAX:.0%} colorful)",
                         "tiles_added_by_extend": n_added},
-        "blood_check": {"rule": f"MUSK p_blood >= {cutoffs.BLOOD_PROB} and not labeled fat", "file": BLOOD_MODEL},
+        "blood_check": {"rule": f"MUSK p_blood >= {cutoffs.BLOOD_PROB} and not labeled {' or '.join(cutoffs.BLOOD_SPARE_LABELS)}", "file": BLOOD_MODEL},
         "model": {"name": "CONCH ViT-B/16 + logistic regression (tissue8_split_v1: NCT-CRC-HE-100K + STARC-9)",
                   "file": TISSUE_MODEL, "prompts_version": PROMPTS_VERSION},
         "alt_model": {"name": "MUSK + logistic regression (tissue8_musk_v1: NCT-CRC-HE-100K + STARC-9)",

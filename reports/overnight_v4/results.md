@@ -54,7 +54,8 @@ Rows = real pT, columns = what the hint said (v4): can't judge / 1 = wall not re
 
 - **"Unsure here" now covers 25% of the tissue (median slide 24%, worst 56%), up from 3% without MUSK.** Every tile
   where CONCH and MUSK disagree is marked unsure. In the app that overlay would cover a quarter of every slide, so it
-  probably needs a stricter rule (e.g. only disagreements that are also low-confidence). Not changed here.
+  probably needs a stricter rule (e.g. only disagreements that are also low-confidence). **Changed afterwards:
+  see section 8.**
 - Necrosis share of tissue: 6.6% (6.7% without MUSK). The blood check removes little necrosis on these slides.
 
 ## 3. How often the map labels are right (my labels, 528 tiles)
@@ -144,10 +145,19 @@ tiles). Results: `holdout/`.
 - TCGA labels: mucin inside the tumor vs "mucinous" AUROC 0.76 (12 vs 55); immune score vs MSI-high AUROC 0.55
   (only 5 MSI-high slides, too few to say anything).
 
-## 6. The MUSK blood check removes real muscle on some slides
+## 6. CORRECTED: the "muscle" the blood check removed was mostly pen ink
 
-The with/without-MUSK comparison changed the depth hint on 5 slides (2 calibration, 3 held-out). Counting the tiles
-skipped as blood on those slides:
+**Correction (Sun Oct 18, midday).** This section first said the MUSK blood check deletes real muscle. That was
+wrong. After protecting muscle-labeled tiles from the blood check, the same tiles were removed as **blur** instead
+(F4-6808: blur 6,087; F5-6813: 6,156). Looking at 24 of them (12 per slide), **all 24 are solid pen ink** (red,
+blue, green marker on the glass), not tissue: CONCH's tissue model calls ink "muscle", MUSK's blood model calls it
+"blood", and the blur rule catches it because ink is perfectly flat. So:
+- the blood check was removing **ink**, which is the right outcome for the wrong reason;
+- F4-6808's over-call without MUSK came from ink counted as a muscle wall, so MUSK's fix there was real;
+- F5-6813's "correct" serosal flag without MUSK was built on ink, so losing it was right;
+- the pipeline has no pen-ink check; ink is removed only by luck (blood or blur).
+
+The original numbers, kept for the record (what they show is ink, not muscle):
 
 | slide | real pT | CONCH muscle tiles | of those skipped as "blood" | depth hint: without → with MUSK |
 |---|---|---|---|---|
@@ -157,13 +167,11 @@ skipped as blood on those slides:
 | D5-6540 | T2 | 4,649 | 116 | beyond the wall (over-call) → reaches the wall (exact) |
 | G4-6321 | T2 | 2,985 | 5 | wall not reached → can't judge |
 
-- On some slides MUSK calls deep-red (eosin-heavy) smooth muscle "blood", and `is_blood()` only protects tiles the
-  tissue model calls fat. **F4-6808 alone is 4,730 of the 7,307 blood-skipped tiles on the 58 slides.**
-- So the over-call MUSK "fixed" on F4-6808 was fixed by deleting most of the muscle wall, not by finding blood.
-  The net effect of MUSK on the depth hint is close to zero, with one lost true pT4 flag.
-- The blood sheets (at most 4 tiles per slide) couldn't show this; per-slide counts did.
-- Likely fix (not applied): don't skip a tile as blood when the tissue model calls it **muscle** (as already done for
-  fat), or require a higher `BLOOD_PROB` there. Check it against these 5 slides plus CM-4746's clot.
+- F4-6808 alone is 4,730 of the 7,307 blood-skipped tiles on the 58 slides: mostly ink.
+- Lesson: per-slide counts pointed at the right slides, but the label "muscle" had to be checked by eye before
+  drawing a conclusion.
+- Fix (not applied): a pen-ink check (ink is strongly colored and perfectly flat; blue and green are outside the H&E
+  color range).
 
 ## 7. Five slides have no resolution information and were tiled at the wrong scale
 
@@ -176,14 +184,37 @@ wrong. All five are "can't judge" for depth, so **the depth and serosa numbers a
 tissue maps and measurements shouldn't be used (they're also in v1–v3). Fix (not applied): skip slides without a
 resolution, or ask for it, instead of guessing.
 
+## 8. Changes made after the test (Sun Oct 18, afternoon)
+
+Team decision: **MUSK is used only for the blood check.** Re-run on the same 125 slides (CPU only:
+`scripts/recheck_quality.py` + `scripts/analyze_slide.py` + `scripts/evaluate_slides.py`; results in
+`metrics_after_fixes.json`, `per_slide_after_fixes.csv`, and the same under `holdout/`).
+
+| change | why |
+|---|---|
+| "unsure here" = low confidence only (`src/features.uncertainty`) | CONCH/MUSK disagreement marked 20–28% of the tissue; most of it was MUSK calling tumor or stroma "necrosis" (MUSK's tissue model over-calls necrosis about 4×) |
+| MUSK's necrosis → muscle overrule off (`cutoffs.ALT_OVERRULES = ()`) | MUSK only for blood; one line brings it back |
+| blood check unchanged: spares fat only | a "spare muscle too" rule was tried and reverted: the "muscle" it protected was pen ink (section 6) |
+| `alt_label` still written to tiles.csv | for reference only; the analysis ignores it |
+
+| | calibration (58) | held-out (67) |
+|---|---|---|
+| "unsure here" (mean share of tissue) | 25.5% → **2.8%** (worst slide 8.4%) | 28.4% → **3.1%** (worst slide 10.6%) |
+| depth hint, serosal flag | unchanged (15/16 claims true; 0/13 pT4, 1/45 false alarms) | unchanged (11/11; 0/21, 0/46) |
+| necrosis share of tissue | 6.61% → 6.62% | 6.64% → 6.73% |
+| quality check (glass / blood / blur) | unchanged | unchanged |
+
+A CONCH/MUSK disagreement count by tissue pair (1.33 M tissue tiles): tumor → MUSK necrosis 5.2% of all tissue,
+stroma → necrosis 2.5%, normal mucosa ↔ tumor 2.3%, mucus → necrosis 0.9%, everything else under 1% each.
+
 ## Suggested next steps (not done)
 
-0. **Blood check vs muscle** (section 6): protect muscle-labeled tiles like fat ones. Small change, clear evidence.
-   Also stop guessing 0.25 µm/px for slides without a resolution (section 7).
+0. **Pen ink** (section 6): a real ink check instead of relying on the blood and blur rules. Also stop guessing
+   0.25 µm/px for slides without a resolution (section 7).
 1. **Glass on edges:** a small glass-vs-tissue check trained on raw TCGA tiles (the 76 glass tiles labeled here are a
    start), or a texture check that tells fat membranes from empty glass.
 2. **Mucin:** measure mucin in and around the tumor (e.g. mucus within the filled tumor outline plus a margin).
-3. **"Unsure here":** count CONCH/MUSK disagreement only when one of them is also unsure.
+3. ~~"Unsure here"~~: done (section 8).
 4. The 13 held-out slides that didn't fit (listed at the end of `calibration/manifest_holdout_v1.csv`) can be run
    later with `scripts/embed_slides_gpu.sbatch` (finished slides are skipped), about 40 GPU-minutes.
 

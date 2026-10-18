@@ -101,12 +101,13 @@ class TileMap:
                 "x": None if np.isnan(x) else int(x), "y": None if np.isnan(y) else int(y)}
 
 
-def overrule(probs, raw_label, alt, rules=cutoffs.ALT_OVERRULES):
+def overrule(probs, raw_label, alt, rules=None):
     """
     Where the main model's top class and the second model (alt_label) form one of `rules` (main, alt), move the
     main class's probability onto the alt class, for the analysis only (tiles.csv keeps the model's numbers).
-    Returns ([R, C] bool: overruled tiles, adjusted copy of probs).
+    rules=None: cutoffs.ALT_OVERRULES (empty now: no overrules). Returns ([R, C] bool: overruled tiles, adjusted probs).
     """
+    rules = cutoffs.ALT_OVERRULES if rules is None else rules
     out, mask = probs.copy(), np.zeros(raw_label.shape, bool)
     if alt is None:
         return mask, out

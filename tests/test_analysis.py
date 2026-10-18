@@ -132,8 +132,9 @@ def test_outer_edge(infiltrative):
 
 def test_uncertainty(infiltrative):
     unsure = infiltrative[1]["uncertainty"]
-    assert unsure["fraction_unsure"] > 0
-    assert any("disagree" in r["why"] for r in unsure["regions"])
+    # low confidence only: the fake slide's CONCH/MUSK disagreement area no longer counts
+    assert unsure["fraction_unsure"] == unsure["fraction_low_confidence"]
+    assert all(r["why"] == "low confidence" for r in unsure["regions"])
 
 
 # --- flags and risk ---------------------------------------------------------------------------

@@ -74,30 +74,25 @@ def tissue_fractions(tm):
 
 
 def uncertainty(tm):
-    """Where the model is unsure: low top probability, or two models disagree (if alt_label exists)."""
+    """
+    Where the model is unsure: top probability below cutoffs.LOW_CONFIDENCE. A second model's label (alt_label) is
+    not used: CONCH/MUSK disagreement marked 20-28% of the tissue on 125 TCGA slides, mostly MUSK over-calling necrosis.
+    """
     low = tm.tissue & (tm.confidence < cutoffs.LOW_CONFIDENCE)
-    alt = tm.extra.get("alt_label")
-    disagree = (tm.tissue & (alt >= 0) & (alt != tm.raw_label)) if alt is not None else np.zeros(tm.shape, bool)
-    unsure = low | disagree
+    unsure = low
 
     regions = []
     lab = measure.label(unsure, connectivity=2)
     for p in sorted(measure.regionprops(lab), key=lambda p: -p.area)[:3]:
-        m = lab == p.label
         r, c = center_tile(p.coords)
-        why = []
-        if (m & low).any():
-            why.append("low confidence")
-        if (m & disagree).any():
-            why.append("CONCH and MUSK disagree")
-        regions.append({**tm.tile_ref(r, c), "n_tiles": int(p.area), "why": " + ".join(why)})
+        regions.append({**tm.tile_ref(r, c), "n_tiles": int(p.area), "why": "low confidence"})
 
     frac = unsure.sum() / max(tm.tissue.sum(), 1)
     text = f"Unsure on {frac:.0%} of tissue tiles."
     if regions:
         text += f" Largest unsure area: {regions[0]['n_tiles']} tiles ({regions[0]['why']})."
-    return {"fraction_unsure": rnd(frac), "fraction_low_confidence": rnd(low.sum() / max(tm.tissue.sum(), 1)),
-            "fraction_models_disagree": rnd(disagree.sum() / max(tm.tissue.sum(), 1)) if alt is not None else None,
+    return {"fraction_unsure": rnd(frac), "fraction_low_confidence": rnd(frac),
+            "fraction_models_disagree": None,                   # kept for older readers; no longer used
             "regions": regions, "text": text}, unsure
 
 

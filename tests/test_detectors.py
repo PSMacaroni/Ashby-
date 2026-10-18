@@ -11,9 +11,9 @@ MODELS = Path(__file__).resolve().parent.parent / "models"
 
 
 def test_is_blood_needs_the_cutoff_and_spares_fat():
-    p = np.array([0.95, 0.95, cutoffs.BLOOD_PROB, cutoffs.BLOOD_PROB - 0.01])
-    labels = np.array(["necrosis", "fat", "tumor", "necrosis"])
-    assert is_blood(p, labels).tolist() == [True, False, True, False]
+    p = np.array([0.95, 0.95, cutoffs.BLOOD_PROB, cutoffs.BLOOD_PROB - 0.01, 0.99])
+    labels = np.array(["necrosis", "fat", "tumor", "necrosis", "muscle"])
+    assert is_blood(p, labels).tolist() == [True, False, True, False, True]
 
 
 def test_class_probs_keeps_label_order_and_fills_unseen_labels():

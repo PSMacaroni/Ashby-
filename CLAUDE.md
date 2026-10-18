@@ -86,13 +86,14 @@ Made on Delta by the whole-slide pipeline (GPU):
   p_mucus, p_necrosis, p_stroma, label, confidence`
   (x, y = level-0 pixel top-left; label = argmax class name; confidence = max prob)
   Optional: `p_nerve`, `p_artery` (trained yes/no detectors, 0-1), `alt_label` (a second model's top class,
-  e.g. MUSK's when the p_* columns are CONCH's; disagreement = "unsure here"), `p_immune` (lymphocyte detector,
+  e.g. MUSK's when the p_* columns are CONCH's; kept for reference, the analysis doesn't use it: MUSK is used
+  only for the blood check, "unsure here" = low confidence only), `p_immune` (lymphocyte detector,
   0-1; `features.immune()` uses it instead of P(lymphocytes) when present), `p_blood` (MUSK blood check, 0-1).
   `scripts/process_slide.py` writes `p_immune`, `p_blood`, `alt_label` (MUSK's tissue8), and also `colorful`
   (share of stained pixels), `blur` (Laplacian variance), `mask_coverage`; `qc_reason` is `background`
   (src/detectors.quality_check: colorless and not fat, or glass), `blood` (src/detectors.is_blood: p_blood >=
-  cutoffs.BLOOD_PROB, not fat) or `blur` (src/detectors.quality_check: < cutoffs.BLUR_REL x the slide's typical
-  sharpness).
+  cutoffs.BLOOD_PROB, not labeled fat) or `blur` (src/detectors.quality_check: < cutoffs.BLUR_REL x the
+  slide's typical sharpness). `scripts/recheck_quality.py` re-applies these rules to saved tiles (CPU).
 - `embeddings.npy`: float32 [n_tiles, dim], rows in the same order as tiles.csv (CONCH 512, MUSK 1024)
 - `embeddings_musk.npy`: optional, MUSK embeddings [n_tiles, 1024] when embeddings.npy is CONCH's
 - `tiles/<row>_<col>.jpg`: optional 128 px tile previews for click-to-zoom
@@ -158,7 +159,7 @@ built and tested · `models/` trained heads + model card · `reports/` evaluatio
 `notebooks/` experiments · `data/` git-ignored.
 - Models: `src/models.py` (CONCH, MUSK, zero-shot, `encode_texts`), `src/prompts.py`, `src/datasets.py`, `src/slides.py`,
   `src/classifier.py` (tissue8), `src/detectors.py` (glass / blur check, immune, blood), `src/structures.py`
-- Analysis (CPU): `src/tilemap.py` (tiles.csv -> grids, CONCH/MUSK overrule) -> `src/front.py` -> `src/features.py`,
+- Analysis (CPU): `src/tilemap.py` (tiles.csv -> grids) -> `src/front.py` -> `src/features.py`,
   `src/flags.py` (+ `src/phrases.py`), `src/risk.py`; `src/analysis.py` runs them all; `src/cutoffs.py`; `src/viz.py`
 - Scripts (`scripts/README.md`): `process_slide.py` (whole-slide pipeline: fat-aware tissue mask + 224 px tiles + CONCH
   tissue model `models/tissue8_split_v1.joblib` + lymphocyte detector `models/immune_v1.joblib` + MUSK blood check

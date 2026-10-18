@@ -93,6 +93,7 @@ def predict_blood(bundle, embeddings):
 
 
 def is_blood(p_blood, tissue_label, min_prob=cutoffs.BLOOD_PROB):
-    """True if the blood model is sure enough and the tissue model did not call the tile fat (blood models confuse
-    the two, and fat matters for the "tumor touches fat" T3 hint). Works on scalars or arrays."""
-    return (np.asarray(p_blood) >= min_prob) & (np.asarray(tissue_label) != "fat")
+    """True if the blood model is sure enough and the tissue model did not call the tile fat
+    (cutoffs.BLOOD_SPARE_LABELS: blood models confuse fat with blood, and fat matters for the "tumor touches fat" T3
+    hint). Works on scalars or arrays."""
+    return (np.asarray(p_blood) >= min_prob) & ~np.isin(np.asarray(tissue_label), cutoffs.BLOOD_SPARE_LABELS)

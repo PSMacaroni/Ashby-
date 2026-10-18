@@ -56,6 +56,8 @@ def numbers(s, prefix=""):
             f"{prefix}immune_margin": s.get("immune", {}).get("margin_fraction"),
             f"{prefix}immune_core": s.get("immune", {}).get("core_fraction"),
             f"{prefix}unsure": s.get("uncertainty", {}).get("fraction_unsure"),
+            f"{prefix}unsure_low_conf": s.get("uncertainty", {}).get("fraction_low_confidence"),
+            f"{prefix}unsure_disagree": s.get("uncertainty", {}).get("fraction_models_disagree"),
             f"{prefix}n_flags": len(s.get("high_risk_flags", []))}
 
 
@@ -128,7 +130,9 @@ def main():
               "qc_totals": {k: int(df[k].fillna(0).sum()) for k in ("n_tiles_read", "n_tissue_tiles", "qc_background",
                                                                        "qc_blood", "qc_blur")},
               "means": {k: float(df[k].astype(float).mean()) for k in ("tumor_frac", "necrosis_frac", "necrosis_in_tumor",
-                                                                      "mucin_in_tumor", "unsure")}}
+                                                                      "mucin_in_tumor", "unsure", "unsure_low_conf",
+                                                                      "unsure_disagree")},
+              "unsure_median_max": [float(df.unsure.median()), float(df.unsure.max())]}
     if args.ablation:
         df["nomusk_outcome"] = df.apply(lambda r: outcome(r.nomusk_depth_level, r.T_level), axis=1)
         result["without_musk"] = {"depth": depth_table(df, "nomusk_depth_level"),

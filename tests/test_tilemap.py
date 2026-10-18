@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 
+from src import cutoffs
 from src.prompts import CLASSES
 from src.tilemap import CLASS_INDEX, TileMap
 
@@ -18,7 +19,8 @@ def block(alt):
     return pd.DataFrame(rows)
 
 
-def test_necrosis_with_musk_muscle_becomes_muscle_for_the_analysis_only():
+def test_necrosis_with_musk_muscle_becomes_muscle_for_the_analysis_only(monkeypatch):
+    monkeypatch.setattr(cutoffs, "ALT_OVERRULES", (("necrosis", "muscle"),))   # off by default, see below
     df = block(("muscle", "necrosis"))
     tm = TileMap.from_dataframe(df)
     nec, mus = CLASS_INDEX["necrosis"], CLASS_INDEX["muscle"]
@@ -32,5 +34,12 @@ def test_necrosis_with_musk_muscle_becomes_muscle_for_the_analysis_only():
 
 def test_no_alt_label_means_no_overrule():
     tm = TileMap.from_dataframe(block(("muscle", "muscle")).drop(columns="alt_label"))
+    assert not tm.overruled.any()
+    assert (tm.label == CLASS_INDEX["necrosis"]).all()
+
+
+def test_overrule_is_off_by_default():
+    # team decision: MUSK is used only for the blood check (cutoffs.ALT_OVERRULES = ())
+    tm = TileMap.from_dataframe(block(("muscle", "muscle")))
     assert not tm.overruled.any()
     assert (tm.label == CLASS_INDEX["necrosis"]).all()
