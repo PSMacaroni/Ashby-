@@ -66,8 +66,11 @@ Compared with the same slides in the overnight test:
 - **Depth hints unchanged**, all true against TCGA (3 exact, 2 shallower, none deeper).
 - **"Unsure here" went from 1–3% to 15–32% of tissue** (the 0.9 confidence cut-off). Honest, but in the app's
   Certainty view it now covers about a third of the map.
-- **Check:** DC-6160 reports 4 satellites although its main tumor is solid; some marked islands sit in a separate
-  tissue piece across the glass. Satellites should probably be limited to the analyzed section.
+- **Satellites behave as designed** (`summary.json` → `satellites` lists every tumor island; only those marked
+  `satellite: true` count): DC-6154 has 4 (all within 0.8 mm, fully surrounded by tissue), CK-4952 2, AZ-4614 1,
+  DC-6160 1 (0.4 mm², 0.5 mm from the tumor), DM-A282 0. The other islands, e.g. DC-6160's tumor in a separate tissue
+  piece 5.7 mm away across glass, are correctly rejected. **The overview figure circles every island, not only
+  satellites**, which can look like over-counting; worth labeling in the app or figure.
 
 Results for the app: `results/<slide_id>/` (copy into `data/results/`). Checked in the app: all 5 load in the Slide
 Box with stage and flag counts, and the slide view shows the scan, tissue overlay, direction arrow and flags.
@@ -78,21 +81,21 @@ Box with stage and flag counts, and the slide view shows the scan, tissue overla
 hackathon reservation ends **today at 18:00**, after which GPU jobs wait in the normal queue.
 
 **For the demo (in order)**
-1. **Re-run the 5 slides with the teammate's finished model.** Everything is ready: same slides, same list files, one
-   `sbatch showcase/showcase_gpu_one.sbatch showcase/list_<case>.txt` per slide (7–11 min each, ~0.9 GPU-hours for
-   all 5). Compare with this run (`results/`) to show what the new model changes.
-2. **Load them into the app and polish it** (`app-core` branch, not on `main` yet). Decide how to show "unsure here"
-   now that it covers 15–32% of each slide (e.g. only the largest unsure areas, or lighter shading).
-3. **Tile previews for click-to-zoom:** the `tiles/` folders (15–31k small JPGs per slide) are on Delta only; copy the
+These results already use the latest model on `main` (`17bdafc`). If `main` changes again, re-run one slide per job:
+`sbatch showcase/showcase_gpu_one.sbatch showcase/list_<case>.txt` (7–11 min each, ~0.9 GPU-hours for all 5).
+
+1. **Polish the app with these 5 slides** (`app-core` branch, not on `main` yet). Decide how to show "unsure here"
+   now that it covers 15–32% of each slide (e.g. only the largest unsure areas, or lighter shading), and mark which
+   circled islands are real satellites.
+2. **Tile previews for click-to-zoom:** the `tiles/` folders (15–31k small JPGs per slide) are on Delta only; copy the
    5 showcase folders' previews to the demo laptop if the app should show real tile pictures.
-4. **Fix or explain DC-6160's satellites** across separate tissue pieces (section 3).
 
 **Open from the record (`docs/project_timeline.md` §20, the reports above)**
-5. **Normal slides → near-zero tumor** (planned validation in `CLAUDE.md`): never measured. Cheap: 5–10 TCGA `-11`
+3. **Normal slides → near-zero tumor** (planned validation in `CLAUDE.md`): never measured. Cheap: 5–10 TCGA `-11`
    slides, a few GPU-minutes each, one line for the deck.
-6. **Pathologist:** about 30 lines of `src/cutoffs.py` are still marked PLACEHOLDER (the front fixes, immune cut-offs and others), and
+4. **Pathologist:** about 30 lines of `src/cutoffs.py` are still marked PLACEHOLDER (the front fixes, immune cut-offs and others), and
    every by-eye label so far is Claude's. Say so in the deck.
-7. **Known limits to state, not hide:** depth is judged on only ~16% of sections (needs a thick muscle wall); the
+5. **Known limits to state, not hide:** depth is judged on only ~16% of sections (needs a thick muscle wall); the
    serosal flag has found 0 pT4 tumors; necrosis is the weakest class; false tumor in normal mucosa is still open
    (`cefe820`); the mucinous flag finds about half the mucinous tumors.
 

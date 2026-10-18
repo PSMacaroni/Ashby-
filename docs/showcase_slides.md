@@ -2,7 +2,7 @@
 
 Picked on Oct 18 from the 125 slides of the overnight test (`reports/overnight_v4/`), using the current pipeline's
 results (`per_slide_after_fixes.csv`, the summaries and `analysis_overview.png` on Delta). The goal: **one slide per
-story, together covering every part of the app**. Re-run them with the finished model, then load them into the app.
+story, together covering every part of the app**.
 
 **Re-run on main `17bdafc` (Oct 18, 16:15):** results, slide record and report in `showcase/` (`showcase/REPORT.md`).
 The numbers below are from the overnight run; the stories still hold.
