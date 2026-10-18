@@ -5,7 +5,8 @@ processed: the cut-offs are re-tuned on the bigger set, so they get better as la
 
 pT is the deepest invasion in the WHOLE surgical specimen; a slide is one section, so it can only show as deep or
 shallower. Scoring follows that:
-  depth level 1 = muscle wall present but not reached, 2 = reaches the muscle wall (>= pT2), 3 = touches fat (>= pT3)
+  depth level 1 = muscle wall present but not reached, 2 = reaches the muscle wall (>= pT2), 3 = touches fat or
+  lies beyond the muscle wall (>= pT3; DEPTH_RULE picks which, see src/features.depth_level)
   correct   predicted level == min(pT, 3)
   overcall  predicted level > pT (claims deeper than the truth): a real error, weighted x2
   undercall predicted level < min(pT, 3): often just sampling (deepest point not in this section), weighted x0.5
@@ -31,14 +32,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import numpy as np
 
 from src import cutoffs
-from src.features import DEPTH_PARAMS, SEROSA_PARAMS, depth_and_fat, outer_edge
+from src.features import DEPTH_PARAMS, SEROSA_PARAMS, depth_evidence, depth_level, outer_edge
 from src.front import find_front
 from src.tilemap import TileMap
 
 DEPTH_GRID = {"WALL_MUSCLE_MIN_MM2": [0.5, 1.0, 2.0, 4.0, 8.0],
               "WALL_FAT_MIN_MM2": [0.25, 0.5, 1.0, 2.0],
+              "WALL_MIN_WIDTH_UM": [0, 300, 450, 600, 800, 1000],
               "DEPTH_CONTACT_MIN_TILES": [1, 2, 3, 5, 8],
-              "DEPTH_CONTACT_RADIUS_TILES": [1, 2]}
+              "DEPTH_CONTACT_RADIUS_TILES": [1, 2],
+              "DEPTH_RULE": ["contact", "position", "either"],
+              "DEPTH_BEYOND_MIN_UM": [100, 150, 300, 600],
+              "DEPTH_BEYOND_MIN_TILES": [5, 10, 20, 30, 60]}
 SEROSA_GRID = {"SEROSA_NEEDS_WALL": [True, False],
                "SEROSA_MIN_RUN_UM": [0, 250, 500, 1000, 2000],
                "SEROSA_MAX_FROM_WALL_UM": [500, 1000, 1500, 3000, 1e9]}
@@ -77,13 +82,26 @@ def serosa_score(flags, truths):
     return tp - 2.0 * fp
 
 
-def summarize_depth(outcomes):
+def summarize_depth(outcomes, truths=None):
     n = len(outcomes)
     k = {o: sum(x == o for x in outcomes) for o in ("correct", "overcall", "undercall", "not_assessable")}
     assessable = n - k["not_assessable"]
-    return {**k, "slides": n, "assessable": assessable,
-            "correct_of_assessable": round(k["correct"] / assessable, 3) if assessable else None,
-            "overcall_of_assessable": round(k["overcall"] / assessable, 3) if assessable else None}
+    out = {**k, "slides": n, "assessable": assessable,
+           "correct_of_assessable": round(k["correct"] / assessable, 3) if assessable else None,
+           "overcall_of_assessable": round(k["overcall"] / assessable, 3) if assessable else None}
+    if truths is not None:        # a T3/T4 slide called "at least pT3" is always the "correct" outcome
+        out["t3_t4_reached"] = sum(o == "correct" and t >= 3 for o, t in zip(outcomes, truths))
+        out["t3_t4_slides"] = sum(t >= 3 for t in truths)
+    return out
+
+
+def leave_one_out(outcome, allowed=None):
+    """For each slide: the outcome of the combination that scores best on all OTHER slides (first one on ties)."""
+    w = {"correct": 1.0, "overcall": -2.0, "undercall": -0.5, "not_assessable": 0.0}
+    table = np.array([[w[o] for o in row] for row in outcome])
+    rows = np.arange(len(outcome)) if allowed is None else np.asarray(allowed)
+    total = table[rows].sum(axis=1)
+    return [outcome[rows[int(np.argmax(total - table[rows, j]))]][j] for j in range(table.shape[1])]
 
 
 def summarize_serosa(flags, truths):
@@ -165,21 +183,28 @@ def main():
     print(f"{len(slides)} slides with known pT: " +
           ", ".join(f"T{t}: {sum(s['truth'] == t for s in slides)}" for t in (1, 2, 3, 4)), flush=True)
 
-    # 1. depth: every setting combination, every slide (CPU, seconds)
+    # 1. depth: every setting combination, every slide (CPU; the slow geometry is computed once per slide and
+    #    wall setting and remembered, see src/features.remembered)
     combos = grid(DEPTH_GRID)
+    print(f"{len(combos)} depth setting combinations", flush=True)
+    truths = [s["truth"] for s in slides]
     pred = np.empty((len(combos), len(slides)), dtype=object)
-    for i, p in enumerate(combos):
-        for j, s in enumerate(slides):
-            pred[i, j] = depth_and_fat(s["tm"], s["fr"], p)[0]["depth_level"]
+    for j, s in enumerate(slides):
+        for i, p in enumerate(combos):
+            pred[i, j] = depth_level(depth_evidence(s["tm"], s["fr"], p), p)[1]
+        s["tm"].__dict__.pop("_depth_cache", None)                   # free the memory; serosa below re-makes layers
     outcome = [[depth_outcome(pred[i, j], s["truth"]) for j, s in enumerate(slides)] for i in range(len(combos))]
     scores = np.array([depth_score(o) for o in outcome])
     best = int(scores.argmax())
     current = {k: getattr(cutoffs, k) for k in DEPTH_PARAMS}
     cur_i = next((i for i, p in enumerate(combos) if p == current), None)
-    loo = []
-    for j in range(len(slides)):       # leave one slide out: tune on the others, score this one
-        others = [depth_score([o for jj, o in enumerate(outcome[i]) if jj != j]) for i in range(len(combos))]
-        loo.append(outcome[int(np.argmax(others))][j])
+    loo = leave_one_out(outcome)       # leave one slide out: tune on the others, score this one
+    by_rule = {}                       # the same, with the rule fixed: how good is each rule on its own?
+    for rule in DEPTH_GRID["DEPTH_RULE"]:
+        allowed = [i for i, p in enumerate(combos) if p["DEPTH_RULE"] == rule]
+        b = max(allowed, key=lambda i: scores[i])
+        by_rule[rule] = {"chosen": combos[b], "on_all_slides": summarize_depth(outcome[b], truths),
+                         "leave_one_out": summarize_depth(leave_one_out(outcome, allowed), truths)}
 
     # 2. serosa: with the chosen depth settings (they define the muscle wall / fat)
     depth_best = combos[best]
@@ -200,10 +225,11 @@ def main():
 
     res = {"version": args.version, "date": str(date.today()), "slides": [s["id"] for s in slides],
            "learning_curve": curve,
-           "depth": {"chosen": depth_best, "on_all_slides": summarize_depth(outcome[best]),
-                     "leave_one_out": summarize_depth(loo),
+           "depth": {"chosen": depth_best, "on_all_slides": summarize_depth(outcome[best], truths),
+                     "leave_one_out": summarize_depth(loo, truths),
                      "current_values": current,
-                     "current_on_all_slides": summarize_depth(outcome[cur_i]) if cur_i is not None else None,
+                     "current_on_all_slides": summarize_depth(outcome[cur_i], truths) if cur_i is not None else None,
+                     "by_rule": by_rule,
                      "by_slide": [{"slide": s["id"], "pT": s["pT"], "predicted_level": pred[best, j],
                                    "outcome": outcome[best][j], "leave_one_out": loo[j]} for j, s in enumerate(slides)]},
            "serosa": {"chosen": scombos[sbest], "on_all_slides": summarize_serosa(flags[sbest], truths4),
@@ -218,6 +244,10 @@ def main():
     print("  current values on all slides:", d["current_on_all_slides"])
     print("  chosen values on all slides: ", d["on_all_slides"])
     print("  honest estimate (leave-one-slide-out):", d["leave_one_out"])
+    for rule, r in d["by_rule"].items():
+        print(f"  rule '{rule}' only: chosen {r['chosen']}")
+        print("    on all slides:", r["on_all_slides"])
+        print("    leave-one-out:", r["leave_one_out"])
     print("\nSEROSA chosen:", res["serosa"]["chosen"])
     print("  current values:", res["serosa"]["current_on_all_slides"])
     print("  chosen values: ", res["serosa"]["on_all_slides"])

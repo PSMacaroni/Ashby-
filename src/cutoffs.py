@@ -55,6 +55,18 @@ WALL_MUSCLE_MIN_MM2 = 2.0          # a muscle region at least this big = the mus
 WALL_FAT_MIN_MM2 = 0.5             # fat region at least this big = fat around the bowel
 DEPTH_CONTACT_MIN_TILES = 3        # raw tumor tiles touching the wall (or fat) needed to say "reaches"
 DEPTH_CONTACT_RADIUS_TILES = 1     # "touching" = within this many tiles
+WALL_MIN_WIDTH_UM = 600            # calibration v3 (58 TCGA slides): a muscle region must be at least this thick on average
+                                   #   to be the wall (muscularis propria ~1-2 mm; the muscularis mucosae is thinner than a
+                                   #   tile). Over-calls 7 -> 1 (judged 28 -> 17); chosen on these same slides (docs/calibration.md v3b)
+DEPTH_RULE = 'contact'             # PLACEHOLDER: what "at least pT3" means: 'contact' (tumor touches a fat layer; v1/v2),
+                                   #   'position' (tumor lies beyond the muscle wall, away from the lining), 'either'
+DEPTH_BEYOND_MIN_UM = 300          # PLACEHOLDER: "beyond the wall" = at least this far outside the wall band
+DEPTH_BEYOND_MIN_TILES = 30        # PLACEHOLDER: this many raw tumor tiles beyond the wall = "consistent with >= pT3"
+# fixed parts of the position rule (src/features.beyond_wall), not tuned by the calibration:
+WALL_BAND_CLOSE_TILES = 2          # PLACEHOLDER: close gaps up to ~2 tiles between muscle bundles into one wall band
+WALL_CROSS_MIN_UM = 300            # PLACEHOLDER: a line "crosses the wall" if at least this much of it is wall
+DEPTH_LINING_REACH_UM = 1000       # PLACEHOLDER: the lining tiles that vote: up to this much farther than the nearest
+DEPTH_BEYOND_MAJORITY = 0.5        # PLACEHOLDER: share of those lining tiles that must lie behind the wall
 SEROSA_MIN_RUN_UM = 1000           # calibration v1 (58 TCGA slides): false alarms 7 -> 1; tumor must lie on the outer edge this long
 SEROSA_NEEDS_WALL = True           # judge the outer edge only in sections that show the muscle wall or fat
 SEROSA_MAX_FROM_WALL_UM = 500      # calibration v1. The serosa lies outside the muscle wall: only tissue edges within this

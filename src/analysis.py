@@ -127,6 +127,8 @@ def _high_risk_flags(s):
     out = []
     if s["invasion"]["deepest_layer"] == "fat":
         out.append("Tumor touches fat: consistent with at least pT3 (check).")
+    if s["invasion"].get("fat_contact_without_wall"):
+        out.append("Tumor touches fat, but no muscle wall in this section: depth unknown (check the fat).")
     if s["outer_edge"]["touches"]:
         out.append("Possible serosal involvement: check (pT4a).")
     if s["border"]["pattern"] == "infiltrative":
