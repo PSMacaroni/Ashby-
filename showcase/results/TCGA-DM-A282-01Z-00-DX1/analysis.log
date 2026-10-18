@@ -1,0 +1,28 @@
+
+== TCGA-DM-A282-01Z-00-DX1: 27104 tissue tiles
+Tumor: 24% of the section, 87.7 mm2
+Growth: Infiltrative: solidity 0.63, 9 finger protrusions, 0 satellites within 1.0 mm.
+Depth:  Tumor touches fat: consistent with at least pT3 (check that this fat lies outside the muscle wall).
+Direction: Front most infiltrative toward 6 o'clock (on the slide image).
+Ahead:  Facing stroma 65%, muscle 24%, tumor 7%.
+Fat:    Tumor touches fat in 18 tiles (about 2.0 mm). Tumor reaches about 12.1 mm past the nearest muscle.
+Stroma: Stroma-high: 88% stroma in the worst field (marked).
+Necrosis: Central necrosis, 0% of tumor area. Likely low-oxygen rim next to it: 1% of tumor tiles.
+Mucin:  0.4% of the tumor (with the mucin pools attached to it) is mucin (a little). Mucin pool in fat, 1.3 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 1.6 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 2.3 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 2.0 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 1.8 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 3.6 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 2.5 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 3.7 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 2.5 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 2.8 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 3.4 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 3.1 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 4.4 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 3.4 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 4.2 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 2.9 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 2.8 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 5.0 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 2.4 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 5.3 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 4.7 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 5.6 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 6.1 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 6.3 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 6.3 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 6.5 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 6.2 mm beyond the muscle: check for floating tumor cells. Mucin pool in fat, 4.7 mm beyond the muscle: check for floating tumor cells.
+Immune: Lymphocyte score: core 0.00, front 0.02, outside 0.10: few lymphocytes (desert-like). H&E shows where lymphocytes sit, not their type (no CD8/CD4) or what they're doing.
+Edge:   Tumor within 0.0 mm of the outer tissue edge.
+Unsure: Unsure on 32% of tissue tiles. Largest unsure area: 4002 tiles (low confidence).
+Flag:   Possible perineural invasion: 5 spot(s), 0 strong [text phrase only (less reliable)]
+Flag:   Possible venous invasion: 4 spot(s), 0 strong [shape rule + text phrase only (less reliable)]
+Flag:   Possible lymphatic invasion: 5 spot(s), 0 strong [text phrase only (less reliable)]
+Flag:   Budding hotspot: count buds here: 1 spot(s), 1 strong [text phrase only (less reliable)]
+Flag:   Stroma at the front (experimental): 5 spot(s), 0 strong [text phrase only (less reliable)]
+Flag:   Possible leftover adenoma: 5 spot(s), 0 strong [text phrase only (less reliable)]
+High-risk list:
+  - Tumor touches fat: consistent with at least pT3 (check).
+  - Infiltrative front (Infiltrative: solidity 0.63, 9 finger protrusions, 0 satellites within 1.0 mm.)
+  - Tumor more than 5 mm past the muscle (check).
+  - Stroma-high: 88% stroma in the worst field (marked).
+  - Budding hotspot marked: count buds there.
+
+wrote /projects/bfqi/hjeong6/showcase_v1/TCGA-DM-A282-01Z-00-DX1/summary.json, /projects/bfqi/hjeong6/showcase_v1/TCGA-DM-A282-01Z-00-DX1/tile_analysis.csv

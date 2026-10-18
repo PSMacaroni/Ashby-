@@ -1,0 +1,5 @@
+/sw/rh9.4/user/python/conda-env/pytorch-2.12.1-cu130/lib/python3.12/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.5.0) or chardet (6.0.0.post1)/charset_normalizer (3.4.2) doesn't match a supported version!
+  warnings.warn(
+/sw/rh9.4/user/python/conda-env/pytorch-2.12.1-cu130/lib/python3.12/site-packages/timm/models/layers/__init__.py:49: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+wrote /projects/bfqi/hjeong6/showcase_v1/TCGA-CK-4952-01Z-00-DX1/phrase_scores.csv (15229 tiles x 13 phrases)
