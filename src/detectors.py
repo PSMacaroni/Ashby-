@@ -10,14 +10,23 @@ Small helpers that sit next to the 8-class tissue model (see docs/fixes_backgrou
    so a tile can be stroma or tumor AND lymphocyte-rich (scattered infiltrates, which the tissue model misses).
    Use p_immune for the immune score instead of the tissue model's P(lymphocytes).
 
+3. Blood check: the tissue model has no blood class, so blood comes out as "necrosis". The MUSK "structures" model
+   (other / nerve / vessel / blood, from the MUSK experiment) recognizes blood on our raw slides: on CM-4746's clot it
+   found 98% of 376 blood tiles and flagged 0.5% of random tissue tiles. The CONCH version found 39% (it learned blood
+   from color-normalized, enlarged STARC-9 tiles). Details: docs/slide_pipeline.md.
+
     from src.detectors import colorful_fraction, is_background, load_immune, predict_immune
     frac = colorful_fraction(tile_rgb)                     # when tiling: 0..1
     bg = is_background(frac, tissue_label)                 # True -> qc_ok=False, qc_reason="background"
     p_immune = predict_immune(load_immune("models/immune_v1.joblib"), embeddings)   # [n] 0..1
+    p_blood = predict_blood(load_bundle("models/structures_musk_v1.joblib"), musk_embeddings)   # [n] 0..1
+    blood = is_blood(p_blood, tissue_label)                # True -> qc_ok=False, qc_reason="blood"
 """
 import joblib
 import numpy as np
 from PIL import Image
+
+from src import cutoffs
 
 COLORFUL_SAT = 20          # HSV saturation (0-255) above which a pixel counts as stained tissue
 BACKGROUND_MAX_COLORFUL = 0.10
@@ -42,3 +51,31 @@ def load_immune(path):
 def predict_immune(model, embeddings):
     """P(lymphocytes / inflammatory cells present) per tile from CONCH embeddings [n, 512]."""
     return model.predict_proba(embeddings)[:, 1]
+
+
+def load_bundle(path):
+    """A saved model: a dict with "clf" (+ "labels" or "classes"), or a bare scikit-learn classifier."""
+    obj = joblib.load(path)
+    return obj if isinstance(obj, dict) else {"clf": obj}
+
+
+def class_probs(bundle, embeddings):
+    """[n, n_labels] probabilities in the bundle's label order; a label the model never saw gets 0."""
+    clf = bundle["clf"]
+    names = bundle.get("labels", bundle.get("classes"))
+    if names is None:
+        names = list(clf.classes_)
+    p = np.zeros((len(embeddings), len(names)))
+    p[:, clf.classes_] = clf.predict_proba(embeddings)
+    return p
+
+
+def predict_blood(bundle, embeddings):
+    """P(blood) per tile from MUSK embeddings [n, 1024] with the MUSK structures model."""
+    return class_probs(bundle, embeddings)[:, list(bundle["labels"]).index("blood")]
+
+
+def is_blood(p_blood, tissue_label, min_prob=cutoffs.BLOOD_PROB):
+    """True if the blood model is sure enough and the tissue model did not call the tile fat (blood models confuse
+    the two, and fat matters for the "tumor touches fat" T3 hint). Works on scalars or arrays."""
+    return (np.asarray(p_blood) >= min_prob) & (np.asarray(tissue_label) != "fat")

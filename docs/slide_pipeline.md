@@ -2,6 +2,7 @@
 
 **Written:** Sat Oct 17 · **Branch:** `slide-pipeline` (from `main` at eaf2c20) · **Code:** `scripts/process_slide.py`,
 `scripts/process_slides_gpu.sbatch` · **First run:** Delta job 22962239, 5 TCGA slides, 7.5 min on one A100 (≈ 0.13 GPU-h)
+· **Blood check added:** Sat Oct 17 evening, branch `musk-blood-check` (section "Blood check" below)
 
 ## What it does
 
@@ -11,12 +12,15 @@
    automatic cut-off (Otsu, 31–70 on our slides) dropped pale submucosa, loose stroma and fat.
 2. **Exact grid** of 224 px tiles at 0.5 µm/px (112 µm; tiles touch, no overlap). Keep cells that are ≥ 50% tissue.
 3. Per tile: colorful fraction, blur score, **128 px preview** (`tiles/<row>_<col>.jpg`, for the app).
-4. **CONCH** embeddings → `embeddings.npy`.
+4. **CONCH** embeddings → `embeddings.npy`, and **MUSK** embeddings of the same tiles → `embeddings_musk.npy`.
 5. **Tissue model** `models/tissue8_split_v1.joblib` (8 classes; NCT + STARC-9; see `docs/split_models.md`)
    → `p_<class>`, `label` (raw argmax), `confidence`.
 6. **Lymphocyte detector** `models/immune_v1.joblib` → `p_immune` (see `docs/fixes_background_lymph.md`).
-7. **QC:** `qc_reason = background` (< 10% colorful and not labeled fat) or `blur` (`cutoffs.BLUR_MIN`, a placeholder).
-8. `thumbnail.png` + `summary.json` slide info (incl. project / pT / pN / stage from `slides.csv`).
+7. **Blood check** (MUSK) `models/structures_musk_v1.joblib` → `p_blood`, and MUSK's own tissue model
+   `models/tissue8_musk_v1.joblib` → `alt_label` (second opinion; see "Blood check" below).
+8. **QC:** `qc_reason = background` (< 10% colorful and not labeled fat), `blood` (`p_blood` ≥ `cutoffs.BLOOD_PROB`
+   and not labeled fat) or `blur` (`cutoffs.BLUR_MIN`). Both cut-offs are placeholders.
+9. `thumbnail.png` + `summary.json` slide info (incl. project / pT / pN / stage from `slides.csv`).
 
 Then `process_slides_gpu.sbatch` runs `score_phrases.py` and `analyze_slide.py` on each folder, unchanged.
 
@@ -84,7 +88,7 @@ cut edge on most TCGA sections. It needs real serosa / fat evidence and a minimu
 - **Blood is the main model-side problem:** it inflates "necrosis" and the dead-core / necrosis-rim features.
   - The structures model's blood detector (trained on color-normalized STARC-9, where blood looks purple) finds only 27 blood tiles on CM-4746 and wrongly flags 14 tumor tiles on AA-3844, so it doesn't transfer to raw slides.
   - A simple "bright red" color rule also fails: CM-4746 is stained heavily with eosin, so its normal muscle looks "red".
-  - **Unsolved.** It needs blood examples from raw slides.
+  - **Fixed later with MUSK:** see "Blood check" below.
 - Stain varies a lot between these slides (AA-3844 is faded and pale; CM-4746 is deep red), and tumor still comes out right on both.
 
 ### Bottom line
@@ -103,11 +107,61 @@ cut edge on most TCGA sections. It needs real serosa / fat evidence and a minimu
    fragment or the luminal surface gets counted as the outer edge. It needs stricter rules (e.g. require fat or
    serosa-like tissue outside, and a minimum length), or should be shown as low-trust.
 4. **Blood is called necrosis on the map:** CM-4746 has a bright red clot (left side) mapped as necrosis. The tissue model has
-   no blood class. `models/structures_split_v1.joblib` (on `starc9-spider-classifiers`) detects blood (95–99%); adding
-   it as `qc_reason = blood` would fix this if wanted.
+   no blood class. **Done on `musk-blood-check`:** blood tiles are now skipped as `qc_reason = blood`, using the MUSK
+   blood model, because the CONCH one (`structures_split_v1`) misses most of our blood. See "Blood check" below.
 5. **App ↔ analysis mismatch:** the app README expects `risk_points` / `risk_level` / `risk_flags` in `tiles.csv`; the
    analysis writes them to `tile_analysis.csv`.
 6. `cutoffs.BLUR_MIN = 0.001` is a placeholder. On these slides it flagged 0–4% of tiles (A6-3809: 130); worth a quick look.
+
+## Blood check (MUSK)
+
+**Why the map said "necrosis":** `tissue8` has no blood class, so it must pick one of its 8 classes. It calls even
+STARC-9's own blood tiles necrosis 78% of the time, so no color change can fix the map by itself. The pipeline needed
+a separate blood step ("identify and ignore", as planned in `docs/dataset_starc9.md`).
+
+**Why the CONCH blood model missed our blood:** it learned blood only from STARC-9 tiles, which differ from ours in
+two ways:
+- **Color:** STARC-9 blood is purple, which is what per-tile Macenko normalization does to red blood; ours is bright red.
+- **Zoom:** STARC-9 tiles are 128 px (64 µm) and CONCH's preprocessing enlarges them to 224 px, so the model saw cells
+  1.75× bigger than in our 224 px / 112 µm tiles. This affects every model trained on STARC-9 tiles, `tissue8`
+  included (not measured there).
+
+**Test set:** 2,237 tiles from the 5 slides:
+- 376 bright-red tiles from CM-4746's clot (40 of them checked by eye: all blood)
+- 200 CM-4746 muscle tiles (deep red stain)
+- 411 other tiles that `tissue8` calls necrosis
+- 1,250 random tiles
+
+Share of tiles called blood (tiles as scanned unless noted):
+
+| blood check | clot | CM-4746 muscle | other "necrosis" | random |
+|---|---|---|---|---|
+| CONCH `structures_split_v1` | 42% | 0% | 9% | 0.7% |
+| same, tiles color-normalized per tile + STARC-9 zoom | 85% | 2% | 13% | 2.3% |
+| zero-shot CONCH, "blood" prompt added | 99% | 3.5% | 31% | 5.4% |
+| **MUSK `structures_musk_v1` (used now, p ≥ 0.5, not fat)** | **98%** | **0%** | **7%** | **0.5%** |
+| MUSK, p ≥ 0.9 | 91% | 0% | 2% | 0% |
+
+The MUSK model is the structures model from the MUSK experiment (`musk-experiments`, run `musk_v1`). There it also
+called only 0.1% of STARC-9 TCGA fat tiles "blood" (CONCH: 16%).
+
+**`alt_label` (MUSK's tissue8):** a second opinion only. On our random tiles it agrees with CONCH's `tissue8` 82% of
+the time; where they disagree, CONCH looked right more often by eye (about 15–19 of 40 vs 6), and MUSK calls 4× more
+tiles necrosis (10.9% vs 2.8%). Disagreements feed the "unsure here" overlay.
+
+**One overrule (`cutoffs.ALT_OVERRULES`, `src/tilemap.py`):** where CONCH says necrosis and MUSK says muscle, the
+analysis uses muscle (tiles.csv keeps the models' numbers; the tiles stay marked "unsure"). On CM-4746 these are
+eosin-heavy smooth muscle with black specks: 16 of 20 checked by eye were plainly muscle, none necrosis. On our other
+4 slides MUSK never called a CONCH-necrosis tile muscle, and on labeled tests MUSK calls real necrosis muscle 0–6.8%
+of the time. Effect: 140 tiles on CM-4746; the smoothed map's necrosis drops from about 100 to 55 tiles; no other
+finding changes. Requiring MUSK to agree on *all* necrosis was rejected: MUSK finds only 66% of SPIDER's necrosis.
+
+**Limits:** the only blood "truth" is one clot on one slide, judged by eye (not a pathologist). Blood on AA-3844 and
+AA-3875 looks magenta and wasn't measured. `cutoffs.BLOOD_PROB` stays a placeholder until the pathologist labels ~50
+blood / not-blood tiles across the slides.
+
+**Cost:** the pipeline now also runs MUSK on every tile. The investigation used 4 short GPU jobs (≈ 0.19 GPU-h). Its
+scripts and results are on Delta in `/work/hdd/bfqi/natmakur/blood_check/`.
 
 ## Run it
 

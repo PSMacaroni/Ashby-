@@ -20,6 +20,14 @@ TISSUE_MASK_SAT = 12               # measured: on our 5 TCGA slides the old rule
                                    #   slips in is removed per tile by the background guard (src/detectors.py)
 BLUR_MIN = 0.001                   # PLACEHOLDER: Laplacian variance below this = blurry (doc: pick by
                                    #   looking at 20 tiles); used when tiling, see src/slides.py
+ALT_OVERRULES = (("necrosis", "muscle"),)  # measured: where CONCH says necrosis and MUSK (alt_label) says muscle,
+                                   #   the analysis uses muscle (src/tilemap.py). On CM-4746, 16 of 20 such tiles
+                                   #   were plainly muscle, none necrosis; on labeled tests MUSK calls real
+                                   #   necrosis muscle 0-6.8% of the time (docs/slide_pipeline.md)
+BLOOD_PROB = 0.5                  # PLACEHOLDER: MUSK p_blood at or above this = blood tile, skipped as
+                                   #   qc_reason "blood" (src/detectors.py). On CM-4746's clot, 0.5 finds 98% of 376
+                                   #   blood tiles and flags 0.5% of random tiles; 0.9 finds 91% and flags 0%. Our
+                                   #   only check is that one clot: confirm with the pathologist's labeled tiles
 
 # --- Zones around the invasive front --------------------------------------------------------
 CORE_UM = 500                      # doc: core = more than 500 µm inside the front
