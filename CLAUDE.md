@@ -87,7 +87,7 @@ Made on Delta by the whole-slide pipeline (GPU):
   e.g. MUSK's when the p_* columns are CONCH's; disagreement = "unsure here"), `p_immune` (lymphocyte detector,
   0-1; `features.immune()` uses it instead of P(lymphocytes) when present). `scripts/process_slide.py` also writes
   `colorful` (share of stained pixels), `blur` (Laplacian variance), `mask_coverage`; `qc_reason` is
-  `background` (src/detectors.is_background) or `blur` (cutoffs.BLUR_MIN).
+  `background` (src/detectors.quality_check: colorless and not fat, or glass) or `blur` (src/detectors.quality_check: < cutoffs.BLUR_REL x the slide's typical sharpness).
 - `embeddings.npy`: float32 [n_tiles, dim], rows in the same order as tiles.csv (CONCH 512, MUSK 1024)
 - `tiles/<row>_<col>.jpg`: optional 128 px tile previews for click-to-zoom
 - `summary.json` slide info: `slide_id, mpp (0.5), tile_size_px (224), thumbnail_downsample, grid_shape,

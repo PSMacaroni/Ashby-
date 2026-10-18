@@ -7,6 +7,7 @@ We read a small thumbnail to find tissue, then read individual patches at full r
 import numpy as np
 import openslide
 from PIL import Image
+from scipy import ndimage
 from skimage.filters import threshold_otsu
 
 
@@ -41,6 +42,32 @@ def tissue_mask(thumbnail, min_sat=None):
     if sat.max() == sat.min():
         return np.zeros(sat.shape, dtype=bool)
     return sat > max(threshold_otsu(sat), 20)
+
+
+def fat_aware_mask(thumbnail, min_sat=12, texture_sd=4.0, gray_max=235, near_px=40, close_px=3, min_px=200):
+    """
+    Tissue mask that also keeps pale fat. The saturation rule (sat > min_sat) misses fat: it is nearly white, but
+    unlike glass it has thin membranes, so its brightness changes locally. Adds pale pixels with local SD of
+    brightness > texture_sd (5 px window) that lie within near_px of stained tissue, closes small gaps, fills holes,
+    and drops pieces smaller than min_px or without stained tissue (dust, smudges). Glass that still slips in is
+    removed per tile by src.detectors.quality_check.
+    """
+    rgb = np.asarray(thumbnail.convert("RGB")).astype(float)
+    stained = np.asarray(thumbnail.convert("HSV"))[..., 1].astype(float) > min_sat
+    if not stained.any():
+        return stained
+    gray = rgb.mean(-1)
+    mean = ndimage.uniform_filter(gray, 5)
+    sd = np.sqrt(np.maximum(ndimage.uniform_filter(gray * gray, 5) - mean * mean, 0))
+    near = ndimage.distance_transform_edt(~stained) <= near_px
+    mask = stained | ((sd > texture_sd) & (gray < gray_max) & near)
+    mask = ndimage.binary_fill_holes(ndimage.binary_closing(mask, np.ones((2 * close_px + 1,) * 2, bool)))
+    lab, n = ndimage.label(mask)
+    sizes = np.bincount(lab.ravel(), minlength=n + 1)
+    has_stain = np.bincount(lab[stained & mask].ravel(), minlength=n + 1) >= 50
+    keep = (sizes >= min_px) & has_stain
+    keep[0] = False
+    return keep[lab] | stained          # never lose what the saturation rule kept
 
 
 def read_patch(slide, x, y, out_px=224, target_mpp=0.5):
@@ -84,8 +111,8 @@ def sample_tissue_coords(slide, n=16, out_px=224, target_mpp=0.5, downsample=64,
 def blur_score(patch):
     """
     Sharpness of a patch: variance of the Laplacian (an edge filter) on the grayscale image.
-    Blurry patches have few sharp edges, so a low score = blurry. Compare with cutoffs.BLUR_MIN,
-    which is a placeholder: pick it by looking at ~20 tiles.
+    Blurry patches have few sharp edges, so a low score = blurry. See src/detectors.quality_check: blurry = below
+    cutoffs.BLUR_REL x the slide's typical score (scans differ a lot in overall sharpness).
     """
     from skimage.color import rgb2gray
     from skimage.filters import laplace

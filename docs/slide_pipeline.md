@@ -15,7 +15,8 @@
 5. **Tissue model** `models/tissue8_split_v1.joblib` (8 classes; NCT + STARC-9; see `docs/split_models.md`)
    → `p_<class>`, `label` (raw argmax), `confidence`.
 6. **Lymphocyte detector** `models/immune_v1.joblib` → `p_immune` (see `docs/fixes_background_lymph.md`).
-7. **QC:** `qc_reason = background` (< 10% colorful and not labeled fat) or `blur` (`cutoffs.BLUR_MIN`, a placeholder).
+7. **QC** (`src/detectors.quality_check`): `qc_reason = background` (< 10% colorful and not labeled fat, or glass:
+   very flat and pale) or `blur` (< 10% of the slide's own typical sharpness). Measured, see `docs/calibration.md` (v2).
 8. `thumbnail.png` + `summary.json` slide info (incl. project / pT / pN / stage from `slides.csv`).
 
 Then `process_slides_gpu.sbatch` runs `score_phrases.py` and `analyze_slide.py` on each folder, unchanged.
@@ -107,7 +108,7 @@ cut edge on most TCGA sections. It needs real serosa / fat evidence and a minimu
    it as `qc_reason = blood` would fix this if wanted.
 5. **App ↔ analysis mismatch:** the app README expects `risk_points` / `risk_level` / `risk_flags` in `tiles.csv`; the
    analysis writes them to `tile_analysis.csv`.
-6. `cutoffs.BLUR_MIN = 0.001` is a placeholder. On these slides it flagged 0–4% of tiles (A6-3809: 130); worth a quick look.
+6. ~~`cutoffs.BLUR_MIN` placeholder~~: replaced by a slide-relative rule + glass check (v2, `docs/calibration.md`).
 
 ## Run it
 
