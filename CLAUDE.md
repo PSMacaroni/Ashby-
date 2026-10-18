@@ -35,6 +35,8 @@ Clinical framing: decision support that flags features that are tedious and inco
 - **Laptop / VS Code**: write code, run the Streamlit app on small result files downloaded from Delta.
 - Code moves via GitHub: write on laptop → push → `git pull` on Delta → run.
 - Never commit: `.env`, tokens, slides, model weights, big arrays, anything in `data/`.
+  Exception: our own small trained classifier heads (scikit-learn, a few KB) live in `models/` with a model card
+  (`models/README.md`); compact evaluation outputs live in `reports/`.
 - Delta home quota is small: set `HF_HOME` to a project/work directory before loading models.
 - Code must run headless on Delta (no GUI), use GPU if available, fall back to CPU, show progress with tqdm,
   and save results to files (sessions end and memory is lost).
@@ -94,6 +96,9 @@ Made on Delta by the whole-slide pipeline (GPU):
 - `embeddings.npy`: float32 [n_tiles, dim], rows in the same order as tiles.csv (CONCH 512, MUSK 1024)
 - `embeddings_musk.npy`: optional, MUSK embeddings [n_tiles, 1024] when embeddings.npy is CONCH's
 - `tiles/<row>_<col>.jpg`: optional 128 px tile previews for click-to-zoom
+- `structures.csv` (optional, not made by `process_slide.py` yet; `src/structures.py`): nerve / vessel side
+  classifier, NOT one of the 8 map classes: `row, col, p_nerve, p_vessel, p_other, structure, p_artery`
+  (p_artery = zero-shot artery-vs-vein, experimental and unvalidated). For perineural / venous invasion flags.
 - `summary.json` slide info: `slide_id, mpp (0.5), tile_size_px (224), thumbnail_downsample, grid_shape,
   model {name, prompts_version}, embeddings_model`, optional `project, pT, pN, stage, qc, blood_check, alt_model`
 

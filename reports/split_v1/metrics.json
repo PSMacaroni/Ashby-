@@ -1,0 +1,415 @@
+{
+  "tissue8": {
+    "C": 10.0,
+    "train_tiles": 169434,
+    "tests": {
+      "crc_val_7k": {
+        "zero_shot": {
+          "n_tiles": 6333,
+          "accuracy": 0.8676772461708511,
+          "balanced_accuracy": 0.8614924637185575,
+          "log_loss": 0.781463086605072,
+          "ece": 0.10003054731174159,
+          "per_class": {
+            "tumor": 0.635036496350365,
+            "normal_mucosa": 0.8893387314439946,
+            "muscle": 0.8175675675675675,
+            "fat": 0.9887892376681614,
+            "lymphocytes": 0.998422712933754,
+            "mucus": 0.9990338164251208,
+            "necrosis": 0.967551622418879,
+            "stroma": 0.5961995249406176
+          },
+          "flagged_as_blood": 0.0
+        },
+        "starc_only": {
+          "n_tiles": 6333,
+          "accuracy": 0.861676930364756,
+          "balanced_accuracy": 0.7763777536459296,
+          "log_loss": 0.5531220135572817,
+          "ece": 0.06022621660179894,
+          "per_class": {
+            "tumor": 0.9091646390916464,
+            "normal_mucosa": 0.9811066126855601,
+            "muscle": 0.7668918918918919,
+            "fat": 0.9970104633781763,
+            "lymphocytes": 0.8911671924290221,
+            "mucus": 0.978743961352657,
+            "necrosis": 0.5634218289085545,
+            "stroma": 0.12351543942992874
+          },
+          "flagged_as_blood": 0.025580293699668404
+        },
+        "nct_only": {
+          "n_tiles": 6333,
+          "accuracy": 0.9575240802147481,
+          "balanced_accuracy": 0.9421334141134141,
+          "log_loss": 0.1989303226101036,
+          "ece": 0.02243042397834137,
+          "per_class": {
+            "tumor": 0.9699918896999189,
+            "normal_mucosa": 0.9946018893387314,
+            "muscle": 0.7297297297297297,
+            "fat": 0.9985052316890882,
+            "lymphocytes": 0.9921135646687698,
+            "mucus": 0.996135265700483,
+            "necrosis": 0.9557522123893806,
+            "stroma": 0.9002375296912114
+          },
+          "flagged_as_blood": 0.0
+        },
+        "tissue8_combined": {
+          "n_tiles": 6333,
+          "accuracy": 0.9553134375493447,
+          "balanced_accuracy": 0.9392760976903771,
+          "log_loss": 0.1410540751467834,
+          "ece": 0.01971100154277671,
+          "per_class": {
+            "tumor": 0.9651257096512571,
+            "normal_mucosa": 0.9946018893387314,
+            "muscle": 0.7280405405405406,
+            "fat": 0.9992526158445441,
+            "lymphocytes": 0.9842271293375394,
+            "mucus": 0.9951690821256038,
+            "necrosis": 0.9380530973451328,
+            "stroma": 0.9097387173396675
+          },
+          "flagged_as_blood": 0.0
+        }
+      },
+      "starc9_val_large": {
+        "zero_shot": {
+          "n_tiles": 48000,
+          "accuracy": 0.8250625,
+          "balanced_accuracy": 0.8250625,
+          "log_loss": 0.9092671871185303,
+          "ece": 0.12637301229623454,
+          "per_class": {
+            "tumor": 0.6346666666666667,
+            "normal_mucosa": 0.9036666666666666,
+            "muscle": 0.951,
+            "fat": 0.907,
+            "lymphocytes": 0.9985,
+            "mucus": 0.989,
+            "necrosis": 0.8931666666666667,
+            "stroma": 0.3235
+          },
+          "flagged_as_blood": 0.0
+        },
+        "starc_only": {
+          "n_tiles": 48000,
+          "accuracy": 0.977125,
+          "balanced_accuracy": 0.977125,
+          "log_loss": 0.0626187992188341,
+          "ece": 0.00136536485975509,
+          "per_class": {
+            "tumor": 0.9825,
+            "normal_mucosa": 0.9588333333333333,
+            "muscle": 0.9571666666666667,
+            "fat": 0.978,
+            "lymphocytes": 0.9898333333333333,
+            "mucus": 0.9891666666666666,
+            "necrosis": 0.9688333333333333,
+            "stroma": 0.9926666666666667
+          },
+          "flagged_as_blood": 0.004458333333333333
+        },
+        "nct_only": {
+          "n_tiles": 48000,
+          "accuracy": 0.8146875,
+          "balanced_accuracy": 0.8146875,
+          "log_loss": 0.6373905277072545,
+          "ece": 0.09411817248041432,
+          "per_class": {
+            "tumor": 0.9188333333333333,
+            "normal_mucosa": 0.9863333333333333,
+            "muscle": 0.8361666666666666,
+            "fat": 0.9966666666666667,
+            "lymphocytes": 0.9875,
+            "mucus": 0.8996666666666666,
+            "necrosis": 0.7218333333333333,
+            "stroma": 0.1705
+          },
+          "flagged_as_blood": 0.0
+        },
+        "tissue8_combined": {
+          "n_tiles": 48000,
+          "accuracy": 0.9756666666666667,
+          "balanced_accuracy": 0.9756666666666667,
+          "log_loss": 0.08218939297944293,
+          "ece": 0.003157808509965697,
+          "per_class": {
+            "tumor": 0.9816666666666667,
+            "normal_mucosa": 0.9675,
+            "muscle": 0.9446666666666667,
+            "fat": 0.987,
+            "lymphocytes": 0.9876666666666667,
+            "mucus": 0.9943333333333333,
+            "necrosis": 0.9683333333333334,
+            "stroma": 0.9741666666666666
+          },
+          "flagged_as_blood": 0.0
+        }
+      },
+      "starc9_val_tcga": {
+        "zero_shot": {
+          "n_tiles": 18500,
+          "accuracy": 0.7872972972972972,
+          "balanced_accuracy": 0.7905108601543385,
+          "log_loss": 1.2080059051513672,
+          "ece": 0.15599852855785476,
+          "per_class": {
+            "tumor": 0.52625,
+            "normal_mucosa": 0.8436363636363636,
+            "muscle": 0.949047619047619,
+            "fat": 0.8408695652173913,
+            "lymphocytes": 0.9976,
+            "mucus": 0.9496,
+            "necrosis": 0.9,
+            "stroma": 0.31708333333333333
+          },
+          "flagged_as_blood": 0.0
+        },
+        "starc_only": {
+          "n_tiles": 18500,
+          "accuracy": 0.968972972972973,
+          "balanced_accuracy": 0.9687230201863354,
+          "log_loss": 0.08767874195189332,
+          "ece": 0.003115598883558616,
+          "per_class": {
+            "tumor": 0.9658333333333333,
+            "normal_mucosa": 0.99,
+            "muscle": 0.9557142857142857,
+            "fat": 0.8973913043478261,
+            "lymphocytes": 0.9932,
+            "mucus": 0.9808,
+            "necrosis": 0.9880952380952381,
+            "stroma": 0.97875
+          },
+          "flagged_as_blood": 0.012864864864864866
+        },
+        "nct_only": {
+          "n_tiles": 18500,
+          "accuracy": 0.7438378378378379,
+          "balanced_accuracy": 0.7461432218144175,
+          "log_loss": 0.8100615325381958,
+          "ece": 0.13515369312344366,
+          "per_class": {
+            "tumor": 0.9141666666666667,
+            "normal_mucosa": 0.9940909090909091,
+            "muscle": 0.7647619047619048,
+            "fat": 0.9621739130434782,
+            "lymphocytes": 0.9936,
+            "mucus": 0.5044,
+            "necrosis": 0.6342857142857142,
+            "stroma": 0.20166666666666666
+          },
+          "flagged_as_blood": 0.0
+        },
+        "tissue8_combined": {
+          "n_tiles": 18500,
+          "accuracy": 0.9638378378378378,
+          "balanced_accuracy": 0.9634288019951064,
+          "log_loss": 0.11951028772947514,
+          "ece": 0.004170393111738026,
+          "per_class": {
+            "tumor": 0.9716666666666667,
+            "normal_mucosa": 0.990909090909091,
+            "muscle": 0.9204761904761904,
+            "fat": 0.9478260869565217,
+            "lymphocytes": 0.994,
+            "mucus": 0.9816,
+            "necrosis": 0.9842857142857143,
+            "stroma": 0.9166666666666666
+          },
+          "flagged_as_blood": 0.0
+        }
+      },
+      "spider_colon": {
+        "zero_shot": {
+          "n_tiles": 3500,
+          "accuracy": 0.7654285714285715,
+          "balanced_accuracy": 0.8091666666666667,
+          "log_loss": 1.6608085632324219,
+          "ece": 0.1751053308078221,
+          "per_class": {
+            "tumor": 0.503,
+            "normal_mucosa": 0.932,
+            "muscle": 0.87,
+            "fat": 0.994,
+            "necrosis": 0.916,
+            "stroma": 0.64
+          },
+          "flagged_as_blood": 0.0
+        },
+        "starc_only": {
+          "n_tiles": 3500,
+          "accuracy": 0.8802857142857143,
+          "balanced_accuracy": 0.8923333333333333,
+          "log_loss": 0.39546774457086536,
+          "ece": 0.06176039324007332,
+          "per_class": {
+            "tumor": 0.808,
+            "normal_mucosa": 0.992,
+            "muscle": 0.756,
+            "fat": 0.988,
+            "necrosis": 0.97,
+            "stroma": 0.84
+          },
+          "flagged_as_blood": 0.009714285714285713
+        },
+        "nct_only": {
+          "n_tiles": 3500,
+          "accuracy": 0.7857142857142857,
+          "balanced_accuracy": 0.7918333333333333,
+          "log_loss": 0.6435440071360582,
+          "ece": 0.0842645585536957,
+          "per_class": {
+            "tumor": 0.749,
+            "normal_mucosa": 0.976,
+            "muscle": 0.896,
+            "fat": 0.968,
+            "necrosis": 0.724,
+            "stroma": 0.438
+          },
+          "flagged_as_blood": 0.0
+        },
+        "tissue8_combined": {
+          "n_tiles": 3500,
+          "accuracy": 0.8905714285714286,
+          "balanced_accuracy": 0.9033333333333333,
+          "log_loss": 0.3292727279950166,
+          "ece": 0.021876181849411525,
+          "per_class": {
+            "tumor": 0.814,
+            "normal_mucosa": 0.986,
+            "muscle": 0.87,
+            "fat": 0.988,
+            "necrosis": 0.91,
+            "stroma": 0.852
+          },
+          "flagged_as_blood": 0.0
+        }
+      }
+    },
+    "note": "nct_only is trained on NCT, so it is in-hospital on crc_val_7k (different patients)"
+  },
+  "structures": {
+    "C": 10.0,
+    "train_tiles": 38941,
+    "tests": {
+      "spider_colon_test": {
+        "n": 2043,
+        "balanced_accuracy": 0.9671721092307957,
+        "recall_other": 0.95968534906588,
+        "recall_vessel": 0.9746588693957114,
+        "precision_vessel": 0.9746588693957114,
+        "auroc_vessel": 0.9970923156246346,
+        "other_called_blood": 0.0
+      },
+      "spider_skin_test": {
+        "n": 2333,
+        "balanced_accuracy": 0.9873868458442562,
+        "recall_other": 0.9779643231899265,
+        "recall_nerve": 0.9974193548387097,
+        "recall_vessel": 0.9867768595041322,
+        "precision_nerve": 0.993573264781491,
+        "auroc_nerve": 0.9999519648846743,
+        "precision_vessel": 0.9754901960784313,
+        "auroc_vessel": 0.9989583333333333,
+        "other_called_blood": 0.0031479538300104933
+      },
+      "starc9_val_large": {
+        "blood_tiles": 6000,
+        "blood_found": 0.9951666666666666,
+        "blood_auroc": 0.9992970833333333,
+        "tissue_called_blood": {
+          "tumor": 0.0003333333333333333,
+          "normal_mucosa": 0.0005,
+          "muscle": 0.012333333333333333,
+          "fat": 0.07583333333333334,
+          "lymphocytes": 0.0028333333333333335,
+          "mucus": 0.0035,
+          "necrosis": 0.0795,
+          "stroma": 0.04
+        },
+        "tissue_called_nerve": 0.000125,
+        "tissue_called_vessel": 0.0006875
+      },
+      "starc9_val_tcga": {
+        "blood_tiles": 1500,
+        "blood_found": 0.9453333333333334,
+        "blood_auroc": 0.9940300540540541,
+        "tissue_called_blood": {
+          "tumor": 0.0033333333333333335,
+          "normal_mucosa": 0.00045454545454545455,
+          "muscle": 0.005714285714285714,
+          "fat": 0.1617391304347826,
+          "lymphocytes": 0.002,
+          "mucus": 0.0124,
+          "necrosis": 0.025714285714285714,
+          "stroma": 0.012083333333333333
+        },
+        "tissue_called_nerve": 0.0002702702702702703,
+        "tissue_called_vessel": 0.0003243243243243243
+      },
+      "crc_val_7k": {
+        "blood_tiles": 0,
+        "tissue_called_blood": {
+          "tumor": 0.0,
+          "normal_mucosa": 0.0,
+          "muscle": 0.005067567567567568,
+          "fat": 0.0,
+          "lymphocytes": 0.0,
+          "mucus": 0.0,
+          "necrosis": 0.5103244837758112,
+          "stroma": 0.0
+        },
+        "tissue_called_nerve": 0.0,
+        "tissue_called_vessel": 0.0037896731406916154
+      },
+      "nct_100k_flags": {
+        "tumor": {
+          "nerve": 0.0,
+          "vessel": 0.00034923517496682265,
+          "blood": 6.984703499336453e-05
+        },
+        "normal_mucosa": {
+          "nerve": 0.0,
+          "vessel": 0.0,
+          "blood": 0.00022823234052265205
+        },
+        "muscle": {
+          "nerve": 0.009308510638297872,
+          "vessel": 0.07291666666666667,
+          "blood": 0.0014036643026004729
+        },
+        "fat": {
+          "nerve": 0.0002882675122513693,
+          "vessel": 0.005477082732776016,
+          "blood": 0.0012491592197559334
+        },
+        "lymphocytes": {
+          "nerve": 0.0,
+          "vessel": 0.0006922211646621095,
+          "blood": 0.0018170805572380376
+        },
+        "mucus": {
+          "nerve": 0.0030350719424460434,
+          "vessel": 0.009217625899280575,
+          "blood": 0.0004496402877697842
+        },
+        "necrosis": {
+          "nerve": 0.0,
+          "vessel": 0.0033877692842251565,
+          "blood": 0.03509381514940931
+        },
+        "stroma": {
+          "nerve": 0.0026804518475971664,
+          "vessel": 0.04068542982959985,
+          "blood": 0.0002871912693854107
+        }
+      }
+    }
+  }
+}
