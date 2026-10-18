@@ -17,6 +17,7 @@ Per-tile prediction tables are not included (too big). They live in `data/result
 | `musk_v1/` | CONCH vs MUSK vs both for the tissue and structures models, same tiles and recipe | `docs/musk_experiment.md` |
 | `overnight_v4/` | **current pipeline on all 58 calibration slides** (+ held-out slides): depth / serosa vs pT, with vs without MUSK; 528 tiles labeled by eye (Claude, blind); TCGA mucinous / MSI checks | `overnight_v4/results.md` |
 | `front_check_v1/` | **by-eye check of the tumor-front features** (main tumor, front, growth pattern, direction, satellites, lymph nodes) on 20 TCGA slides; why the pattern is 96% "infiltrative" | `front_check_v1/results.md` |
+| `cutoffs_v1/` | **four cut-offs set from evidence**: mucinous flag (vs TCGA), "unsure here" confidence, pushing / infiltrative, blood check; chosen on calibration slides, reported on held-out | `cutoffs_v1/results.md` |
 | `blood_check_v1/` | why blood was mapped as necrosis (color, zoom), MUSK blood check, pipeline test on 2 slides | `docs/slide_pipeline.md` |
 
 The depth-hint calibration on 58 TCGA slides lives in `calibration/` (write-up: `docs/calibration.md`).

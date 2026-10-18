@@ -26,6 +26,7 @@ def test_mucin_pool_at_the_tumor_edge_counts():
     out, _ = mucin(tm, find_front(tm))
     assert 0.3 < out["fraction_in_tumor"] < 0.5      # about 10 / (14 + 10) of the width
     assert "mucin pools attached" in out["label"]
+    assert out["check_mucinous"] and "check for mucinous features" in out["label"]
 
 
 def test_mucin_far_from_the_tumor_does_not_count():
@@ -35,3 +36,4 @@ def test_mucin_far_from_the_tumor_does_not_count():
     tm = grid_map(layout)
     out, _ = mucin(tm, find_front(tm))
     assert out["fraction_in_tumor"] == 0
+    assert not out["check_mucinous"]

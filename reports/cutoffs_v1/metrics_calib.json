@@ -1,0 +1,74 @@
+{
+  "depth": {
+    "slides": 56,
+    "judged": 16,
+    "exact": 7,
+    "shallower": 8,
+    "deeper_than_pT": 1,
+    "claim_true": "15/16",
+    "T3T4_reached_level3": "2/27"
+  },
+  "serosa": {
+    "pT4_found": "0/13",
+    "false_alarms": "1/43"
+  },
+  "depth_by_pT": {
+    "cant_judge": {
+      "T1": 13,
+      "T2": 9,
+      "T3": 11,
+      "T4": 7
+    },
+    "1": {
+      "T1": 3,
+      "T2": 1,
+      "T3": 1,
+      "T4": 0
+    },
+    "2": {
+      "T1": 0,
+      "T2": 2,
+      "T3": 2,
+      "T4": 4
+    },
+    "3": {
+      "T1": 1,
+      "T2": 0,
+      "T3": 0,
+      "T4": 2
+    }
+  },
+  "qc_totals": {
+    "n_tiles_read": 585487,
+    "n_tissue_tiles": 530702,
+    "qc_background": 28623,
+    "qc_blood": 7307,
+    "qc_blur": 18855
+  },
+  "means": {
+    "tumor_frac": 0.5592321428571428,
+    "necrosis_frac": 0.05614285714285715,
+    "necrosis_in_tumor": 0.006482142857142857,
+    "mucin_in_tumor": 0.04923214285714285,
+    "unsure": 0.3040178571428572,
+    "unsure_low_conf": 0.3040178571428572,
+    "unsure_disagree": NaN
+  },
+  "unsure_median_max": [
+    0.279,
+    0.7
+  ],
+  "mucin_vs_tcga_mucinous": {
+    "n_mucinous": 9,
+    "n_other": 47,
+    "median_mucin_in_tumor_mucinous": 0.142,
+    "median_mucin_in_tumor_other": 0.001,
+    "auroc": 0.7446808510638298
+  },
+  "immune_vs_msi": {
+    "n_msi_high": 12,
+    "n_mss": 43,
+    "auroc_margin": 0.7015503875968992,
+    "auroc_core": 0.5892857142857143
+  }
+}

@@ -304,7 +304,7 @@ def growth_pattern(tm, fr, pieces):
     satellites = [p for p in pieces if p["satellite"]]
     arcs, arc_masks = front_arcs(tm, fr, contour, deviation, is_front_pt, fingers, pieces)
 
-    # plain rule over the measures (always shown with the numbers behind it); cutoffs are placeholders
+    # plain rule over the measures (always shown with the numbers behind it); cutoffs set by eye, see src/cutoffs.py
     protrusions = len(fingers) + len(satellites)
     infiltrative = solidity < cutoffs.SOLIDITY_INFILTRATIVE or protrusions >= cutoffs.INFILTRATIVE_MIN_PROTRUSIONS
     pattern = "infiltrative" if infiltrative else "pushing"
@@ -703,11 +703,16 @@ def mucin(tm, fr):
     attached = np.isin(pools_lab, np.unique(pools_lab[near & (pools_lab > 0)]))
     region = fr.main_filled | attached
     fraction = (mucus & region).sum() / max(int(region.sum()), 1)
+    check = bool(fraction >= cutoffs.MUCIN_FLAG_FRACTION)
+    share = f"{fraction:.1%}" if fraction < 0.1 else f"{fraction:.0%}"
     if fraction > cutoffs.MUCINOUS_FRACTION:
-        label = (f"Mucinous: {fraction:.0%} of the tumor (with the mucin pools attached to it) is mucin (over the "
+        label = (f"Mucinous: {share} of the tumor (with the mucin pools attached to it) is mucin (over the "
                  f"{cutoffs.MUCINOUS_FRACTION:.0%} cutoff for mucinous adenocarcinoma).")
+    elif check:
+        label = (f"{share} of the tumor (with the mucin pools attached to it) is mucin: check for mucinous features "
+                 f"(on TCGA slides at this level, about half were diagnosed mucinous).")
     elif fraction > 0:
-        label = f"{fraction:.0%} of the tumor (with the mucin pools attached to it) is mucin (mucinous features)."
+        label = f"{share} of the tumor (with the mucin pools attached to it) is mucin (a little)."
     else:
         label = "No mucin in or next to the tumor."
 
@@ -725,7 +730,7 @@ def mucin(tm, fr):
         pools.append({**tm.tile_ref(r, c), "area_mm2": rnd(p.area * tm.tile_mm2), "distance_past_muscle_um": rnd(past, 0),
                       "text": f"Mucin pool in fat, {where}: check for floating tumor cells."})
         pool_grid |= m
-    return {"fraction_in_tumor": rnd(fraction), "label": label, "pools": pools}, pool_grid
+    return {"fraction_in_tumor": rnd(fraction), "check_mucinous": check, "label": label, "pools": pools}, pool_grid
 
 
 # --- immune cells ---------------------------------------------------------------------------

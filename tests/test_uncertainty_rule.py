@@ -24,11 +24,14 @@ def unsure_tiles(tiles):
     return uncertainty(tile_map(tiles))[1][0].tolist()
 
 
+HIGH = min(cutoffs.LOW_CONFIDENCE + 0.05, 0.99)
+
+
 def test_disagreement_alone_is_not_unsure():
-    assert unsure_tiles([("tumor", 0.9, "necrosis"), ("muscle", 0.9, "stroma"), ("tumor", 0.9, "normal_mucosa")]) \
+    assert unsure_tiles([("tumor", HIGH, "necrosis"), ("muscle", HIGH, "stroma"), ("tumor", HIGH, "normal_mucosa")]) \
         == [False, False, False]
 
 
 def test_low_confidence_is_unsure():
     low = cutoffs.LOW_CONFIDENCE - 0.1
-    assert unsure_tiles([("stroma", low, "stroma"), ("tumor", 0.9, "tumor")]) == [True, False]
+    assert unsure_tiles([("stroma", low, "stroma"), ("tumor", HIGH, "tumor")]) == [True, False]

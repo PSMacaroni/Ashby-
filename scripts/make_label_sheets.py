@@ -8,6 +8,8 @@ Samples (each spread over slides: at most --per-slide tiles from one slide per s
   blood          tiles skipped as blood (qc_reason = blood): were they blood?
   blood_border   0.3 <= p_blood < 0.7, not fat: for choosing cutoffs.BLOOD_PROB later
   overrule       CONCH necrosis + MUSK muscle (the analysis uses muscle): which one was right?
+  blood_bins     --n tiles in each p_blood band 0.3-0.5 / 0.5-0.7 / 0.7-0.9 / 0.9-1.0, not fat: for choosing
+                 cutoffs.BLOOD_PROB
 
 Writes <out>/sheet_NN.jpg (8 x 6 tiles of 128 px, numbered 1-48) and <out>/index.csv.
 
@@ -73,6 +75,10 @@ def main():
     if "overrule" in wanted and "alt_label" in tiles:
         m = ok & (tiles.label == "necrosis") & (tiles.alt_label == "muscle")
         picks.append(spread(tiles[m], args.n, args.per_slide, rng).assign(set="overrule"))
+    if "blood_bins" in wanted and "p_blood" in tiles:
+        for lo, hi in ((0.3, 0.5), (0.5, 0.7), (0.7, 0.9), (0.9, 1.01)):
+            m = (tiles.p_blood >= lo) & (tiles.p_blood < hi) & (tiles.label != "fat") & (tiles.qc_reason != "background")
+            picks.append(spread(tiles[m], args.n, args.per_slide, rng).assign(set=f"blood_{lo:.1f}"))
     index = pd.concat(picks, ignore_index=True)
     index = index.iloc[rng.permutation(len(index))].reset_index(drop=True)   # blind: sets mixed together
 

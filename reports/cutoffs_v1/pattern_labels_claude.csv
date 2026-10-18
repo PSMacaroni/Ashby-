@@ -1,0 +1,89 @@
+split,slide,mine,sure,note,tool_pattern_before,solidity,n_fingers,n_satellites,front_mm,roughness_um,sheet_set,sheet_id
+calib,TCGA-A6-6138-01Z-00-DX1,cant_tell,,tumor-only slab; front dots on the cut edges,infiltrative,0.78,7,0,10.864,71.2,pattern,1
+calib,TCGA-A6-6140-01Z-00-DX1,infiltrative,leaning,tumor glands spread into pink stroma at the lower right,infiltrative,0.626,4,0,10.976,62.3,pattern,2
+calib,TCGA-A6-6653-01Z-00-DX1,cant_tell,,mucinous; tumor floating in mucin; short front,infiltrative,0.582,2,0,3.024,69.9,pattern,3
+calib,TCGA-AA-3852-01Z-00-DX1,cant_tell,,villous exophytic tumor; base not seen,infiltrative,0.725,0,0,2.352,55.5,pattern,4
+calib,TCGA-AA-3855-01Z-00-DX1,cant_tell,,villous tumor with pale stroma; no wall layers,infiltrative,0.742,4,1,11.088,76.3,pattern,5
+calib,TCGA-AA-3872-01Z-00-DX1,cant_tell,,fragments,infiltrative,0.548,3,1,2.128,65.6,pattern,6
+calib,TCGA-AA-3875-01Z-00-DX1,cant_tell,,tumor mass + villous fragments; no clear host tissue,infiltrative,0.632,5,0,10.976,,pattern,7
+calib,TCGA-AA-3877-01Z-00-DX1,cant_tell,,villous fronds + a muscle strip; front short,infiltrative,0.504,4,1,3.92,88.3,pattern,8
+calib,TCGA-AA-3941-01Z-00-DX1,cant_tell,,mostly tumor; no host layers,infiltrative,0.78,10,0,17.36,66.8,pattern,9
+calib,TCGA-AA-3947-01Z-00-DX1,cant_tell,,curved tumor section; no host layers at the front,infiltrative,0.456,12,0,23.408,60.0,pattern,10
+calib,TCGA-AA-3973-01Z-00-DX1,pushing,leaning,broad base on submucosa / muscle with small bumps,infiltrative,0.788,3,0,16.688,71.1,pattern,11
+calib,TCGA-AA-3975-01Z-00-DX1,infiltrative,leaning,wavy left border with glands into pale stroma,infiltrative,0.704,7,0,18.368,66.1,pattern,12
+calib,TCGA-AA-3979-01Z-00-DX1,cant_tell,,villous tumor; short front,infiltrative,0.802,1,0,4.256,55.3,pattern,13
+calib,TCGA-AD-5900-01Z-00-DX1,pushing,leaning,long straight base over submucosa,infiltrative,0.747,0,0,5.936,46.1,pattern,14
+calib,TCGA-AD-6890-01Z-00-DX1,cant_tell,,diagonal jagged line with lymphoid aggregates; unclear,infiltrative,0.569,3,0,5.824,51.7,pattern,15
+calib,TCGA-AF-2690-01Z-00-DX1,infiltrative,sure,tumor glands dispersed through desmoplastic stroma,infiltrative,0.539,23,2,88.704,72.2,pattern,16
+calib,TCGA-AG-3878-01Z-00-DX1,cant_tell,,fragment,pushing,0.878,1,0,3.36,43.1,pattern,17
+calib,TCGA-AG-3898-01Z-00-DX1,cant_tell,,tumor lobules with pale stroma; fronts short,infiltrative,0.602,9,0,19.712,79.1,pattern,18
+calib,TCGA-AG-A026-01Z-00-DX1,cant_tell,,pale section; tumor hard to see,infiltrative,0.574,1,0,3.472,65.2,pattern,19
+calib,TCGA-AH-6547-01Z-00-DX1,cant_tell,,fragment,pushing,0.905,2,0,3.472,58.9,pattern,20
+calib,TCGA-AZ-4313-01Z-00-DX1,pushing,leaning,straight edge between tumor and fibrous tissue,infiltrative,0.576,1,0,3.248,48.6,pattern,21
+calib,TCGA-AZ-5407-01Z-00-DX1,pushing,leaning,polypoid tumor; straight base on submucosa,infiltrative,0.607,1,2,6.048,48.8,pattern,22
+calib,TCGA-AZ-6603-01Z-00-DX1,pushing,leaning,broad straight edge on muscle (left part irregular),infiltrative,0.835,6,0,18.592,62.7,pattern,23
+calib,TCGA-AZ-6606-01Z-00-DX1,infiltrative,sure,tumor nests below the main front in stroma (scanner banding),infiltrative,0.578,19,4,58.912,61.8,pattern,24
+calib,TCGA-CK-6746-01Z-00-DX1,pushing,sure,large solid mass with a smooth rounded border,infiltrative,0.781,4,0,30.8,50.6,pattern,25
+calib,TCGA-CM-4746-01Z-00-DX1,pushing,leaning,exophytic tumor on muscle; straight base,infiltrative,0.701,8,1,18.48,58.4,pattern,26
+calib,TCGA-CM-5868-01Z-00-DX1,pushing,leaning,lobulated rounded border against stroma,infiltrative,0.798,4,0,29.68,56.2,pattern,27
+calib,TCGA-CM-6163-01Z-00-DX1,infiltrative,leaning,jagged front with tumor fingers into stroma (pen ink),infiltrative,0.626,8,1,21.952,67.0,pattern,28
+calib,TCGA-DC-5337-01Z-00-DX1,infiltrative,leaning,tumor into muscle and fibrous tissue; fingers,infiltrative,0.681,9,2,29.008,69.4,pattern,29
+calib,TCGA-DC-6154-01Z-00-DX1,infiltrative,sure,tumor nests dispersed through fibrous stroma,infiltrative,0.409,47,4,151.424,81.1,pattern,30
+calib,TCGA-DY-A1DF-01Z-00-DX1,cant_tell,,heavy pen ink,infiltrative,0.781,2,2,8.176,57.8,pattern,31
+calib,TCGA-F4-6808-01Z-00-DX1,cant_tell,,heavy pen ink,infiltrative,0.657,2,0,5.824,50.5,pattern,32
+calib,TCGA-F5-6464-01Z-00-DX1,infiltrative,leaning,top right: tumor clusters spreading into stroma,infiltrative,0.683,11,2,24.08,74.0,pattern,33
+calib,TCGA-G4-6307-01Z-00-DX1,pushing,sure,scalloped rounded lobes pushing into a fibrous band,infiltrative,0.595,11,1,54.656,65.9,pattern,34
+calib,TCGA-G4-6323-01Z-00-DX1,pushing,leaning,pedunculated polyp; smooth stalk border,infiltrative,0.441,7,3,4.256,68.1,pattern,35
+calib,TCGA-G4-6628-01Z-00-DX1,pushing,sure,smooth broad front on submucosa,infiltrative,0.538,1,1,22.176,38.4,pattern,36
+calib,TCGA-G5-6641-01Z-00-DX1,cant_tell,,mucinous; partial front,infiltrative,0.668,6,1,9.52,87.1,pattern,37
+holdout,TCGA-5M-AATE-01Z-00-DX1,cant_tell,,broad bottom front but jagged left side near fat,infiltrative,0.763,23,2,96.992,61.3,pattern,49
+holdout,TCGA-A6-2676-01Z-00-DX1,pushing,leaning,solid mass; smooth top border against fat,infiltrative,0.833,4,0,12.992,52.6,pattern_holdout2,1
+holdout,TCGA-A6-2677-01Z-00-DX1,pushing,leaning,broad stepped base on submucosa over fat,infiltrative,0.816,5,0,10.752,62.7,pattern_holdout2,2
+holdout,TCGA-AA-3538-01Z-00-DX1,cant_tell,,fragment,pushing,0.913,1,0,3.136,53.2,pattern_holdout2,3
+holdout,TCGA-AA-3544-01Z-00-DX1,cant_tell,,tumor nodules among normal mucosa,infiltrative,0.715,2,0,11.536,65.8,pattern,47
+holdout,TCGA-AA-3667-01Z-00-DX1,cant_tell,,villous fragments; tumor against pale stroma at the top only,infiltrative,0.717,3,0,5.824,57.5,pattern_holdout2,4
+holdout,TCGA-AA-3684-01Z-00-DX1,infiltrative,leaning,mucinous tumor spread diffusely under normal mucosa,infiltrative,0.557,12,6,6.944,83.8,pattern_holdout2,5
+holdout,TCGA-AA-3693-01Z-00-DX1,cant_tell,,villous tumor around a fibrous stalk,infiltrative,0.617,5,1,12.432,51.8,pattern_holdout2,6
+holdout,TCGA-AA-3866-01Z-00-DX1,cant_tell,,villous fragments,infiltrative,0.788,2,1,6.496,60.4,pattern,41
+holdout,TCGA-AA-3955-01Z-00-DX1,cant_tell,,villous fragments,infiltrative,0.755,4,1,6.048,64.9,pattern_holdout2,7
+holdout,TCGA-AA-A00D-01Z-00-DX1,cant_tell,,fragment,infiltrative,0.779,4,0,8.848,68.4,pattern_holdout2,8
+holdout,TCGA-AA-A00J-01Z-00-DX1,cant_tell,,tumor + normal mucosa; short front,infiltrative,0.604,2,0,9.968,63.2,pattern_holdout2,9
+holdout,TCGA-AA-A01C-01Z-00-DX1,cant_tell,,fragments + normal mucosa,infiltrative,0.701,2,0,3.136,88.6,pattern,54
+holdout,TCGA-AA-A02E-01Z-00-DX1,cant_tell,,fragments,infiltrative,0.589,2,1,4.816,56.0,pattern_holdout2,10
+holdout,TCGA-AF-5654-01Z-00-DX1,cant_tell,,fragment,infiltrative,0.678,6,0,3.024,67.9,pattern,53
+holdout,TCGA-AF-6655-01Z-00-DX1,pushing,leaning,fairly straight base on stroma,infiltrative,0.784,2,1,6.944,56.6,pattern,38
+holdout,TCGA-AG-3601-01Z-00-DX1,cant_tell,,fragment,infiltrative,0.688,2,1,5.264,79.5,pattern,51
+holdout,TCGA-AG-3896-01Z-00-DX1,cant_tell,,fragment,infiltrative,0.775,2,0,6.496,49.8,pattern_holdout2,11
+holdout,TCGA-AG-3901-01Z-00-DX1,cant_tell,,short front at the base,infiltrative,0.739,1,1,3.136,69.5,pattern_holdout2,12
+holdout,TCGA-AG-4007-01Z-00-DX1,cant_tell,,no clear host layer,infiltrative,0.675,8,0,20.384,81.9,pattern_holdout2,13
+holdout,TCGA-AG-A002-01Z-00-DX1,cant_tell,,tumor-only mass,pushing,0.857,1,0,4.256,55.6,pattern_holdout2,14
+holdout,TCGA-AG-A023-01Z-00-DX1,cant_tell,,glands in pale stroma near muscle; unclear,infiltrative,0.677,9,1,18.816,84.3,pattern_holdout2,15
+holdout,TCGA-AZ-4614-01Z-00-DX1,pushing,sure,large mass with a smooth rounded border on muscle,infiltrative,0.826,4,1,52.64,49.4,pattern_holdout2,16
+holdout,TCGA-AZ-6600-01Z-00-DX1,infiltrative,sure,glands scattered through fibrous tissue and muscle,infiltrative,0.652,11,1,16.912,62.0,pattern,42
+holdout,TCGA-AZ-6605-01Z-00-DX1,infiltrative,leaning,tumor tongue into fibromuscular tissue toward fat,infiltrative,0.469,7,0,33.04,53.5,pattern_holdout2,17
+holdout,TCGA-CA-6716-01Z-00-DX1,pushing,leaning,polypoid tumor; sharp base on submucosa,infiltrative,0.731,6,1,13.776,55.6,pattern,57
+holdout,TCGA-CK-4952-01Z-00-DX1,cant_tell,,mucin pools at the base; pen ink,infiltrative,0.668,5,2,8.848,67.6,pattern_holdout2,18
+holdout,TCGA-CK-5916-01Z-00-DX1,infiltrative,leaning,tumor nests within pink stroma at the right,infiltrative,0.46,27,3,88.144,58.0,pattern_holdout2,19
+holdout,TCGA-CK-6748-01Z-00-DX1,infiltrative,leaning,tumor glands scattered in fibrous tissue,infiltrative,0.67,18,1,65.968,71.6,pattern_holdout2,20
+holdout,TCGA-CM-4748-01Z-00-DX1,infiltrative,leaning,jagged front into muscle bundles,infiltrative,0.747,5,2,10.528,59.2,pattern_holdout2,21
+holdout,TCGA-CM-4750-01Z-00-DX1,cant_tell,,tumor-only mass,infiltrative,0.921,4,0,10.976,57.0,pattern,44
+holdout,TCGA-CM-6171-01Z-00-DX1,cant_tell,,tumor-only mass with cracks,infiltrative,0.787,1,2,13.216,51.9,pattern_holdout2,22
+holdout,TCGA-D5-6533-01Z-00-DX1,infiltrative,leaning,tumor nests among muscle bundles,infiltrative,0.607,10,1,19.936,61.5,pattern_holdout2,23
+holdout,TCGA-D5-6540-01Z-00-DX1,cant_tell,,short front,infiltrative,0.762,1,1,4.48,43.5,pattern,56
+holdout,TCGA-D5-6898-01Z-00-DX1,cant_tell,,fragment,infiltrative,0.733,7,1,9.52,80.6,pattern,40
+holdout,TCGA-D5-6926-01Z-00-DX1,cant_tell,,faded fragment,infiltrative,0.804,6,0,4.368,79.9,pattern,52
+holdout,TCGA-D5-6929-01Z-00-DX1,cant_tell,,short front,infiltrative,0.746,7,0,18.48,57.0,pattern_holdout2,24
+holdout,TCGA-D5-6931-01Z-00-DX1,cant_tell,,faded fragment,pushing,0.873,1,0,2.128,65.6,pattern,39
+holdout,TCGA-DC-6156-01Z-00-DX1,infiltrative,sure,tumor nests into muscle at the top,infiltrative,0.643,14,2,49.616,60.4,pattern,43
+holdout,TCGA-DC-6160-01Z-00-DX1,pushing,sure,straight broad front under muscle,pushing,0.874,1,1,12.096,52.4,pattern_holdout2,25
+holdout,TCGA-DM-A1DA-01Z-00-DX1,pushing,leaning,smooth curved base (pen ink; short front),infiltrative,0.676,3,3,8.96,70.5,pattern,45
+holdout,TCGA-DM-A282-01Z-00-DX1,cant_tell,,pen ink; looping front,infiltrative,0.644,9,0,39.2,60.4,pattern_holdout2,26
+holdout,TCGA-EI-6506-01Z-00-DX1,pushing,leaning,tumor in fat with a lobulated well-defined border,infiltrative,0.775,17,0,55.664,62.3,pattern_holdout2,27
+holdout,TCGA-EI-7002-01Z-00-DX1,cant_tell,,fragment,infiltrative,0.797,3,0,7.616,76.3,pattern,55
+holdout,TCGA-F4-6807-01Z-00-DX1,cant_tell,,heavy pen ink,infiltrative,0.57,15,1,51.744,70.2,pattern,50
+holdout,TCGA-F5-6813-01Z-00-DX1,cant_tell,,heavy pen ink,infiltrative,0.563,15,1,48.384,73.4,pattern,48
+holdout,TCGA-G4-6298-01Z-00-DX1,cant_tell,,left smooth / right irregular,infiltrative,0.704,12,2,52.752,56.8,pattern_holdout2,28
+holdout,TCGA-G4-6627-01Z-00-DX1,infiltrative,leaning,tumor glands dispersed in desmoplastic stroma,infiltrative,0.725,18,0,55.216,60.8,pattern_holdout2,29
+holdout,TCGA-NH-A50U-01Z-00-DX1,pushing,leaning,broad wavy border with lobes on stroma,infiltrative,0.677,9,1,50.736,57.6,pattern_holdout2,30
+holdout,TCGA-NH-A8F7-01Z-00-DX1,pushing,leaning,rounded lobes into fibrous septa; some nodules near fat,infiltrative,0.739,10,1,54.544,58.5,pattern,46
+holdout,TCGA-QG-A5YV-01Z-00-DX1,cant_tell,,short front; necrosis,infiltrative,0.745,15,5,28.56,76.2,pattern_holdout2,31

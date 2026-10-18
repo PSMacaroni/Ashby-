@@ -19,8 +19,11 @@ TUMOR_JOIN_UM = 500                # PLACEHOLDER: tumor pieces closer than this 
                                    #   checked by eye; 0 of 42 "satellites" were separate (reports/front_check_v1)
 TUMOR_MIN_MM2 = 1.0                # PLACEHOLDER: less tumor than this in the main tumor = "no main tumor found"
                                    #   (scattered false tumor tiles in normal mucosa made one on CA-5796)
-LOW_CONFIDENCE = 0.5               # PLACEHOLDER: top probability below this = "unsure here" (the only rule: MUSK's
-                                   #   second opinion, alt_label, is no longer used; see ALT_OVERRULES)
+LOW_CONFIDENCE = 0.9               # calibrated by eye (Claude's tile labels, no pathologist; reports/cutoffs_v1): top
+                                   #   probability below this = "unsure here". On 295 calibration tiles the map was right on
+                                   #   28% below 0.9 vs 69% above (held-out 142 tiles: 22% vs 77%); 0.9 catches 114 of 156
+                                   #   wrong tiles. Marks ~30% of the tissue on a typical slide (0.7: ~13%). The only rule:
+                                   #   MUSK's second opinion (alt_label) is not used
 TISSUE_MASK_SAT = 12               # measured: on our 5 TCGA slides the old rule (saturation > Otsu, 31-70) dropped
                                    #   pale real tissue (submucosa, loose stroma, fat); > 12 keeps it. Glass that
                                    #   slips in is removed per tile by the background guard (src/detectors.py)
@@ -40,9 +43,12 @@ ALT_OVERRULES = ()                 # team decision (Oct 18): MUSK is used only f
                                    #   of the tissue "unsure" (reports/overnight_v4). To bring back the old overrule
                                    #   (CONCH necrosis + MUSK muscle -> muscle; by eye 16 muscle / 0 necrosis):
                                    #   (("necrosis", "muscle"),)
-BLOOD_PROB = 0.5                  # PLACEHOLDER: MUSK p_blood at or above this = blood tile, skipped as
-                                   #   qc_reason "blood" (src/detectors.py). On CM-4746's clot, 0.5 finds 98% of 376
-                                   #   blood tiles and flags 0.5% of random tiles; 0.9 finds 91% and flags 0%
+BLOOD_PROB = 0.5                   # checked by eye (Claude's labels on 192 tiles, no pathologist; reports/cutoffs_v1): MUSK
+                                   #   p_blood at or above this = blood tile, skipped as qc_reason "blood" (src/detectors.py).
+                                   #   No clean cut-off: tiles at 0.9+ are 81% blood / 4% tissue, but 0.3-0.9 is a mix
+                                   #   (24-42% blood, ~30% real tissue, the rest pen ink / glass / blur). 0.9 would keep about
+                                   #   2/3 of the blood; 0.7 would save ~700 tissue tiles but keep ~600 more blood tiles (of
+                                   #   490k). 0.5 also removes the most pen ink, which nothing else catches
 BLOOD_SPARE_LABELS = ("fat",)     # never skip a tile as blood when the tissue model says one of these. Fat: blood
                                    #   models confuse it with blood (16% on TCGA fat). Muscle is NOT spared: the
                                    #   "muscle" MUSK called blood on 125 TCGA slides was pen ink (reports/overnight_v4,
@@ -54,8 +60,12 @@ FRONT_BAND_UM = 500                # doc: front band = within 500 µm on either 
 PERITUMORAL_UM = 2000              # doc: peritumoral = 0.5 to 2 mm outside
 
 # --- Growth pattern -------------------------------------------------------------------------
-SOLIDITY_INFILTRATIVE = 0.85       # PLACEHOLDER: doc says pick it from 10 slides the pathologist labels
-INFILTRATIVE_MIN_PROTRUSIONS = 3   # PLACEHOLDER: fingers + satellites at or above this = infiltrative
+SOLIDITY_INFILTRATIVE = 0.5        # set by eye (Claude's pushing / infiltrative calls on TCGA thumbnails, no pathologist;
+INFILTRATIVE_MIN_PROTRUSIONS = 7   #   reports/cutoffs_v1): fingers + satellites at or above 7 = infiltrative. Solidity barely
+                                   #   separated the calls (any cut-off up to 0.5 was equally good, higher was worse), so
+                                   #   only very ragged outlines trigger it. Chosen on 19 calibration slides (15 right; the
+                                   #   old 0.85 / 3 called all 19 infiltrative); 15 of 19 right on held-out slides.
+                                   #   Counts are not per mm of front: large sections lean infiltrative
 FRACTAL_MIN_BOXES = 8              # PLACEHOLDER: only use box sizes that still hit this many boxes
 ROUGHNESS_SMOOTH_UM = 1000         # PLACEHOLDER: "wide moving average" used to measure front roughness
 FINGER_DISK_TILES = 3              # doc: fingers = tumor removed by an opening with a 3-tile disk
@@ -100,6 +110,10 @@ FAT_DEPTH_FLAG_UM = 5000           # doc / literature (rectal cancer, verify bef
                                    #   past the muscle carries a worse outlook
 NECROSIS_RIM_UM = 200              # doc: tumor within ~200 µm (2 tiles) of necrosis = likely low oxygen
 MUCINOUS_FRACTION = 0.5            # literature (WHO): >50% extracellular mucin = mucinous adenocarcinoma
+MUCIN_FLAG_FRACTION = 0.015        # calibrated vs TCGA's mucinous diagnosis (one slide per case, reports/cutoffs_v1): at or
+                                   #   above this = "check for mucinous features". Chosen on 56 calibration slides (any value
+                                   #   0.015-0.02 is best, balanced accuracy 0.76); on 64 held-out slides it flags 15, 7 of them
+                                   #   mucinous (finds 7 of 12). Our map sees far less mucin than the WHO 50% (1 slide over it)
 MUCIN_ATTACH_TILES = 1             # PLACEHOLDER: mucin pools within this many tiles of the tumor count as part of it.
                                    #   Counting only enclosed holes missed TCGA mucinous tumors (AUROC 0.54, 7 of 9
                                    #   said "no mucin"; plain mucus share of tissue: 0.92; reports/overnight_v4)

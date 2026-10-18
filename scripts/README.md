@@ -21,7 +21,9 @@ Run everything from the project folder (`python scripts/...`, `sbatch scripts/..
 | `recheck_quality.py` | re-apply the glass / blood / blur rules to processed slides from saved tile numbers (after a cut-off change) | laptop / Delta, CPU |
 | `evaluate_slides.py` | score the analysis with the current settings (no tuning); `--ablation` = same tiles without MUSK | laptop / Delta, CPU |
 | `make_eye_sheets.py` | per-slide sheets for checking the front features by eye (`reports/front_check_v1/`) | Delta, CPU |
-| `make_label_sheets.py` | blind contact sheets of sampled tiles for labeling by eye (`reports/overnight_v4/`) | laptop / Delta, CPU |
+| `make_label_sheets.py` | blind contact sheets of sampled tiles for labeling by eye (`reports/overnight_v4/`, `reports/cutoffs_v1/`) | laptop / Delta, CPU |
+| `make_pattern_sheets.py` | blind thumbnail sheets of the main tumor + its front, for pushing / infiltrative calls by eye | Delta, CPU |
+| `calibrate_cutoffs.py` | re-derive the mucinous flag, "unsure" confidence, growth-pattern and blood cut-offs from the saved labels (`reports/cutoffs_v1/`) | laptop |
 | `calibrate_analysis.py` | calibrate the depth hint / serosal flag against real pT (`docs/calibration.md`) | laptop / Delta, CPU |
 
 ## How the models were built and tested (`scripts/models/`)
