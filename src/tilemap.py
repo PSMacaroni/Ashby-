@@ -21,7 +21,7 @@ from src.prompts import CLASSES
 NO_TISSUE = -1
 CLASS_INDEX = {name: i for i, name in enumerate(CLASSES)}
 # Optional per-tile columns (see CLAUDE.md data contract): detector outputs and a second model's label
-EXTRA_PROB_COLUMNS = ("p_nerve", "p_artery")
+EXTRA_PROB_COLUMNS = ("p_nerve", "p_artery", "p_immune")
 ALT_LABEL_COLUMN = "alt_label"
 
 

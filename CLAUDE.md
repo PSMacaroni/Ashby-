@@ -84,7 +84,10 @@ Made on Delta by the whole-slide pipeline (GPU):
   p_mucus, p_necrosis, p_stroma, label, confidence`
   (x, y = level-0 pixel top-left; label = argmax class name; confidence = max prob)
   Optional: `p_nerve`, `p_artery` (trained yes/no detectors, 0-1), `alt_label` (a second model's top class,
-  e.g. MUSK's when the p_* columns are CONCH's; disagreement = "unsure here")
+  e.g. MUSK's when the p_* columns are CONCH's; disagreement = "unsure here"), `p_immune` (lymphocyte detector,
+  0-1; `features.immune()` uses it instead of P(lymphocytes) when present). `scripts/process_slide.py` also writes
+  `colorful` (share of stained pixels), `blur` (Laplacian variance), `mask_coverage`; `qc_reason` is
+  `background` (src/detectors.is_background) or `blur` (cutoffs.BLUR_MIN).
 - `embeddings.npy`: float32 [n_tiles, dim], rows in the same order as tiles.csv (CONCH 512, MUSK 1024)
 - `tiles/<row>_<col>.jpg`: optional 128 px tile previews for click-to-zoom
 - `summary.json` slide info: `slide_id, mpp (0.5), tile_size_px (224), thumbnail_downsample, grid_shape,
@@ -146,7 +149,9 @@ Update this contract here if it must change.
 - Analysis (CPU): `src/tilemap.py` (tiles.csv -> grids) -> `src/front.py` -> `src/features.py`, `src/flags.py`
   (+ `src/phrases.py`), `src/risk.py`; `src/analysis.py` runs them all; `src/cutoffs.py`; `src/viz.py` (class colors)
 - Scripts: `first_look.py` (model bake-off), `analyze_slide.py`, `score_phrases.py`, `make_fake_slide.py`,
-  `check_setup.py`. Still to build: the whole-slide pipeline (tile + embed + classify -> tiles.csv, embeddings.npy).
+  `check_setup.py`, `process_slide.py` (whole-slide pipeline: tissue mask + 224 px tiles + background guard + CONCH
+  + tissue model `models/tissue8_split_v1.joblib` + lymphocyte detector `models/immune_v1.joblib` -> tiles.csv,
+  embeddings.npy, tiles/, thumbnail.png, summary.json; `scripts/process_slides_gpu.sbatch` runs it + phrases + analysis).
 
 ## Validation we want for judges
 Normal (-11) slides → near-zero tumor; tissue accuracy on ~100 hand-checked tiles (zero-shot vs small classifier);

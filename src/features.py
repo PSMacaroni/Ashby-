@@ -503,7 +503,10 @@ def mucin(tm, fr):
 
 def immune(tm, fr, node_mask):
     """Lymphocytes in the tumor core vs the front band vs outside, by side. Location only, not type."""
-    p_lymph = tm.probs[..., CLASS_INDEX["lymphocytes"]]
+    if "p_immune" in tm.extra:   # lymphocyte detector (src/detectors.py): also counts lymphocytes scattered in stroma/tumor
+        p_lymph, measure = tm.extra["p_immune"], "mean p_immune (lymphocyte detector) per tile in each zone (0-1)"
+    else:
+        p_lymph, measure = tm.probs[..., CLASS_INDEX["lymphocytes"]], "mean P(lymphocytes) per tile in each zone (0-1)"
     valid = tm.tissue & ~node_mask                    # lymph nodes aren't part of the immune reaction
 
     def mean_in(mask):
@@ -535,7 +538,7 @@ def immune(tm, fr, node_mask):
             "H&E shows where lymphocytes sit, not their type (no CD8/CD4) or what they're doing.")
     return {"core_fraction": rnd(core), "margin_fraction": rnd(margin), "peritumoral_fraction": rnd(peri),
             "margin_by_side": by_side, "pattern": pattern, "pattern_cutoffs_calibrated": False,
-            "measure": "mean P(lymphocytes) per tile in each zone (0-1)", "text": text}
+            "measure": measure, "text": text}
 
 
 # --- the outer surface ----------------------------------------------------------------------

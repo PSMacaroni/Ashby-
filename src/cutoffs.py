@@ -15,6 +15,9 @@ TUMOR_PROB = 0.5                   # doc: tumor = smoothed P(tumor) >= 0.5
 SMALL_HOLE_TILES = 4               # PLACEHOLDER: fill holes in the tumor mask up to this many tiles
 SECTION_GAP_UM = 300               # PLACEHOLDER: tissue pieces closer than this are one section
 LOW_CONFIDENCE = 0.5               # PLACEHOLDER: top probability below this = "unsure here"
+TISSUE_MASK_SAT = 12               # measured: on our 5 TCGA slides the old rule (saturation > Otsu, 31-70) dropped
+                                   #   pale real tissue (submucosa, loose stroma, fat); > 12 keeps it. Glass that
+                                   #   slips in is removed per tile by the background guard (src/detectors.py)
 BLUR_MIN = 0.001                   # PLACEHOLDER: Laplacian variance below this = blurry (doc: pick by
                                    #   looking at 20 tiles); used when tiling, see src/slides.py
 
@@ -49,7 +52,8 @@ TSR_STROMA_HIGH = 0.5              # literature (Gao et al. 2021): stroma-high =
 TSR_MIN_TILES = 10                 # PLACEHOLDER: skip windows with fewer tumor + stroma tiles
 
 # --- Immune cells ---------------------------------------------------------------------------
-IMMUNE_LOW = 0.05                  # PLACEHOLDER: mean P(lymphocytes) below this = "few lymphocytes"
+IMMUNE_LOW = 0.05                  # PLACEHOLDER: mean immune score (p_immune if present, else P(lymphocytes))
+                                   #   below this = "few lymphocytes"; recalibrate when switching scores
 IMMUNE_CORE_TO_MARGIN = 0.5        # PLACEHOLDER: core/margin ratio above this = "lymphocytes get inside"
 
 # --- Lymph nodes, satellites, deposits ------------------------------------------------------

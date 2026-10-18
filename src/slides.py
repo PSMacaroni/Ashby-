@@ -26,13 +26,18 @@ def get_thumbnail(slide, downsample=64):
     return slide.get_thumbnail((w // downsample, h // downsample)).convert("RGB")
 
 
-def tissue_mask(thumbnail):
+def tissue_mask(thumbnail, min_sat=None):
     """
     True where there is tissue. Tissue is pink/purple (colorful); background glass is
     white/grey, so we threshold the color saturation. Rough, but good enough to skip glass.
+    min_sat=None: automatic cut-off (Otsu, at least 20). A fixed min_sat (cutoffs.TISSUE_MASK_SAT = 12)
+    also keeps pale tissue (submucosa, loose stroma, fat) that the automatic cut-off drops; the
+    whole-slide pipeline uses that plus a per-tile background check.
     """
     hsv = np.asarray(thumbnail.convert("HSV"))
     sat = hsv[..., 1].astype(float)
+    if min_sat is not None:
+        return sat > min_sat
     if sat.max() == sat.min():
         return np.zeros(sat.shape, dtype=bool)
     return sat > max(threshold_otsu(sat), 20)
