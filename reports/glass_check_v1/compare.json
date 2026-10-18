@@ -1,0 +1,218 @@
+{
+ "calib": {
+  "slides": 56,
+  "qc_background": [
+   28623,
+   59057
+  ],
+  "qc_blood": [
+   7307,
+   1583
+  ],
+  "qc_blur": [
+   18855,
+   6224
+  ],
+  "pattern_counts": {
+   "old": {
+    "pushing": 22,
+    "not_assessable": 19,
+    "infiltrative": 15
+   },
+   "new": {
+    "not_assessable": 21,
+    "pushing": 20,
+    "infiltrative": 15
+   }
+  },
+  "pattern_vs_eye": {
+   "old": "15/19 judged",
+   "new": "15/19 judged",
+   "labeled_slides": 19
+  },
+  "mucin_flag": [
+   13,
+   13
+  ],
+  "changed": {
+   "pattern": [
+    "TCGA-AA-3875",
+    "TCGA-DY-A1DF"
+   ],
+   "depth": [
+    "TCGA-AG-A026",
+    "TCGA-DY-A1DF"
+   ],
+   "t_hint": [
+    "TCGA-AG-A026",
+    "TCGA-DY-A1DF"
+   ],
+   "mucin_flag": []
+  },
+  "tumor_frac_mean": [
+   0.5592,
+   0.5693
+  ],
+  "tiles_by_eye": {
+   "glass_or_ink_removed": [
+    "21/98",
+    "53/98"
+   ],
+   "tissue_removed": [
+    "13/263",
+    "15/263"
+   ],
+   "blood_removed": [
+    "23/42",
+    "23/42"
+   ],
+   "new_reason_counts": {
+    "ok": 410,
+    "background": 58,
+    "blood": 52
+   },
+   "tissue_newly_removed": [
+    [
+     "TCGA-AG-3892",
+     127,
+     69,
+     "mucus",
+     "mucus",
+     "background"
+    ],
+    [
+     "TCGA-F4-6808",
+     88,
+     73,
+     "muscle",
+     "necrosis",
+     "background"
+    ]
+   ]
+  }
+ },
+ "holdout": {
+  "slides": 66,
+  "qc_background": [
+   43962,
+   76440
+  ],
+  "qc_blood": [
+   9757,
+   2650
+  ],
+  "qc_blur": [
+   21170,
+   6231
+  ],
+  "pattern_counts": {
+   "old": {
+    "pushing": 27,
+    "infiltrative": 24,
+    "not_assessable": 13,
+    "NaN": 2
+   },
+   "new": {
+    "pushing": 27,
+    "infiltrative": 24,
+    "not_assessable": 13,
+    "NaN": 2
+   }
+  },
+  "pattern_vs_eye": {
+   "old": "15/19 judged",
+   "new": "15/19 judged",
+   "labeled_slides": 19
+  },
+  "mucin_flag": [
+   15,
+   14
+  ],
+  "changed": {
+   "pattern": [
+    "TCGA-A6-2679",
+    "TCGA-CA-6716",
+    "TCGA-DM-A1DA",
+    "TCGA-EI-7004"
+   ],
+   "depth": [
+    "TCGA-A6-2679",
+    "TCGA-EI-7004"
+   ],
+   "t_hint": [
+    "TCGA-A6-2679",
+    "TCGA-AA-3866",
+    "TCGA-CK-5916",
+    "TCGA-EI-7004"
+   ],
+   "mucin_flag": [
+    "TCGA-AG-4015"
+   ]
+  },
+  "tumor_frac_mean": [
+   0.5802,
+   0.5841
+  ],
+  "tiles_by_eye": {
+   "glass_or_ink_removed": [
+    "5/39",
+    "14/39"
+   ],
+   "tissue_removed": [
+    "4/104",
+    "9/104"
+   ],
+   "blood_removed": [
+    "8/12",
+    "8/12"
+   ],
+   "new_reason_counts": {
+    "ok": 173,
+    "background": 20,
+    "blood": 18
+   },
+   "tissue_newly_removed": [
+    [
+     "TCGA-AA-A00J",
+     174,
+     116,
+     "lymphocytes",
+     "lymphocytes",
+     "background"
+    ],
+    [
+     "TCGA-AA-A00J",
+     176,
+     116,
+     "lymphocytes",
+     "lymphocytes",
+     "background"
+    ],
+    [
+     "TCGA-AG-3600",
+     21,
+     112,
+     "mucus",
+     "mucus",
+     "background"
+    ],
+    [
+     "TCGA-AG-A023",
+     54,
+     96,
+     "mucus",
+     "mucus",
+     "background"
+    ],
+    [
+     "TCGA-F5-6813",
+     143,
+     32,
+     "muscle",
+     "muscle",
+     "background"
+    ]
+   ]
+  }
+ }
+}
