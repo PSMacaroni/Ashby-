@@ -18,8 +18,9 @@
 6. **Lymphocyte detector** `models/immune_v1.joblib` → `p_immune` (see `docs/fixes_background_lymph.md`).
 7. **Blood check** (MUSK) `models/structures_musk_v1.joblib` → `p_blood`, and MUSK's own tissue model
    `models/tissue8_musk_v1.joblib` → `alt_label` (second opinion; see "Blood check" below).
-8. **QC:** `qc_reason = background` (< 10% colorful and not labeled fat), `blood` (`p_blood` ≥ `cutoffs.BLOOD_PROB`
-   and not labeled fat) or `blur` (`cutoffs.BLUR_MIN`). Both cut-offs are placeholders.
+8. **QC** (`src/detectors.quality_check` + `is_blood`): `qc_reason = background` (< 10% colorful and not labeled fat,
+   or glass: very flat and pale), `blood` (`p_blood` ≥ `cutoffs.BLOOD_PROB` and not labeled fat; a placeholder) or
+   `blur` (< 10% of the slide's own typical sharpness; measured, see `docs/calibration.md` v2).
 9. `thumbnail.png` + `summary.json` slide info (incl. project / pT / pN / stage from `slides.csv`).
 
 Then `process_slides_gpu.sbatch` runs `score_phrases.py` and `analyze_slide.py` on each folder, unchanged.
@@ -111,7 +112,7 @@ cut edge on most TCGA sections. It needs real serosa / fat evidence and a minimu
    blood model, because the CONCH one (`structures_split_v1`) misses most of our blood. See "Blood check" below.
 5. **App ↔ analysis mismatch:** the app README expects `risk_points` / `risk_level` / `risk_flags` in `tiles.csv`; the
    analysis writes them to `tile_analysis.csv`.
-6. `cutoffs.BLUR_MIN = 0.001` is a placeholder. On these slides it flagged 0–4% of tiles (A6-3809: 130); worth a quick look.
+6. ~~`cutoffs.BLUR_MIN` placeholder~~: replaced by a slide-relative rule + glass check (v2, `docs/calibration.md`).
 
 ## Blood check (MUSK)
 

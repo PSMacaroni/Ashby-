@@ -3,7 +3,8 @@ Whole-slide pipeline (Delta, GPU): one .svs slide -> the result folder the analy
 (data contract in CLAUDE.md). Afterwards run scripts/analyze_slide.py (CPU) on the folder.
 
 Steps:
-  1. thumbnail (64x smaller) + tissue mask (saturation > cutoffs.TISSUE_MASK_SAT: keeps pale submucosa / fat)
+  1. thumbnail (64x smaller) + fat-aware tissue mask (src/slides.fat_aware_mask: stained pixels + textured pale
+     pixels next to them, i.e. fat; cutoffs.TISSUE_MASK_*)
   2. grid of 224 px tiles at 0.5 µm/px (112 µm), keep grid cells that are >= 50% tissue in the thumbnail
   3. per tile: read at full resolution, colorful fraction, blur score, 128 px preview
   4. CONCH image embeddings (224 px) -> embeddings.npy (rows = tiles.csv rows); MUSK image embeddings of the same
@@ -12,14 +13,20 @@ Steps:
   6. lymphocyte detector (models/immune_v1.joblib, CONCH) -> p_immune (used by features.immune when present)
   7. blood check (models/structures_musk_v1.joblib, MUSK) -> p_blood; MUSK's own tissue model
      (models/tissue8_musk_v1.joblib) -> alt_label, a second opinion: CONCH and MUSK disagreeing = "unsure here"
-  8. quality check: qc_reason "background" (src/detectors.is_background: < 10% colorful and not fat),
-     "blood" (src/detectors.is_blood: p_blood >= cutoffs.BLOOD_PROB and not fat) or "blur"
+  8. quality check (src/detectors.quality_check + is_blood): qc_reason "background" (colorless and not fat, or
+     glass: very flat and pale), "blood" (p_blood >= cutoffs.BLOOD_PROB and not fat) or "blur" (< cutoffs.BLUR_REL x
+     the slide's typical sharpness)
 
 Writes data/results/<slide_id>/: thumbnail.png, tiles.csv, embeddings.npy, embeddings_musk.npy, tiles/<row>_<col>.jpg,
 summary.json
 
     python scripts/process_slide.py --slide /projects/bfqi/$USER/tcga_slides/TCGA-AA-3844-....svs \
         --slides-csv /projects/bfqi/$USER/tcga_slides/slides.csv
+
+--extend: the slide was processed before with a smaller mask. Only the grid cells the current mask adds are read and
+embedded; they're appended to tiles.csv / embeddings.npy / embeddings_musk.npy, and the models and quality check are
+re-run on all tiles (cheap, from the saved embeddings). A folder made before the MUSK blood check has no
+embeddings_musk.npy: then every tile is read again.
 """
 import argparse
 import json
@@ -39,11 +46,11 @@ from tqdm import tqdm
 
 from src import cutoffs
 from src.classifier import load_classifier, predict
-from src.detectors import (class_probs, colorful_fraction, is_background, is_blood, load_bundle, load_immune,
-                           predict_blood, predict_immune)
+from src.detectors import (class_probs, colorful_fraction, is_blood, load_bundle, load_immune, predict_blood,
+                           predict_immune, quality_check)
 from src.models import load_conch, load_musk
 from src.prompts import CLASSES, PROMPTS_VERSION
-from src.slides import blur_score, get_mpp, get_thumbnail, open_slide, tissue_mask
+from src.slides import blur_score, fat_aware_mask, get_mpp, get_thumbnail, open_slide
 
 TILE_PX, MPP, DOWNSAMPLE, PREVIEW_PX = 224, 0.5, 64, 128
 TISSUE_MODEL = "models/tissue8_split_v1.joblib"
@@ -60,7 +67,8 @@ def tile_grid(slide):
     thumb = get_thumbnail(slide, DOWNSAMPLE)
     W, H = slide.dimensions
     sx, sy = W / thumb.width, H / thumb.height             # exact level-0 px per thumbnail px
-    mask = tissue_mask(thumb, min_sat=cutoffs.TISSUE_MASK_SAT)
+    mask = fat_aware_mask(thumb, min_sat=cutoffs.TISSUE_MASK_SAT, texture_sd=cutoffs.TISSUE_MASK_TEXTURE_SD,
+                          gray_max=cutoffs.TISSUE_MASK_GRAY_MAX, near_px=cutoffs.TISSUE_MASK_NEAR_PX)
     integral = np.pad(mask.astype(np.int64).cumsum(0).cumsum(1), ((1, 0), (1, 0)))
     R, C = H // read_px, W // read_px
     rows = []
@@ -114,7 +122,8 @@ def main():
     ap.add_argument("--out", default="data/results")
     ap.add_argument("--slides-csv", default=None, help="table with file_name, project, pT, pN, stage")
     ap.add_argument("--workers", type=int, default=14)
-    ap.add_argument("--batch-size", type=int, default=128)
+    ap.add_argument("--batch-size", type=int, default=128, help="128: each tile also carries a 384 px MUSK copy")
+    ap.add_argument("--extend", action="store_true", help="only read cells the current mask adds (see above)")
     args = ap.parse_args()
 
     slide_path = Path(args.slide)
@@ -128,22 +137,47 @@ def main():
     print(f"{slide_id}: slide {slide.dimensions}, {slide_mpp} µm/px, tile = {read_px} px at level 0, "
           f"grid {grid}, {len(tiles)} tissue tiles", flush=True)
 
-    device = config.get_device()
-    model, preprocess = load_conch(device=device, image_size=TILE_PX)
-    musk, preprocess_musk = load_musk(device=device)
-    loader = DataLoader(Tiles(slide_path, tiles, read_px, preprocess, preprocess_musk, out / "tiles"),
-                        batch_size=args.batch_size, num_workers=args.workers)
-    embs, embs_musk, colorful, blur = [], [], [], []
-    with torch.inference_mode():
-        for x, xm, c, b in tqdm(loader, desc=slide_id):
-            embs.append(model.encode_image(x.to(device), proj_contrast=True, normalize=True).float().cpu().numpy())
-            for chunk in xm.split(MUSK_CHUNK):
-                embs_musk.append(musk.encode_image(chunk.to(device)).float().cpu().numpy())
-            colorful.append(c.numpy())
-            blur.append(b.numpy())
-    E = np.concatenate(embs).astype(np.float32)
-    E_musk = np.concatenate(embs_musk).astype(np.float32)
-    tiles["colorful"], tiles["blur"] = np.concatenate(colorful), np.concatenate(blur)
+    n_added = None
+    saved = [out / f for f in ("tiles.csv", "embeddings.npy", "embeddings_musk.npy")]
+    if args.extend and all(f.exists() for f in saved):
+        old = pd.read_csv(saved[0])
+        E_old, M_old = np.load(saved[1]), np.load(saved[2])
+        assert len(old) == len(E_old) == len(M_old), "tiles.csv and the embeddings don't match"
+        seen = set(zip(old.row, old.col))
+        todo = tiles[[(r, c) not in seen for r, c in zip(tiles.row, tiles.col)]].reset_index(drop=True)
+        cov = dict(zip(zip(tiles.row, tiles.col), tiles.mask_coverage))
+        old["mask_coverage"] = [cov.get(k, m) for k, m in zip(zip(old.row, old.col), old.mask_coverage)]
+        old = old[["row", "col", "x", "y", "mask_coverage", "colorful", "blur"]]
+        n_added = len(todo)
+        print(f"extend: {len(old)} tiles already done, {n_added} new cells to read", flush=True)
+    else:
+        if args.extend:
+            print("extend: no earlier tiles.csv + embeddings.npy + embeddings_musk.npy here, reading every tile",
+                  flush=True)
+        old, todo = None, tiles
+        E_old, M_old = np.zeros((0, 512), np.float32), np.zeros((0, 1024), np.float32)
+
+    E_new, M_new = np.zeros((0, E_old.shape[1]), np.float32), np.zeros((0, M_old.shape[1]), np.float32)
+    if len(todo):
+        device = config.get_device()
+        model, preprocess = load_conch(device=device, image_size=TILE_PX)
+        musk, preprocess_musk = load_musk(device=device)
+        loader = DataLoader(Tiles(slide_path, todo, read_px, preprocess, preprocess_musk, out / "tiles"),
+                            batch_size=args.batch_size, num_workers=args.workers)
+        embs, embs_musk, colorful, blur = [], [], [], []
+        with torch.inference_mode():
+            for x, xm, c, b in tqdm(loader, desc=slide_id):
+                embs.append(model.encode_image(x.to(device), proj_contrast=True, normalize=True).float().cpu().numpy())
+                for chunk in xm.split(MUSK_CHUNK):
+                    embs_musk.append(musk.encode_image(chunk.to(device)).float().cpu().numpy())
+                colorful.append(c.numpy())
+                blur.append(b.numpy())
+        E_new = np.concatenate(embs).astype(np.float32)
+        M_new = np.concatenate(embs_musk).astype(np.float32)
+        todo = todo.assign(colorful=np.concatenate(colorful), blur=np.concatenate(blur))
+    tiles = pd.concat([d for d in (old, todo) if d is not None], ignore_index=True)
+    E = np.concatenate([E_old, E_new]).astype(np.float32)
+    E_musk = np.concatenate([M_old, M_new]).astype(np.float32)
 
     probs, _ = predict(load_classifier(TISSUE_MODEL), E)      # 8 classes, rows sum to 1
     for i, c in enumerate(CLASSES):
@@ -154,9 +188,9 @@ def main():
     tiles["p_blood"] = predict_blood(load_bundle(BLOOD_MODEL), E_musk).round(5)
     tiles["alt_label"] = np.array(CLASSES)[class_probs(load_bundle(ALT_MODEL), E_musk).argmax(1)]
 
-    background = is_background(tiles.colorful.to_numpy(), tiles.label.to_numpy())
+    background, blurry, blur_ref = quality_check(tiles.colorful, tiles.blur, tiles.label)
     blood = is_blood(tiles.p_blood.to_numpy(), tiles.label.to_numpy()) & ~background
-    blurry = (tiles.blur.to_numpy() < cutoffs.BLUR_MIN) & ~background & ~blood
+    blurry = blurry & ~blood
     tiles["qc_ok"] = ~(background | blood | blurry)
     tiles["qc_reason"] = np.where(background, "background", np.where(blood, "blood", np.where(blurry, "blur", "")))
     tiles["tile_size_px"] = TILE_PX
@@ -173,9 +207,15 @@ def main():
         "mpp": MPP, "slide_mpp": slide_mpp, "tile_size_px": TILE_PX, "thumbnail_downsample": round(downsample, 4),
         "grid_shape": list(grid), "n_tiles_read": int(len(tiles)), "n_tissue_tiles": int(ok.sum()),
         "qc": {"background": int(background.sum()), "blood": int(blood.sum()), "blur": int(blurry.sum()),
-               "blur_cutoff_is_placeholder": True, "blood_cutoff_is_placeholder": True},
-        "tissue_mask": {"rule": f"saturation > {cutoffs.TISSUE_MASK_SAT} on the {DOWNSAMPLE}x thumbnail, cell >= 50% tissue",
-                        "background_guard": "< 10% colorful pixels and not labeled fat"},
+               "blur_reference": round(blur_ref, 6),
+               "blur_rule": f"blur < {cutoffs.BLUR_REL} x blur_reference (median blur of clearly stained tiles)",
+               "blood_cutoff_is_placeholder": True},
+        "tissue_mask": {"rule": f"fat-aware: saturation > {cutoffs.TISSUE_MASK_SAT} plus textured pale pixels "
+                                f"(local SD > {cutoffs.TISSUE_MASK_TEXTURE_SD}) within {cutoffs.TISSUE_MASK_NEAR_PX} px "
+                                f"of stained tissue, on the {DOWNSAMPLE}x thumbnail; cell >= 50% tissue",
+                        "background_guard": f"< 10% colorful pixels and not labeled fat, or glass (blur < "
+                                            f"{cutoffs.GLASS_BLUR_MAX} and < {cutoffs.GLASS_COLORFUL_MAX:.0%} colorful)",
+                        "tiles_added_by_extend": n_added},
         "blood_check": {"rule": f"MUSK p_blood >= {cutoffs.BLOOD_PROB} and not labeled fat", "file": BLOOD_MODEL},
         "model": {"name": "CONCH ViT-B/16 + logistic regression (tissue8_split_v1: NCT-CRC-HE-100K + STARC-9)",
                   "file": TISSUE_MODEL, "prompts_version": PROMPTS_VERSION},

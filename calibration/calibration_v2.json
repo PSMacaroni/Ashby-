@@ -1,0 +1,601 @@
+{
+  "version": "v2",
+  "date": "2026-10-17",
+  "slides": [
+    "TCGA-A6-2674-01Z-00-DX1",
+    "TCGA-A6-3809-01Z-00-DX1",
+    "TCGA-A6-6138-01Z-00-DX1",
+    "TCGA-A6-6140-01Z-00-DX1",
+    "TCGA-A6-6653-01Z-00-DX1",
+    "TCGA-AA-3495-01Z-00-DX1",
+    "TCGA-AA-3522-01Z-00-DX1",
+    "TCGA-AA-3680-01Z-00-DX1",
+    "TCGA-AA-3685-01Z-00-DX1",
+    "TCGA-AA-3844-01Z-00-DX1",
+    "TCGA-AA-3852-01Z-00-DX1",
+    "TCGA-AA-3855-01Z-00-DX1",
+    "TCGA-AA-3872-01Z-00-DX1",
+    "TCGA-AA-3875-01Z-00-DX1",
+    "TCGA-AA-3877-01Z-00-DX1",
+    "TCGA-AA-3941-01Z-00-DX1",
+    "TCGA-AA-3947-01Z-00-DX1",
+    "TCGA-AA-3949-01Z-00-DX1",
+    "TCGA-AA-3973-01Z-00-DX1",
+    "TCGA-AA-3975-01Z-00-DX1",
+    "TCGA-AA-3979-01Z-00-DX1",
+    "TCGA-AA-A00O-01Z-00-DX1",
+    "TCGA-AA-A00W-01Z-00-DX1",
+    "TCGA-AD-5900-01Z-00-DX1",
+    "TCGA-AD-6890-01Z-00-DX1",
+    "TCGA-AD-A5EK-01Z-00-DX1",
+    "TCGA-AF-2690-01Z-00-DX1",
+    "TCGA-AF-2691-01Z-00-DX1",
+    "TCGA-AF-4110-01Z-00-DX1",
+    "TCGA-AG-3580-01Z-00-DX1",
+    "TCGA-AG-3742-01Z-00-DX1",
+    "TCGA-AG-3878-01Z-00-DX1",
+    "TCGA-AG-3892-01Z-00-DX1",
+    "TCGA-AG-3898-01Z-00-DX1",
+    "TCGA-AG-A025-01Z-00-DX1",
+    "TCGA-AG-A026-01Z-00-DX1",
+    "TCGA-AG-A02X-01Z-00-DX1",
+    "TCGA-AH-6547-01Z-00-DX1",
+    "TCGA-AY-4071-01Z-00-DX1",
+    "TCGA-AZ-4313-01Z-00-DX1",
+    "TCGA-AZ-5407-01Z-00-DX1",
+    "TCGA-AZ-6603-01Z-00-DX1",
+    "TCGA-AZ-6606-01Z-00-DX1",
+    "TCGA-CA-5796-01Z-00-DX1",
+    "TCGA-CK-6746-01Z-00-DX1",
+    "TCGA-CM-4746-01Z-00-DX1",
+    "TCGA-CM-5868-01Z-00-DX1",
+    "TCGA-CM-6163-01Z-00-DX1",
+    "TCGA-DC-5337-01Z-00-DX1",
+    "TCGA-DC-6154-01Z-00-DX1",
+    "TCGA-DY-A1DF-01Z-00-DX1",
+    "TCGA-F4-6808-01Z-00-DX1",
+    "TCGA-F5-6464-01Z-00-DX1",
+    "TCGA-G4-6307-01Z-00-DX1",
+    "TCGA-G4-6321-01Z-00-DX1",
+    "TCGA-G4-6323-01Z-00-DX1",
+    "TCGA-G4-6628-01Z-00-DX1",
+    "TCGA-G5-6641-01Z-00-DX1"
+  ],
+  "learning_curve": {
+    "pool_size": [
+      1,
+      6,
+      11,
+      16,
+      21,
+      26,
+      31,
+      36,
+      41,
+      46,
+      51,
+      56
+    ],
+    "correct": [
+      0.243,
+      0.375,
+      0.25,
+      0.174,
+      0.409,
+      0.273,
+      0.25,
+      0.32,
+      0.364,
+      0.3,
+      0.4,
+      0.364
+    ],
+    "overcall": [
+      0.486,
+      0.25,
+      0.393,
+      0.435,
+      0.318,
+      0.364,
+      0.167,
+      0.24,
+      0.227,
+      0.25,
+      0.133,
+      0.273
+    ],
+    "orders": 50,
+    "figure": "calibration\\learning_curve_v2.png"
+  },
+  "depth": {
+    "chosen": {
+      "WALL_MUSCLE_MIN_MM2": 8.0,
+      "WALL_FAT_MIN_MM2": 2.0,
+      "DEPTH_CONTACT_MIN_TILES": 8,
+      "DEPTH_CONTACT_RADIUS_TILES": 1
+    },
+    "on_all_slides": {
+      "correct": 8,
+      "overcall": 4,
+      "undercall": 7,
+      "not_assessable": 39,
+      "slides": 58,
+      "assessable": 19,
+      "correct_of_assessable": 0.421,
+      "overcall_of_assessable": 0.211
+    },
+    "leave_one_out": {
+      "correct": 6,
+      "overcall": 6,
+      "undercall": 7,
+      "not_assessable": 39,
+      "slides": 58,
+      "assessable": 19,
+      "correct_of_assessable": 0.316,
+      "overcall_of_assessable": 0.316
+    },
+    "current_values": {
+      "WALL_MUSCLE_MIN_MM2": 2.0,
+      "WALL_FAT_MIN_MM2": 0.5,
+      "DEPTH_CONTACT_MIN_TILES": 3,
+      "DEPTH_CONTACT_RADIUS_TILES": 1
+    },
+    "current_on_all_slides": {
+      "correct": 9,
+      "overcall": 7,
+      "undercall": 14,
+      "not_assessable": 28,
+      "slides": 58,
+      "assessable": 30,
+      "correct_of_assessable": 0.3,
+      "overcall_of_assessable": 0.233
+    },
+    "by_slide": [
+      {
+        "slide": "TCGA-A6-2674-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-A6-3809-01Z-00-DX1",
+        "pT": "T4",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-A6-6138-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-A6-6140-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-A6-6653-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3495-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3522-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3680-01Z-00-DX1",
+        "pT": "T4",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3685-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3844-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3852-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3855-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3872-01Z-00-DX1",
+        "pT": "T4",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3875-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3877-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3941-01Z-00-DX1",
+        "pT": "T4",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3947-01Z-00-DX1",
+        "pT": "T4",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3949-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3973-01Z-00-DX1",
+        "pT": "T4",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3975-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-3979-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-A00O-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AA-A00W-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AD-5900-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AD-6890-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AD-A5EK-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AF-2690-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": 3,
+        "outcome": "correct",
+        "leave_one_out": "correct"
+      },
+      {
+        "slide": "TCGA-AF-2691-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AF-4110-01Z-00-DX1",
+        "pT": "T4a",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AG-3580-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AG-3742-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AG-3878-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AG-3892-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AG-3898-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AG-A025-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AG-A026-01Z-00-DX1",
+        "pT": "T4",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AG-A02X-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AH-6547-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AY-4071-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-AZ-4313-01Z-00-DX1",
+        "pT": "T1a",
+        "predicted_level": 1,
+        "outcome": "correct",
+        "leave_one_out": "correct"
+      },
+      {
+        "slide": "TCGA-AZ-5407-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": 2,
+        "outcome": "overcall",
+        "leave_one_out": "overcall"
+      },
+      {
+        "slide": "TCGA-AZ-6603-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": 2,
+        "outcome": "correct",
+        "leave_one_out": "correct"
+      },
+      {
+        "slide": "TCGA-AZ-6606-01Z-00-DX1",
+        "pT": "T4",
+        "predicted_level": 2,
+        "outcome": "undercall",
+        "leave_one_out": "undercall"
+      },
+      {
+        "slide": "TCGA-CA-5796-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": 1,
+        "outcome": "undercall",
+        "leave_one_out": "undercall"
+      },
+      {
+        "slide": "TCGA-CK-6746-01Z-00-DX1",
+        "pT": "T4b",
+        "predicted_level": 2,
+        "outcome": "undercall",
+        "leave_one_out": "undercall"
+      },
+      {
+        "slide": "TCGA-CM-4746-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": 2,
+        "outcome": "correct",
+        "leave_one_out": "correct"
+      },
+      {
+        "slide": "TCGA-CM-5868-01Z-00-DX1",
+        "pT": "T4a",
+        "predicted_level": 3,
+        "outcome": "correct",
+        "leave_one_out": "correct"
+      },
+      {
+        "slide": "TCGA-CM-6163-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": 1,
+        "outcome": "correct",
+        "leave_one_out": "overcall"
+      },
+      {
+        "slide": "TCGA-DC-5337-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": 3,
+        "outcome": "overcall",
+        "leave_one_out": "overcall"
+      },
+      {
+        "slide": "TCGA-DC-6154-01Z-00-DX1",
+        "pT": "T4a",
+        "predicted_level": 3,
+        "outcome": "correct",
+        "leave_one_out": "correct"
+      },
+      {
+        "slide": "TCGA-DY-A1DF-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": 1,
+        "outcome": "undercall",
+        "leave_one_out": "undercall"
+      },
+      {
+        "slide": "TCGA-F4-6808-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": null,
+        "outcome": "not_assessable",
+        "leave_one_out": "not_assessable"
+      },
+      {
+        "slide": "TCGA-F5-6464-01Z-00-DX1",
+        "pT": "T4b",
+        "predicted_level": 2,
+        "outcome": "undercall",
+        "leave_one_out": "undercall"
+      },
+      {
+        "slide": "TCGA-G4-6307-01Z-00-DX1",
+        "pT": "T3",
+        "predicted_level": 2,
+        "outcome": "undercall",
+        "leave_one_out": "undercall"
+      },
+      {
+        "slide": "TCGA-G4-6321-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": 1,
+        "outcome": "undercall",
+        "leave_one_out": "undercall"
+      },
+      {
+        "slide": "TCGA-G4-6323-01Z-00-DX1",
+        "pT": "Tis",
+        "predicted_level": 2,
+        "outcome": "overcall",
+        "leave_one_out": "overcall"
+      },
+      {
+        "slide": "TCGA-G4-6628-01Z-00-DX1",
+        "pT": "T2",
+        "predicted_level": 2,
+        "outcome": "correct",
+        "leave_one_out": "overcall"
+      },
+      {
+        "slide": "TCGA-G5-6641-01Z-00-DX1",
+        "pT": "T1",
+        "predicted_level": 3,
+        "outcome": "overcall",
+        "leave_one_out": "overcall"
+      }
+    ]
+  },
+  "serosa": {
+    "chosen": {
+      "SEROSA_NEEDS_WALL": true,
+      "SEROSA_MIN_RUN_UM": 2000,
+      "SEROSA_MAX_FROM_WALL_UM": 500
+    },
+    "on_all_slides": {
+      "flagged": 1,
+      "true_pT4_flagged": 0,
+      "false_alarms": 1,
+      "sensitivity": 0.0,
+      "specificity": 0.978,
+      "pT4_slides": 13,
+      "other_slides": 45
+    },
+    "leave_one_out": {
+      "flagged": 2,
+      "true_pT4_flagged": 0,
+      "false_alarms": 2,
+      "sensitivity": 0.0,
+      "specificity": 0.956,
+      "pT4_slides": 13,
+      "other_slides": 45
+    },
+    "current_values": {
+      "SEROSA_MIN_RUN_UM": 1000,
+      "SEROSA_NEEDS_WALL": true,
+      "SEROSA_MAX_FROM_WALL_UM": 500
+    },
+    "current_on_all_slides": {
+      "flagged": 2,
+      "true_pT4_flagged": 0,
+      "false_alarms": 2,
+      "sensitivity": 0.0,
+      "specificity": 0.956,
+      "pT4_slides": 13,
+      "other_slides": 45
+    }
+  }
+}

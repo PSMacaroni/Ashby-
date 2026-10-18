@@ -44,6 +44,23 @@ def is_background(colorful, tissue_label, max_colorful=BACKGROUND_MAX_COLORFUL):
     return (np.asarray(colorful) < max_colorful) & (np.asarray(tissue_label) != "fat")
 
 
+def quality_check(colorful, blur, tissue_label):
+    """
+    Per-tile quality check for a whole slide -> (background, blurry, blur_reference), boolean arrays + a number.
+    background = the colorless guard above OR glass (very flat and pale; cutoffs.GLASS_*).
+    blurry = blur score below cutoffs.BLUR_REL x this slide's typical sharpness (median blur of tiles with >= 50%
+    colorful pixels), so soft but readable scans aren't thrown away.
+    """
+    from src import cutoffs
+    colorful, blur = np.asarray(colorful, float), np.asarray(blur, float)
+    glass = (blur < cutoffs.GLASS_BLUR_MAX) & (colorful < cutoffs.GLASS_COLORFUL_MAX)
+    background = is_background(colorful, tissue_label) | glass
+    stained = colorful >= 0.5
+    reference = float(np.median(blur[stained] if stained.sum() >= 20 else blur)) if len(blur) else 0.0
+    blurry = (blur < cutoffs.BLUR_REL * reference) & ~background
+    return background, blurry, reference
+
+
 def load_immune(path):
     return joblib.load(path)
 

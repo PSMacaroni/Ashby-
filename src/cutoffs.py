@@ -18,8 +18,17 @@ LOW_CONFIDENCE = 0.5               # PLACEHOLDER: top probability below this = "
 TISSUE_MASK_SAT = 12               # measured: on our 5 TCGA slides the old rule (saturation > Otsu, 31-70) dropped
                                    #   pale real tissue (submucosa, loose stroma, fat); > 12 keeps it. Glass that
                                    #   slips in is removed per tile by the background guard (src/detectors.py)
-BLUR_MIN = 0.001                   # PLACEHOLDER: Laplacian variance below this = blurry (doc: pick by
-                                   #   looking at 20 tiles); used when tiling, see src/slides.py
+TISSUE_MASK_TEXTURE_SD = 4.0       # fat-aware mask: pale thumbnail pixels with local brightness changes (fat
+TISSUE_MASK_GRAY_MAX = 235         #   membranes / septa; glass is flat, local SD < 1) and not near-white,
+TISSUE_MASK_NEAR_PX = 40           #   within this many thumbnail px of stained tissue, also count as tissue.
+                                   #   Measured on DC-5337: the saturation rule alone dropped most of a large fat
+                                   #   region (pT3 fat contact was invisible); see docs/calibration.md (v2)
+GLASS_BLUR_MAX = 0.0003            # measured on 480k tiles from 58 slides: tiles this flat AND this pale are glass
+GLASS_COLORFUL_MAX = 0.30          #   (often tinted, so the < 10% colorful guard misses them; labeled necrosis).
+                                   #   Real fat almost never qualifies (18 of 12,401 fat tiles)
+BLUR_REL = 0.1                     # blurry = blur score < 10% of the slide's own typical sharpness (median blur of
+                                   #   its clearly stained tiles). A fixed cut-off failed: soft scans (AG-A025,
+                                   #   median 0.00027) have readable tissue far below sharp scans' junk
 ALT_OVERRULES = (("necrosis", "muscle"),)  # measured: where CONCH says necrosis and MUSK (alt_label) says muscle,
                                    #   the analysis uses muscle (src/tilemap.py). On CM-4746, 16 of 20 such tiles
                                    #   were plainly muscle, none necrosis; on labeled tests MUSK calls real
@@ -46,6 +55,18 @@ ARC_LENGTH_UM = 1000               # doc: score the front in arcs of about 1 mm
 ARC_NEIGHBOR_UM = 1500             # PLACEHOLDER: fingers/satellites this close to an arc count for it
 ARC_ROUGHNESS_INFILTRATIVE_UM = 60 # PLACEHOLDER: arcs rougher than this count as infiltrative
 RAY_MAX_UM = 2000                  # doc: look 2 mm ahead of the front ("what it is heading into")
+
+# --- Depth hint and serosa (CALIBRATE: scripts/calibrate_analysis.py tunes these against TCGA pT;
+#     values below are the starting guesses, replaced by calibration/ results when available) -------
+WALL_MUSCLE_MIN_MM2 = 2.0          # a muscle region at least this big = the muscle wall (muscularis propria),
+                                   #   not the thin muscularis mucosae or stray tiles
+WALL_FAT_MIN_MM2 = 0.5             # fat region at least this big = fat around the bowel
+DEPTH_CONTACT_MIN_TILES = 3        # raw tumor tiles touching the wall (or fat) needed to say "reaches"
+DEPTH_CONTACT_RADIUS_TILES = 1     # "touching" = within this many tiles
+SEROSA_MIN_RUN_UM = 1000           # calibration v1 (58 TCGA slides): false alarms 7 -> 1; tumor must lie on the outer edge this long
+SEROSA_NEEDS_WALL = True           # judge the outer edge only in sections that show the muscle wall or fat
+SEROSA_MAX_FROM_WALL_UM = 500      # calibration v1. The serosa lies outside the muscle wall: only tissue edges within this
+                                   #   distance of the wall or fat count as "outer" (not the luminal surface)
 
 # --- Depth, fat, mucin, necrosis ------------------------------------------------------------
 FAT_DEPTH_FLAG_UM = 5000           # doc / literature (rectal cancer, verify before a slide): >5 mm

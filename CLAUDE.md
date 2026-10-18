@@ -88,8 +88,9 @@ Made on Delta by the whole-slide pipeline (GPU):
   0-1; `features.immune()` uses it instead of P(lymphocytes) when present), `p_blood` (MUSK blood check, 0-1).
   `scripts/process_slide.py` writes `p_immune`, `p_blood`, `alt_label` (MUSK's tissue8), and also `colorful`
   (share of stained pixels), `blur` (Laplacian variance), `mask_coverage`; `qc_reason` is `background`
-  (src/detectors.is_background), `blood` (src/detectors.is_blood: p_blood >= cutoffs.BLOOD_PROB, not fat) or
-  `blur` (cutoffs.BLUR_MIN).
+  (src/detectors.quality_check: colorless and not fat, or glass), `blood` (src/detectors.is_blood: p_blood >=
+  cutoffs.BLOOD_PROB, not fat) or `blur` (src/detectors.quality_check: < cutoffs.BLUR_REL x the slide's typical
+  sharpness).
 - `embeddings.npy`: float32 [n_tiles, dim], rows in the same order as tiles.csv (CONCH 512, MUSK 1024)
 - `embeddings_musk.npy`: optional, MUSK embeddings [n_tiles, 1024] when embeddings.npy is CONCH's
 - `tiles/<row>_<col>.jpg`: optional 128 px tile previews for click-to-zoom
