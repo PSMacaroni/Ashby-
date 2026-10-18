@@ -3,8 +3,9 @@ Makes the DEMO slides in app/demo_data/ from the team's fake slides (src/fake_sl
 the team's analysis on them (src/analysis.py). So a demo slide has exactly the files a real slide
 will have: tiles.csv, phrase_scores.csv, summary.json, tile_analysis.csv and thumbnail.png.
 
-The one difference: the thumbnail is a painted, H&E-looking picture of the fake tissue (made here)
-instead of flat class colors. Every number in a demo slide is made up; the app marks them DEMO.
+The one difference: a demo slide has no real scan, so its "thumbnail" is a plain, neutral outline of
+the tissue (no fake H&E colors). Real slides show their real scan under the map. Every number in a
+demo slide is made up; the app marks them DEMO.
 
     python app/make_demo_data.py
 
@@ -23,6 +24,7 @@ DEMOS = {   # variant: (name on the card, date entered)
     "normal": ("Demo · normal colon wall", "2026-10-16"),
 }
 PX_PER_TILE = 10          # thumbnail pixels per tile
+DEMO_VERSION = 3          # bump to rebuild existing demo slides when this file changes
 GLASS = -1
 K = {c: i for i, c in enumerate(CLASSES)}
 
@@ -56,7 +58,7 @@ def make_demo(variant, out_dir):
     tiles, scores, meta, truth = make_fake_slide(variant)
     name, entered = DEMOS[variant]
     meta.update(slide_id=f"demo_{variant}", display_name=name, case_id="DEMO", processed_at=entered,
-                is_demo=True, thumbnail_downsample=LEVEL0_PER_TILE / PX_PER_TILE)
+                is_demo=True, demo_version=DEMO_VERSION, thumbnail_downsample=LEVEL0_PER_TILE / PX_PER_TILE)
     shape = tuple(meta["grid_shape"])
     tm = TileMap.from_dataframe(tiles, mpp=meta["mpp"], shape=shape)
     summary, tile_table = analyze(tm, phrase_grids(scores, shape), meta)
@@ -66,7 +68,7 @@ def make_demo(variant, out_dir):
     scores.to_csv(out_dir / "phrase_scores.csv", index=False)
     tile_table.to_csv(out_dir / "tile_analysis.csv", index=False)
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
-    paint_thumbnail(truth["label"], np.random.default_rng(1)).save(out_dir / "thumbnail.png")
+    outline_thumbnail(truth["label"], np.random.default_rng(1)).save(out_dir / "thumbnail.png")
     overview_figure(tm, summary, tile_table, out_dir / "analysis_overview.png")
     return summary
 
@@ -84,8 +86,21 @@ def overview_figure(tm, summary, tile_table, path):
         print(f"[demo] no analysis_overview.png: {type(e).__name__}: {e}")
 
 
+def outline_thumbnail(labels, rng):
+    """A plain stand-in for the scan: the tissue's outline in neutral gray on white glass, with soft
+    edges. No fake H&E colors, so nothing on a demo slide pretends to be a real scan."""
+    from scipy import ndimage
+
+    tissue = np.repeat(np.repeat(labels != GLASS, PX_PER_TILE, 0), PX_PER_TILE, 1).astype(float)
+    soft = ndimage.gaussian_filter(tissue, 3)
+    grain = ndimage.gaussian_filter(rng.normal(size=tissue.shape), 1.2) * 6
+    gray = 250 - soft * (26 + grain)
+    rgb = np.stack([gray, gray - 2 * soft, gray + 1 * soft], -1)
+    return Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8))
+
+
 def paint_thumbnail(labels, rng):
-    """A fake H&E-looking picture of the tissue, PX_PER_TILE x PX_PER_TILE pixels per tile."""
+    """(Not used any more) a painted, H&E-looking picture; kept for fake tile previews' colors."""
     from scipy import ndimage
 
     lab = np.repeat(np.repeat(labels, PX_PER_TILE, 0), PX_PER_TILE, 1)
@@ -172,8 +187,15 @@ def make_all():
 
 def ensure_demo_data():
     """Make the demo slides if they aren't there yet (first launch, or after an update)."""
-    if not all((DEMO_DIR / f"demo_{v}" / name).exists() for v in DEMOS
-               for name in ("tile_analysis.csv", "analysis_overview.png")):
+    def current(v):
+        folder = DEMO_DIR / f"demo_{v}"
+        try:
+            version = json.loads((folder / "summary.json").read_text(encoding="utf-8")).get("demo_version")
+        except (OSError, ValueError):
+            return False
+        return version == DEMO_VERSION and all((folder / n).exists() for n in ("tile_analysis.csv", "analysis_overview.png"))
+
+    if not all(current(v) for v in DEMOS):
         make_all()
 
 

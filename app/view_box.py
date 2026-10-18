@@ -82,6 +82,12 @@ def show():
             with col:
                 card(slide)
 
+    if not any(not s.is_demo for s in slides):
+        st.html('<div class="banner" style="margin-top:14px">Real slides: the pipeline’s first run on our 5 TCGA '
+                'slides (AA-3875, CM-4746, AA-3844, AH-6547, A6-3809; Delta job 22962239) saved its results on Delta '
+                'in data/results/. Copy those folders into data/results/ on this laptop and they appear here, with '
+                'the real scan under the map.</div>')
+
     if hidden:
         with st.expander(f"Removed from the box ({len(hidden)}): files are still on disk"):
             for s in hidden:

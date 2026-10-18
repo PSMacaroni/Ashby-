@@ -28,7 +28,8 @@ Open **http://127.0.0.1:8501** (use the number, not `localhost`: on some Windows
 it. Server settings and the look live in `app/.streamlit/config.toml`. Starting the server takes
 10-40 s on a slow laptop (loading Python libraries); after that pages load in about a second.
 
-The first start makes 3 demo slides in `app/demo_data/` (about a minute). To remake them:
+The first start makes 3 demo slides in `app/demo_data/` (about a minute). Demo slides have no real scan, so
+they show a plain gray outline of the tissue under the map; real slides show their real scan. To remake them:
 `python app/make_demo_data.py`.
 
 ## Screens
@@ -37,7 +38,7 @@ The first start makes 3 demo slides in `app/demo_data/` (about a minute). To rem
 |---|---|---|
 | 1 | **Slide Box** | A grid of slide cards (three per row). Hover a card for tumor % and flag count; click it to open. **⋯** opens its options: rename (and copy the details), export (PDF report, map picture, summary JSON, tiles CSV), duplicate, remove. Search and sort above the grid. |
 | — | **Model results** | Top bar → Model results: what our models scored in testing (tissue model 94.6% vs 81.1% untrained, nerve/vessel detector, immune detector, background guard), an accuracy table per test set, before/after confusion charts, and real tiles and slides from our tests. Figures are read from the repo's `reports/` and `docs/img/` when present, otherwise from `app/assets/results/` (copies, see `SOURCES.md`). |
-| 2 | **Slide** | Top: search this slide, and a switch between the **Live map** and the team's **Figure** (`analysis_overview.png`: tissue map, zones with the front and growth arrows, risk points, flags). Left: the map. Color it by **Tissue**, **Certainty**, **Risk** points or **Zones** (core / front band / peritumoral; Zones also shows arrows where the front is infiltrative and rings on tumor islands, from `border.arcs` and `satellites`). In Tissue mode the legend is clickable: pick a class to highlight it. Hover any square for a fixed-size info box; click it to open it in the panel. Scroll to zoom, drag to move, double-click (or the fit button) to reset. Right: the panel (below), with PDF and map-picture downloads at the bottom. |
+| 2 | **Slide** | Top: search this slide, and a switch between the **Live map** and the team's **Figure** (`analysis_overview.png`: tissue map, zones with the front and growth arrows, risk points, flags). Left: the map. The slide scan is underneath; a see-through colored layer sits on top (opacity slider, default 35%). Five views, colored exactly like the team's analysis figure: **Tissue**, **Zones** (core / front band / peritumoral / other tissue, the invasive front as a solid black line, blue arrows where the front is infiltrative, blue rings on tumor islands), **Risk** (points, white to dark red), **Flags** (the analysis's flag spots with the figure's marker shapes, unsure areas circled), **Certainty**. The main direction of invasion is a blue arrow (no o'clock label). In Tissue mode the legend is clickable: pick a class to highlight it. Hover any square for a fixed-size info box; click it to open it in the panel. Scroll to zoom, drag to move, double-click (or the fit button) to reset. Right: the panel (below), with PDF and map-picture downloads at the bottom. |
 
 Panel sections on Level 2:
 - **Summary**: flags to check, then the findings (growth, depth, direction, what the front faces, fat,
@@ -65,8 +66,11 @@ The app reads what the team's analysis writes: `summary.json` (every section has
 Optional side-model scores are shown when present: `p_nerve`, `p_vessel`, `p_artery`, `p_immune` (in
 `tiles.csv` or `structures.csv`), and `analysis_overview.png` (from `scripts/analyze_slide.py`).
 
-**Real slides: none exist yet.** The whole-slide pipeline (tile + embed + classify on Delta) is still
-to build. Once a folder lands in `data/results/`, it shows up in the Slide Box with no app changes.
+**Real slides:** the whole-slide pipeline (`scripts/process_slide.py`, branch `slide-pipeline`) ran on our 5 TCGA
+slides on Delta (job 22962239: AA-3875, CM-4746, AA-3844, AH-6547, A6-3809). Their folders are in `data/results/` on
+Delta (not in git). Copy them into `data/results/` here and they show up in the Slide Box with the real scan, real
+128 px tile pictures, pT/pN/stage, and the immune score, with no app changes. Tested for speed at that size
+(41,000 tiles): a map redraw takes ~0.4 s.
 
 ## Search in a slide
 

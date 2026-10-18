@@ -83,7 +83,7 @@ def map_area(slide, data):
                                         default="tissue", key=f"mode_{k}", label_visibility="collapsed") or "tissue"
             st.space("stretch")
             overlay = st.toggle("Overlay", value=True, key=f"overlay_{k}")
-            opacity = st.slider("Opacity", 0.15, 1.0, 0.55, 0.05, key=f"opacity_{k}", disabled=not overlay,
+            opacity = st.slider("Opacity", 0.1, 1.0, 0.35, 0.05, key=f"opacity_{k}", disabled=not overlay,
                                 label_visibility="collapsed", width=110)
             if st.button("", icon=":material/fit_screen:", key=f"reset_{k}", help="Show the whole slide"):
                 mem["zoom"] = None
@@ -100,11 +100,13 @@ def map_area(slide, data):
         st.html(f"<style>@media (max-width: 640px) {{ .st-key-mapcard [data-testid='stPlotlyChart'] {{"
                 f" max-height: calc((100vw - 4rem) * {ratio:.3f} + 8px); overflow: hidden; }} }}</style>")
         growth = tile_map.growth_layer(data.summary) if (mode == "zones" and overlay and not matching) else None
+        flags = tile_map.flag_layer(data.summary) if (mode == "flags" and overlay and not matching) else None
         fig = tile_map.figure(data, jpeg, selected=mem["selected"], markers=mem["markers"], zoom=mem["zoom"],
-                              arrow=mem["arrow"], uirevision=f"{k}-{mem['zoom_rev']}", height=height, growth=growth)
+                              arrow=mem["arrow"], uirevision=f"{k}-{mem['zoom_rev']}", height=height,
+                              growth=growth, flags=flags)
         event = st.plotly_chart(fig, key=f"map_{k}", on_select="rerun", selection_mode="points",
                                 config={"displayModeBar": False, "scrollZoom": True, "doubleClick": "reset"})
-        handle_click(event, k)
+        handle_click(event, k, data)
 
         if matching:
             ui.legend([("Weaker match", RISK_RAMP[1]), ("Stronger match", RISK_RAMP[-1])])
@@ -112,11 +114,7 @@ def map_area(slide, data):
         elif overlay and mode == "tissue":
             class_filter(data, k)
         elif overlay:
-            items = tile_map.legend_items(data, mode)
-            if growth and (growth[0] or growth[1]):
-                items += [("Arrows: infiltrative arcs (where the front pushes out)", THEME["accent"]),
-                          ("Rings: tumor islands", THEME["accent"])]
-            ui.legend(items)
+            ui.legend(tile_map.legend_items(data, mode))
         ui.note("Hover for details · click a spot to open it · scroll to zoom · drag to move · "
                 "double-click to reset")
 
@@ -133,7 +131,7 @@ def overview_figure(slide):
         ui.note("No analysis figure for this slide yet. Run: python scripts/analyze_slide.py " + str(slide.folder))
 
 
-def handle_click(event, k):
+def handle_click(event, k, data):
     """A click on the map: open that spot in the panel (needs a full rerun so the panel updates)."""
     mem = memory(k)
     try:
@@ -147,13 +145,9 @@ def handle_click(event, k):
     if sig == mem["last_click"]:
         return
     mem["last_click"] = sig
-    if p.get("curve_number") == 1:              # the tile layer: point order = tile order
-        idx = p.get("point_index", p.get("point_number"))
-    else:                                       # a pointer: its tile index is in customdata
-        idx = p.get("customdata")
-        while isinstance(idx, (list, tuple)):
-            idx = idx[0] if idx else None
-    if idx is not None and int(idx) >= 0:
+    idx = tile_map.clicked_tile(data, p.get("curve_number", -1), p.get("point_index", p.get("point_number")),
+                                p.get("customdata"))
+    if idx is not None:
         mem["selected"] = int(idx)
         mem["want_tab"] = "Spot"
         st.rerun()
@@ -276,7 +270,7 @@ def summary_tab(slide, data):
 
     vec, cen = get(s, "invasion.direction.vector_rc"), get(s, "tumor.centroid_rc")
     if vec and cen:
-        return (cen, vec, get(s, "invasion.direction.side", "front"))
+        return (cen, vec)               # drawn as an arrow only (no o'clock label)
     return None
 
 

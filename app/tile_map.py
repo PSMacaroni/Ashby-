@@ -1,7 +1,10 @@
 """
-The slide map: the colored overlay picture, the hover box, clickable points, markers and the
-legend. Map coordinates are in TILES: tile (row, col) covers x = col..col+1, y = row..row+1, and
-the thumbnail image is stretched to match.
+The slide map: the scan with a see-through colored layer on top, the hover box, clickable points,
+pointers and the legend. The layers and colors are the same as the team's analysis figure
+(src/viz.py): tissue map, zones + invasive front + growth arrows, risk points (Reds), flags.
+
+Map coordinates are in TILES: tile (row, col) covers x = col..col+1, y = row..row+1, and the
+slide thumbnail is stretched to match.
 """
 import base64
 import io
@@ -11,15 +14,15 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 import slide_data
-from common import (CERTAINTY, CLASS_COLORS, CLASSES, NAMES, NOT_ANALYZED, RISK_RAMP, THEME, ZONES,
-                    risk_color)
+from common import (CERTAINTY, CLASS_COLORS, CLASSES, FLAG_MARKERS, FRONT_COLOR, GROWTH_COLOR, NAMES, NOT_ANALYZED,
+                    REDS, RISK_RAMP, THEME, ZONES, risk_color)
 
-MODES = {"tissue": "Tissue", "certainty": "Certainty", "risk": "Risk", "zones": "Zones"}   # "match" = search
+MODES = {"tissue": "Tissue", "zones": "Zones", "risk": "Risk", "flags": "Flags", "certainty": "Certainty"}
 FAINT = 0.12          # how much of a class's color stays when another class is highlighted
 RULE = "─" * 30       # fixed-width line: keeps every hover box the same size
 NB = " "         # non-breaking space (normal spaces would be squeezed together)
 
-ZONE_SHORT = {"core": "Core", "front_band": "Front band", "peritumoral": "Peritumoral", "outside": "Outside", "": "—"}
+ZONE_SHORT = {"core": "Core", "front_band": "Front band", "peritumoral": "Peritumoral", "outside": "Other tissue", "": "—"}
 
 
 def hex_rgb(color):
@@ -30,23 +33,27 @@ def hex_rgb(color):
 # ---------------------------------------------------------------- overlay picture
 
 def tile_rgba(data, mode, focus=None, values=None):
-    """[rows, cols, 4] overlay colors for one coloring mode. focus = a class to highlight;
-    values = per-tile 0-1 match scores for the "match" mode."""
+    """[rows, cols, 4] overlay colors for one mode. focus = a class to highlight; values = per-tile
+    0-1 match scores for the "match" mode (search)."""
     g = data.geom
     out = np.zeros((g["rows"], g["cols"], 4), np.uint8)
     colors = np.zeros((len(data.rows), 4), np.uint8)
+    table = np.array([hex_rgb(CLASS_COLORS[c]) + (255,) for c in CLASSES], np.uint8)
     if mode == "tissue":
-        table = np.array([hex_rgb(CLASS_COLORS[c]) + (255,) for c in CLASSES], np.uint8)
         colors[:] = table[data.label]
         if focus in CLASSES:
             colors[data.label != CLASSES.index(focus), 3] = int(255 * FAINT)
+    elif mode == "flags":                               # pale tissue map under the flag markers
+        colors[:] = table[data.label]
+        colors[:, 3] = 110
     elif mode == "certainty":
         for level, color in CERTAINTY.items():
             if color:
                 colors[data.certainty == level] = hex_rgb(color) + (255,)
     elif mode == "risk":
-        for p in range(1, int(data.risk_points.max(initial=0)) + 1):
-            colors[data.risk_points == p] = hex_rgb(risk_color(p)) + (255,)
+        top = int(data.risk_points.max(initial=0))
+        for p in range(1, top + 1):
+            colors[data.risk_points == p] = hex_rgb(risk_color(p, top)) + (255,)
     elif mode == "match" and values is not None:
         ramp = np.array([hex_rgb(c) for c in RISK_RAMP], float)
         v = np.clip(np.asarray(values, float), 0, 1)
@@ -57,7 +64,8 @@ def tile_rgba(data, mode, focus=None, values=None):
     elif mode == "zones":
         for z, (_, color) in ZONES.items():
             colors[data.zone == z] = hex_rgb(color) + (255,)
-        colors[data.on_front] = (40, 14, 4, 255)
+        colors[data.zone == ""] = hex_rgb(ZONES["outside"][1]) + (255,)
+        colors[data.on_front] = hex_rgb(FRONT_COLOR) + (255,)
     colors[~data.ok] = hex_rgb(NOT_ANALYZED) + (255,)
     out[data.rows, data.cols] = colors
     return out
@@ -68,14 +76,15 @@ _pic_lock = threading.Lock()
 
 
 def _compose(slide, data, mode, opacity, show_overlay, focus, values=None, dark_glass=False):
+    """The slide scan with the see-through map layer blended on top."""
     g = data.geom
     thumb = slide_data.thumbnail(slide.folder)
     base = (thumb if thumb is not None else Image.new("RGB", (g["width"], g["height"]), (236, 236, 240))).convert("RGBA")
     size = (max(1, round(g["cols"] * g["step"])), max(1, round(g["rows"] * g["step"])))
     at = (round(g["x0"]), round(g["y0"]))
     if dark_glass:
-        # dim the empty glass around the tissue (where there are no tiles), so the tissue sits on the
-        # dark page like in a slide viewer. Tissue pixels are untouched (fat looks white too!)
+        # dim the empty glass around the tissue (no tiles there), so the scan sits on the dark page
+        # like in a slide viewer. Tissue pixels are untouched (fat looks white too)
         grid = ((data.index_grid >= 0) * 255).astype(np.uint8)
         tissue = Image.new("L", base.size, 0)
         tissue.paste(Image.fromarray(grid).resize(size, Image.NEAREST), at)
@@ -85,6 +94,8 @@ def _compose(slide, data, mode, opacity, show_overlay, focus, values=None, dark_
     if show_overlay:
         rgba = tile_rgba(data, mode, focus, values)
         rgba[..., 3] = (rgba[..., 3] * opacity).astype(np.uint8)
+        if mode == "zones":                              # the invasive front stays a solid line
+            rgba[data.rows[data.on_front], data.cols[data.on_front], 3] = 235
         layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
         layer.paste(Image.fromarray(rgba, "RGBA").resize(size, Image.NEAREST), at)
         base = Image.alpha_composite(base, layer)
@@ -92,13 +103,12 @@ def _compose(slide, data, mode, opacity, show_overlay, focus, values=None, dark_
 
 
 def map_image(slide, mode, opacity, show_overlay=True, focus=None, values=None):
-    """The thumbnail with the colored map blended on top (PIL image, white glass), for exports."""
+    """The scan with the map on top (PIL image, white glass), for exports."""
     return _compose(slide, slide_data.load(slide), mode, opacity, show_overlay, focus, values)
 
 
 def map_jpeg(slide, mode, opacity, show_overlay, focus, values=None, values_key=None):
-    """The picture for the interactive map (dark glass) as JPEG bytes; remembered per setting.
-    values: per-tile 0-1 scores for the "match" mode (search), named by values_key."""
+    """The picture for the interactive map (dark glass) as JPEG bytes; remembered per setting."""
     key = (str(slide.folder), slide_data.stamp(slide.folder), mode, round(opacity, 2), show_overlay, focus, values_key)
     with _pic_lock:
         if key not in _pictures:
@@ -122,65 +132,78 @@ def legend_items(data, mode):
         items = [(f"Check (score under 80%) · {(data.certainty == 'Check').sum() / n_ok:.0%}", CERTAINTY["Check"]),
                  (f"Unsure · {(data.certainty == 'Unsure').sum() / n_ok:.0%}", CERTAINTY["Unsure"])]
     elif mode == "risk":
-        top = int(data.risk_points.max(initial=0))
-        items = [(f"{p} point{'s' if p > 1 else ''}", risk_color(p)) for p in range(1, max(top, 1) + 1)]
-        if top >= len(RISK_RAMP):
-            items[-1] = (f"{len(RISK_RAMP)}+ points", RISK_RAMP[-1])
+        top = max(4, int(data.risk_points.max(initial=0)))
+        items = [(f"{p} point{'s' if p > 1 else ''}", risk_color(p, top)) for p in range(1, top + 1)]
+    elif mode == "flags":
+        items = [(name.replace("_", " ").capitalize(), color) for name, (_, color) in FLAG_MARKERS.items()]
+        items.append(("Unsure area", "#7D8590"))
     else:
-        items = [(name, color) for name, color in ZONES.values()] + [("Invasive front edge", "#280E04")]
+        items = [(name, color) for name, color in ZONES.values()] + [("Invasive front", FRONT_COLOR),
+                                                                     ("Growth arrows, tumor islands", GROWTH_COLOR)]
     if (~ok).any():
         items.append((f"Not analyzed · {int((~ok).sum())}", NOT_ANALYZED))
     return items
 
 
-# ---------------------------------------------------------------- hover box
+# ---------------------------------------------------------------- hover box (grouped = fast)
 
-_hover = {}
-
-
-def hover_data(data):
-    """Per tile: [class, score, certainty, 2nd model, zone, risk] as a numpy text array (fast to send)."""
-    key = id(data)
-    if key not in _hover:
-        n = len(data.rows)
-        why_unsure = np.where(data.has_alt & (data.alt >= 0) & (data.alt != data.label), "models split", "low score")
-        cert = np.where(data.certainty == "Unsure", np.char.add("Unsure · ", why_unsure.astype(str)),
-                        np.where(data.certainty == "Check", "Check", data.certainty)).astype(object)
-        names = np.array([NAMES[c] for c in CLASSES], dtype=object)
-        cls = names[data.label]
-        score = np.char.add((np.round(data.conf * 100).astype(int)).astype(str), "%").astype(object)
-        if data.has_alt:
-            alt_names = np.append(names, "—")[data.alt]       # -1 -> "—"
-            second = np.where(data.alt == data.label, "Agrees", np.char.add("Says ", alt_names.astype(str))).astype(object)
-        else:
-            second = np.full(n, "—", dtype=object)
-        zone = np.array([ZONE_SHORT.get(z, z) for z in data.zone], dtype=object)
-        zone[data.on_front] = "Front edge"
-        unit = np.where(data.risk_points == 1, " point", " points")
-        risk = np.where(data.risk_points > 0, np.char.add(data.risk_points.astype(str), unit), "—").astype(object)
-        reason = data.tiles["qc_reason"].to_numpy(dtype=object)
-        bad = ~data.ok
-        cls[bad], score[bad] = "Not analyzed", ""
-        cert[bad] = np.char.add("Skipped · ", reason[bad].astype(str)) if bad.any() else cert[bad]
-        second[bad] = zone[bad] = risk[bad] = "—"
-        _hover[key] = np.stack([cls, score, cert, second, zone, risk], axis=1).astype(str)
-    return _hover[key]
+_groups = {}
 
 
 def label(text):
     return (text + NB * 11)[:11]
 
 
-HOVER_TEMPLATE = (
-    "<b>%{customdata[0]}</b>" + NB * 2 + "%{customdata[1]}<br>"
-    f"<span style='color:#545C68'>{RULE}</span><br>"
-    + label("Certainty") + "%{customdata[2]}<br>"
-    + label("2nd model") + "%{customdata[3]}<br>"
-    + label("Zone") + "%{customdata[4]}<br>"
-    + label("Risk") + "%{customdata[5]}<br>"
-    f"<span style='color:#545C68'>{RULE}</span><br>"
-    f"<span style='color:{THEME['muted']}'>Click for details</span><extra></extra>"
-)
+def hover_groups(data):
+    """
+    Squares grouped by everything their hover box SAYS (class, certainty, second model, zone).
+    Each group becomes one map layer whose words are written once; per square only two small numbers
+    go to the browser (score %, risk points). On a 34,000-tile slide that is ~5x less to send than
+    one text box per square. Returns [(texts, tile indices)], in drawing order.
+    """
+    key = id(data)
+    if key not in _groups:
+        why_unsure = np.where(data.has_alt & (data.alt >= 0) & (data.alt != data.label), "models split", "low score")
+        cert = np.where(data.certainty == "Unsure", np.char.add("Unsure · ", why_unsure.astype(str)),
+                        data.certainty.astype(str)).astype(object)
+        names = np.array([NAMES[c] for c in CLASSES], dtype=object)
+        cls = names[data.label]
+        if data.has_alt:
+            alt_names = np.append(names, "—")[data.alt]
+            second = np.where(data.alt == data.label, "Agrees", np.char.add("Says ", alt_names.astype(str))).astype(object)
+        else:
+            second = np.full(len(data.rows), "—", dtype=object)
+        zone = np.array([ZONE_SHORT.get(z, z) for z in data.zone], dtype=object)
+        zone[data.on_front] = "Invasive front"
+        bad = ~data.ok
+        reason = data.tiles["qc_reason"].to_numpy(dtype=object)
+        cls[bad] = "Not analyzed"
+        cert[bad] = np.array([f"Skipped · {r}" for r in reason[bad]], dtype=object)
+        second[bad] = zone[bad] = "—"
+        keys = np.array([f"{a}\x1f{b}\x1f{c}\x1f{d}" for a, b, c, d in zip(cls, cert, second, zone)])
+        uniq, inverse = np.unique(keys, return_inverse=True)
+        _groups[key] = [(tuple(k.split("\x1f")), np.flatnonzero(inverse == i)) for i, k in enumerate(uniq)]
+    return _groups[key]
+
+
+def group_template(texts):
+    cls, cert, second, zone = texts
+    score = "" if cls == "Not analyzed" else NB * 2 + "%{customdata[0]}%"
+    return (f"<b>{cls}</b>{score}<br><span style='color:#545C68'>{RULE}</span><br>"
+            + label("Certainty") + f"{cert}<br>" + label("2nd model") + f"{second}<br>"
+            + label("Zone") + f"{zone}<br>" + label("Risk pts") + "%{customdata[1]}<br>"
+            f"<span style='color:#545C68'>{RULE}</span><br>"
+            f"<span style='color:{THEME['muted']}'>Click for details</span><extra></extra>")
+
+
+def clicked_tile(data, curve, point_index, customdata):
+    """Which tile a click hit: curves 1..N are the hover groups; later curves carry the index."""
+    groups = hover_groups(data)
+    if 1 <= curve <= len(groups) and point_index is not None:
+        return int(groups[curve - 1][1][int(point_index)])
+    while isinstance(customdata, (list, tuple)):
+        customdata = customdata[0] if customdata else None
+    return int(customdata) if customdata is not None and int(customdata) >= 0 else None
 
 
 # ---------------------------------------------------------------- the figure
@@ -193,11 +216,21 @@ def growth_layer(summary):
     return arcs, sats
 
 
-def figure(data, jpeg, selected=None, markers=(), zoom=None, arrow=None, uirevision="map", height=600, growth=None):
+def flag_layer(summary):
+    """Flag spots and unsure areas from the analysis, drawn like the team's figure."""
+    spots = [(f["key"], f["title"], c) for f in summary.get("flags") or [] if f.get("status") == "ok"
+             for c in f.get("candidates", [])]
+    unsure = (summary.get("uncertainty") or {}).get("regions", [])
+    return spots, unsure
+
+
+def figure(data, jpeg, selected=None, markers=(), zoom=None, arrow=None, uirevision="map", height=600,
+           growth=None, flags=None):
     """
-    The interactive map (plotly). Hover: the fixed-size box above. Click: Streamlit returns the
-    clicked point; on the tile layer (curve 1) its point_index is the tile's index. markers: [{"r", "c", "label", "color", "hover"}] pointers.
-    zoom: [r0, c0, r1, c1] tiles to show (None = whole slide). arrow: ((r, c), (dr, dc), text).
+    The interactive map (plotly). Hover: the fixed-size box. Click: see clicked_tile().
+    markers: [{"r", "c", "label", "color", "hover"}] pointers. zoom: [r0, c0, r1, c1] tiles to
+    show (None = whole slide). arrow: ((r, c), (dr, dc)) the main direction of invasion.
+    growth: growth_layer(); flags: flag_layer().
     """
     import plotly.graph_objects as go
 
@@ -206,11 +239,51 @@ def figure(data, jpeg, selected=None, markers=(), zoom=None, arrow=None, uirevis
     uri = "data:image/jpeg;base64," + base64.b64encode(jpeg).decode()
     fig = go.Figure(go.Image(source=uri, x0=(0.5 - X0) / S, y0=(0.5 - Y0) / S, dx=1 / S, dy=1 / S,
                              hoverinfo="skip"))
-    fig.add_trace(go.Scattergl(
-        x=data.cols + 0.5, y=data.rows + 0.5, mode="markers", customdata=hover_data(data),
-        hovertemplate=HOVER_TEMPLATE, showlegend=False, name="",
-        marker=dict(size=max(6.0, 600 / max(g["cols"], g["rows"])), color="#000", opacity=0),
-        selected=dict(marker=dict(opacity=0)), unselected=dict(marker=dict(opacity=0))))
+    size = max(6.0, 600 / max(g["cols"], g["rows"]))
+    numbers = np.stack([np.round(data.conf * 100), data.risk_points], axis=1).astype(np.uint8)
+    for texts, idx in hover_groups(data):           # curves 1..N: the hover layers
+        fig.add_trace(go.Scattergl(
+            x=(data.cols[idx] + 0.5).astype(np.float32), y=(data.rows[idx] + 0.5).astype(np.float32),
+            customdata=numbers[idx], hovertemplate=group_template(texts), mode="markers", showlegend=False,
+            name="", marker=dict(size=size, color="#000", opacity=0),
+            selected=dict(marker=dict(opacity=0)), unselected=dict(marker=dict(opacity=0))))
+
+    if growth:
+        arcs, sats = growth
+        reach = max(g["rows"], g["cols"]) * 0.07
+        for a in arcs:
+            (r, c), (dr, dc) = a["center_rc"], a["normal_rc"]
+            fig.add_annotation(x=c + 0.5 + dc * reach, y=r + 0.5 + dr * reach, ax=c + 0.5, ay=r + 0.5,
+                               axref="x", ayref="y", showarrow=True, arrowhead=2, arrowsize=1, arrowwidth=2.4,
+                               arrowcolor=GROWTH_COLOR, text="")
+        if sats:
+            fig.add_trace(go.Scatter(
+                x=[p["col"] + 0.5 for p in sats], y=[p["row"] + 0.5 for p in sats], mode="markers",
+                marker=dict(symbol="circle-open", size=18, color=GROWTH_COLOR, line=dict(width=2)),
+                hovertemplate="%{text}<extra></extra>", showlegend=False, name="",
+                text=[f"Tumor island · {p.get('diameter_um', '?')} µm across · {p.get('distance_to_main_um', '?')} µm "
+                      f"from the main tumor · in {p.get('sits_in', '?')}"
+                      + (" · possible deposit" if p.get("possible_deposit") else "") for p in sats],
+                customdata=[[-1] for _ in sats]))
+
+    if flags:
+        spots, unsure = flags
+        for key in dict.fromkeys(k for k, _, _ in spots):
+            symbol, color = FLAG_MARKERS.get(key, ("circle", "#000000"))
+            mine = [(t, c) for k, t, c in spots if k == key]
+            fig.add_trace(go.Scatter(
+                x=[c["col"] + 0.5 for _, c in mine], y=[c["row"] + 0.5 for _, c in mine], mode="markers",
+                marker=dict(symbol=symbol, size=11, color=color, line=dict(width=1, color="#FFFFFF")),
+                hovertemplate="%{text}<extra></extra>", showlegend=False, name="",
+                text=[f"{t}{' (strong)' if c.get('strong') else ''}: {c.get('why', '')}" for t, c in mine],
+                customdata=[[int(data.index_grid[c["row"], c["col"]])] for _, c in mine]))
+        if unsure:
+            fig.add_trace(go.Scatter(
+                x=[u["col"] + 0.5 for u in unsure], y=[u["row"] + 0.5 for u in unsure], mode="markers",
+                marker=dict(symbol="circle-open", size=24, color="#7D8590", line=dict(width=2.5)),
+                hovertemplate="%{text}<extra></extra>", showlegend=False, name="",
+                text=[f"Unsure area · {u['n_tiles']} squares · {u.get('why', '')}" for u in unsure],
+                customdata=[[-1] for _ in unsure]))
 
     if markers:
         idx = [int(data.index_grid[m["r"], m["c"]]) if 0 <= m["r"] < g["rows"] and 0 <= m["c"] < g["cols"]
@@ -228,33 +301,12 @@ def figure(data, jpeg, selected=None, markers=(), zoom=None, arrow=None, uirevis
                                bgcolor=THEME["surface"], bordercolor=m["color"], borderwidth=1.5, borderpad=3,
                                font=dict(color=THEME["text"], size=12))
 
-    if growth:
-        arcs, sats = growth
-        reach = max(g["rows"], g["cols"]) * 0.07
-        for a in arcs:
-            (r, c), (dr, dc) = a["center_rc"], a["normal_rc"]
-            fig.add_annotation(x=c + 0.5 + dc * reach, y=r + 0.5 + dr * reach, ax=c + 0.5, ay=r + 0.5,
-                               axref="x", ayref="y", showarrow=True, arrowhead=2, arrowsize=1, arrowwidth=2.2,
-                               arrowcolor=THEME["accent"], text="",
-                               hovertext=f"Infiltrative arc · faces {a.get('clock', '?')} o'clock · roughness "
-                                         f"{a.get('roughness_um', '?')} µm")
-        if sats:
-            fig.add_trace(go.Scatter(
-                x=[p["col"] + 0.5 for p in sats], y=[p["row"] + 0.5 for p in sats], mode="markers",
-                marker=dict(symbol="circle-open", size=18, color=THEME["accent"], line=dict(width=2)),
-                hovertemplate="%{text}<extra></extra>", showlegend=False, name="",
-                text=[f"Tumor island · {p.get('diameter_um', '?')} µm · {p.get('distance_to_main_um', '?')} µm from the "
-                      f"main tumor · in {p.get('sits_in', '?')}" + (" · possible deposit" if p.get("possible_deposit") else "")
-                      for p in sats],
-                customdata=[[-1] for _ in sats]))
-
-    if arrow:
-        (r, c), (dr, dc), text = arrow
+    if arrow:                                       # main direction of invasion: just the arrow
+        (r, c), (dr, dc) = arrow
         length = max(g["rows"], g["cols"]) * 0.16
         fig.add_annotation(x=c + 0.5 + dc * length, y=r + 0.5 + dr * length, ax=c + 0.5, ay=r + 0.5,
-                           axref="x", ayref="y", showarrow=True, arrowhead=2, arrowsize=1.2, arrowwidth=2.5,
-                           arrowcolor=THEME["bg"], text=text, font=dict(color=THEME["text"], size=12),
-                           bgcolor="rgba(11,13,16,0.85)", borderpad=4)
+                           axref="x", ayref="y", showarrow=True, arrowhead=2, arrowsize=1.2, arrowwidth=3,
+                           arrowcolor=GROWTH_COLOR, text="")
 
     if selected is not None:
         r, c = int(data.rows[selected]), int(data.cols[selected])
@@ -284,9 +336,10 @@ def zoom_box(r, c, data, half=12):
 
 
 def neighborhood(slide, data, i, radius=6, scale=4):
-    """A zoomed crop of the thumbnail around tile i, with that tile outlined."""
+    """A zoomed crop of the scan around tile i, with that tile outlined."""
     g = data.geom
-    thumb = slide_data.thumbnail(slide.folder) or Image.new("RGB", (g["width"], g["height"]), (236, 236, 240))
+    thumb = slide_data.thumbnail(slide.folder)
+    thumb = thumb if thumb is not None else Image.new("RGB", (g["width"], g["height"]), (236, 236, 240))
     x, y = g["x0"] + data.cols[i] * g["step"], g["y0"] + data.rows[i] * g["step"]
     pad = radius * g["step"]
     box = [max(0, x - pad), max(0, y - pad), min(thumb.width, x + g["step"] + pad), min(thumb.height, y + g["step"] + pad)]

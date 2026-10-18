@@ -52,15 +52,26 @@ KNOWN_MIXUPS = {
 }
 
 # ---- map overlay colors (beyond the tissue classes) -----------------------------------------
-# Risk points: one hue, light -> dark (more points = darker). Index = points, capped at the end.
+# Same colors as the team's analysis figure (src/viz.py overview_figure), so the live map and the
+# figure read the same way.
+# Risk points: matplotlib "Reds" (white -> dark red), scaled 0..max(4, highest points) like the figure
+REDS = ["#FFF5F0", "#FEE0D2", "#FCBBA1", "#FC9272", "#FB6A4A", "#EF3B2C", "#CB181D", "#A50F15", "#67000D"]
+# Search match: one blue scale (more = darker), so it never looks like risk
 RISK_RAMP = ["#B7D3F6", "#86B6EF", "#5598E7", "#2A78D6", "#1C5CAB", "#104281"]
-# Zones around the invasive front: ordered, so one hue from dark (core) to light (outside)
+# Zones around the invasive front (figure: core dark red, front band orange, peritumoral peach,
+# other tissue light gray, the front itself black)
 ZONES = {
-    "core": ("Tumor core", "#B4471B"),
-    "front_band": ("Invasive front band", "#E8753E"),
-    "peritumoral": ("Peritumoral (0.5-2 mm)", "#F4B48F"),
-    "outside": ("Further out", "#FBE3D3"),
+    "core": ("Tumor core", "#8C0000"),
+    "front_band": ("Invasive front band (±0.5 mm)", "#FF734D"),
+    "peritumoral": ("Peritumoral (0.5-2 mm)", "#FFD9B3"),
+    "outside": ("Other tissue", "#D9D9D9"),
 }
+FRONT_COLOR = "#000000"
+GROWTH_COLOR = "#1F5BFF"         # the figure's blue arrows / circles
+# Flag markers: (plotly symbol, color), from src/viz.py FLAG_MARKERS
+FLAG_MARKERS = {"perineural": ("triangle-up", "#000000"), "venous": ("square", "#6A3D9A"),
+                "lymphatic": ("diamond", "#FF7F00"), "budding": ("star", "#B15928"),
+                "stroma_maturity": ("x", "#666666"), "adenoma": ("cross", "#33A02C")}
 # Certainty: only the doubtful tiles get a color, so they stand out
 CERTAINTY = {"Sure": None, "Check": "#E8B341", "Unsure": "#E5534B"}
 NOT_ANALYZED = "#8B929C"
@@ -68,8 +79,12 @@ NOT_ANALYZED = "#8B929C"
 HIGH_CONF = 0.80          # top score at or above this (and no flags) = "Sure"
 
 
-def risk_color(points):
-    return RISK_RAMP[min(int(points), len(RISK_RAMP)) - 1] if points else None
+def risk_color(points, top=4):
+    """Reds color for a number of risk points, on a 0..max(4, top) scale (like the team's figure)."""
+    if not points:
+        return None
+    frac = min(1.0, float(points) / max(4, top))
+    return REDS[min(len(REDS) - 1, int(round(frac * (len(REDS) - 1))))]
 
 
 def pct(x, digits=0):
