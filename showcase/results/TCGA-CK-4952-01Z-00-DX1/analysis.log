@@ -1,0 +1,25 @@
+
+== TCGA-CK-4952-01Z-00-DX1: 14652 tissue tiles
+Tumor: 33% of the section, 65.35 mm2
+Growth: Infiltrative: solidity 0.66, 5 finger protrusions, 2 satellites within 1.0 mm.
+Depth:  Tumor reaches the muscle wall (muscularis propria): consistent with at least pT2.
+Direction: Front most infiltrative toward 3 o'clock (on the slide image), where 1 of 2 satellites lie.
+Ahead:  Facing stroma 35%, mucus 32%, muscle 13%.
+Fat:    Tumor doesn't touch fat.
+Stroma: Stroma-high: 93% stroma in the worst field (marked).
+Necrosis: Central necrosis, 0% of tumor area. Likely low-oxygen rim next to it: 0% of tumor tiles.
+Mucin:  20% of the tumor (with the mucin pools attached to it) is mucin: check for mucinous features (on TCGA slides at this level, about half were diagnosed mucinous).
+Immune: Lymphocyte score: core 0.06, front 0.10, outside 0.10: lymphocytes reach inside the tumor (inflamed-like). H&E shows where lymphocytes sit, not their type (no CD8/CD4) or what they're doing.
+Edge:   Tumor within 0.0 mm of the outer tissue edge.
+Unsure: Unsure on 32% of tissue tiles. Largest unsure area: 1436 tiles (low confidence).
+Flag:   Possible perineural invasion: 5 spot(s), 0 strong [text phrase only (less reliable)]
+Flag:   Possible venous invasion: 4 spot(s), 0 strong [shape rule + text phrase only (less reliable)]
+Flag:   Possible lymphatic invasion: 5 spot(s), 0 strong [text phrase only (less reliable)]
+Flag:   Budding hotspot: count buds here: 1 spot(s), 0 strong [text phrase only (less reliable)]
+Flag:   Stroma at the front (experimental): 5 spot(s), 0 strong [text phrase only (less reliable)]
+Flag:   Possible leftover adenoma: 5 spot(s), 0 strong [text phrase only (less reliable)]
+High-risk list:
+  - Infiltrative front (Infiltrative: solidity 0.66, 5 finger protrusions, 2 satellites within 1.0 mm.)
+  - Stroma-high: 93% stroma in the worst field (marked).
+
+wrote /projects/bfqi/hjeong6/showcase_v1/TCGA-CK-4952-01Z-00-DX1/summary.json, /projects/bfqi/hjeong6/showcase_v1/TCGA-CK-4952-01Z-00-DX1/tile_analysis.csv
