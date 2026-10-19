@@ -1,0 +1,21 @@
+id,slide,main_tumor,front,pattern_tool,direction,sat_is_tumor,sat_truly_separate,note
+1,F5-6464,mostly,mostly,infiltrative,"yes (up, toward the muscle)",1/2,1/2,main tumor now covers the lower and central tumor; front along its upper (deep) side; islands up in the muscle remain (real infiltration >0.5 mm away); S2 is surface epithelium
+2,CM-5868,partly,partly,infiltrative,"yes (3 o'clock, toward the deep tumor in the fat)",-,-,"still two parts (left mass vs tumor out in the fat, >0.5 mm apart across muscle and fat); the false edge satellite is gone; arrow now points to the deep part"
+3,AA-3877,partly,partly,infiltrative,unclear,1/1,0/1,polyp fronds: joining makes a ragged outline (solidity 0.50) so still 'infiltrative' (wrong for a polyp); the left fronds stay separate
+4,AZ-6606,partly,mostly,infiltrative,yes (down into the wall),4/4,3/4,"main = top band, lower tumor still separate; satellites are now infiltrating gland clusters 0.5-1 mm ahead of the front in stroma, which is what the feature means"
+5,F4-6808,yes,yes,infiltrative,"yes (up, toward the submucosa)",-,-,both tumor lobes now one main tumor; ink satellites gone; front on the tumor/stroma side; pattern still 'infiltrative' because the joined outline has a deep notch (solidity 0.66); 'necrosis' along the ink line remains
+6,AY-4071,yes,"yes (none, correct)",not_assessable,can't judge (correct),-,-,"the two halves across the tear are one tumor now; no front, pattern and direction say 'can't judge'"
+7,AF-4110,"partly (other fragment separate, correct: glass between)",yes (can't judge),not_assessable,can't judge (correct),-,-,"two tumor-only fragments separated by glass stay separate (right); 1.5 mm of front, below the 2 mm minimum, so 'can't judge'"
+8,AA-A00W,yes,"yes (none, correct)",not_assessable,can't judge (correct),-,-,polyp with no invasive front: now 'can't judge' instead of 'pushing' (more honest)
+9,AG-3878,yes,yes,pushing,yes (toward the stroma),-,-,unchanged and still right
+10,F5-6813,yes,mostly,infiltrative,"partly (8 o'clock, lower left)",1/1,1/1,"front now mostly on the tumor's outer border, fewer lines inside it; the ink 'satellite' is gone; one satellite left, tumor glands in stroma"
+11,D5-6540,yes,partly,infiltrative,no (4 o'clock; the deep side is up),1/1,0/1,"front only in short pieces; arrow now lower right, away from the muscle wall; the satellite is the tumor's own left edge across a mucus gap"
+12,DC-6156,mostly,mostly,infiltrative,"yes (up, toward the fat)",2/2,2/2,"main tumor bigger, islands ~40 -> ~6; both satellites are tumor glands infiltrating the muscle ahead of the front, which is what the feature means"
+13,AZ-4614,yes,yes,infiltrative,unclear,1/1,1/1,"whole tumor outlined, front on its stroma/muscle border; satellites 4 -> 1 (a tumor cluster near the top edge)"
+14,AA-3864,yes,yes (can't judge),not_assessable,can't judge (correct),-,-,0.7 mm of front: pattern and direction now 'can't judge' instead of an arrow into glass; satellite gone
+15,AG-A02G,yes,yes (can't judge),not_assessable,can't judge (correct),-,-,tumor-only piece: 'can't judge' instead of 'pushing'
+16,AA-3522,yes,yes (can't judge),not_assessable,can't judge (correct),-,-,"tumor-only piece: 0.4 mm of front, 'can't judge' instead of 'infiltrative'"
+17,AA-3875,yes,mostly,infiltrative,can't judge,-,-,fixed: the invasive part in the submucosa is now inside the main tumor and the front sits on its tumor/stroma borders (before: a tear in the wrong fragment); the direction says can't judge because those fronts are inside the outline
+18,CM-4746,yes,yes,infiltrative,partly (4 o'clock; the wall is straight down),0/1,0/1,"front still right; satellites 4 -> 1, and that one is normal crypts mislabeled tumor"
+19,A6-6138,partly,partly,infiltrative,unclear,-,-,still analyzes the patchiest of three serial copies; little change (fingers 10 -> 7)
+20,CA-5796,no,,not_assessable,can't judge,0/1,0/1,"not fixed: joining scattered false tumor tiles in normal mucosa makes a 'main tumor' above the 1 mm2 minimum; pattern now 'can't judge', but its depth hint still rests on false tumor; the remaining satellite is normal mucosa"

@@ -13,7 +13,7 @@ from collections import Counter
 
 import numpy as np
 from scipy import ndimage
-from skimage import measure
+from skimage import measure, morphology
 
 from src import cutoffs
 from src.front import (BORDER_FRONT, BORDER_MUCOSA, ZONE_CORE, ZONE_FRONT, ZONE_PERI, dilate, disk,
@@ -74,30 +74,25 @@ def tissue_fractions(tm):
 
 
 def uncertainty(tm):
-    """Where the model is unsure: low top probability, or two models disagree (if alt_label exists)."""
+    """
+    Where the model is unsure: top probability below cutoffs.LOW_CONFIDENCE. A second model's label (alt_label) is
+    not used: CONCH/MUSK disagreement marked 20-28% of the tissue on 125 TCGA slides, mostly MUSK over-calling necrosis.
+    """
     low = tm.tissue & (tm.confidence < cutoffs.LOW_CONFIDENCE)
-    alt = tm.extra.get("alt_label")
-    disagree = (tm.tissue & (alt >= 0) & (alt != tm.raw_label)) if alt is not None else np.zeros(tm.shape, bool)
-    unsure = low | disagree
+    unsure = low
 
     regions = []
     lab = measure.label(unsure, connectivity=2)
     for p in sorted(measure.regionprops(lab), key=lambda p: -p.area)[:3]:
-        m = lab == p.label
         r, c = center_tile(p.coords)
-        why = []
-        if (m & low).any():
-            why.append("low confidence")
-        if (m & disagree).any():
-            why.append("CONCH and MUSK disagree")
-        regions.append({**tm.tile_ref(r, c), "n_tiles": int(p.area), "why": " + ".join(why)})
+        regions.append({**tm.tile_ref(r, c), "n_tiles": int(p.area), "why": "low confidence"})
 
     frac = unsure.sum() / max(tm.tissue.sum(), 1)
     text = f"Unsure on {frac:.0%} of tissue tiles."
     if regions:
         text += f" Largest unsure area: {regions[0]['n_tiles']} tiles ({regions[0]['why']})."
-    return {"fraction_unsure": rnd(frac), "fraction_low_confidence": rnd(low.sum() / max(tm.tissue.sum(), 1)),
-            "fraction_models_disagree": rnd(disagree.sum() / max(tm.tissue.sum(), 1)) if alt is not None else None,
+    return {"fraction_unsure": rnd(frac), "fraction_low_confidence": rnd(frac),
+            "fraction_models_disagree": None,                   # kept for older readers; no longer used
             "regions": regions, "text": text}, unsure
 
 
@@ -136,7 +131,8 @@ def tumor_summary(tm, fr):
 
 def tumor_pieces(tm, fr, node_mask):
     """Every tumor piece that isn't the main tumor: satellites, possible deposits, node metastases."""
-    dist_to_main = ndimage.distance_transform_edt(~fr.main_filled) * tm.tile_um
+    dist_tiles, nearest_main = ndimage.distance_transform_edt(~fr.main_filled, return_indices=True)
+    dist_to_main = dist_tiles * tm.tile_um
     front = fr.border_type == BORDER_FRONT
     near_front = None
     if front.any():
@@ -150,6 +146,7 @@ def tumor_pieces(tm, fr, node_mask):
         mix = class_mix(tm, ring_of(m, tm))
         r, c = center_tile(p.coords)
         gap = max(0.0, float(dist_to_main[m].min()) - tm.tile_um)   # roughly edge to edge
+        through_tissue = tissue_between(tm, (r, c), (nearest_main[0][r, c], nearest_main[1][r, c]))
         in_node = bool((m & node_mask).any())
         direction = None
         if near_front is not None:
@@ -163,12 +160,21 @@ def tumor_pieces(tm, fr, node_mask):
             "distance_to_main_um": round(gap),
             "sits_in": max(mix, key=mix.get) if any(mix.values()) else "unknown",
             "fat_fraction_around": rnd(mix["fat"], 2),
-            "satellite": gap <= cutoffs.SATELLITE_MAX_UM,
+            "tissue_between": rnd(through_tissue, 2),
+            "satellite": gap <= cutoffs.SATELLITE_MAX_UM and through_tissue >= cutoffs.SATELLITE_MIN_TISSUE,
             "possible_deposit": mix["fat"] >= cutoffs.DEPOSIT_RING_FAT and not in_node,
             "in_lymph_node": in_node,
             "bearing_deg": rnd(direction, 1),
         })
     return pieces
+
+
+def tissue_between(tm, a, b, samples=32):
+    """Share of the straight line from tile a to tile b that runs through tissue (not glass, a tear or a gap)."""
+    t = np.linspace(0, 1, samples)
+    rr = np.rint(a[0] + (b[0] - a[0]) * t).astype(int)
+    cc = np.rint(a[1] + (b[1] - a[1]) * t).astype(int)
+    return float(tm.tissue[rr, cc].mean())
 
 
 # --- growth pattern -------------------------------------------------------------------------
@@ -298,12 +304,17 @@ def growth_pattern(tm, fr, pieces):
     satellites = [p for p in pieces if p["satellite"]]
     arcs, arc_masks = front_arcs(tm, fr, contour, deviation, is_front_pt, fingers, pieces)
 
-    # plain rule over the measures (always shown with the numbers behind it); cutoffs are placeholders
+    # plain rule over the measures (always shown with the numbers behind it); cutoffs set by eye, see src/cutoffs.py
     protrusions = len(fingers) + len(satellites)
     infiltrative = solidity < cutoffs.SOLIDITY_INFILTRATIVE or protrusions >= cutoffs.INFILTRATIVE_MIN_PROTRUSIONS
     pattern = "infiltrative" if infiltrative else "pushing"
     text = (f"{pattern.capitalize()}: solidity {solidity:.2f}, {len(fingers)} finger protrusions, "
             f"{len(satellites)} satellites within {mm(cutoffs.SATELLITE_MAX_UM)}.")
+    front_um = float(front.sum()) * tm.tile_um
+    if front_um < cutoffs.FRONT_MIN_UM:      # e.g. a tumor-only fragment: the "front" is a few tiles, nothing to judge
+        pattern, arcs, arc_masks = "not_assessable", [], {}
+        text = (f"Can't judge the growth pattern: only {mm(front_um)} of invasive front in this section (needs "
+                f"{mm(cutoffs.FRONT_MIN_UM)}); the tumor mostly meets the tissue edge, the lumen or the lining here.")
     summary = {"n_border_tiles": int((fr.border_type > 0).sum()), "n_front_tiles": int(front.sum()),
                "solidity": rnd(solidity), "irregularity": rnd(roughness, 1), "roughness_um": rnd(roughness, 1),
                "fractal_dimension": rnd(fractal), "n_fingers": len(fingers),
@@ -319,7 +330,7 @@ def direction(arcs, pieces):
     """Which way the most infiltrative part of the front faces, plus a 16-bin rose diagram."""
     if not arcs:
         return {"side": None, "clock": None, "bearing_deg": None, "vector_rc": None, "rose_16": [0.0] * 16,
-                "text": "No invasive front found."}
+                "text": "Can't judge the direction: no invasive front long enough in this section."}
     infiltrative = [a for a in arcs if a["infiltrative"]]
     use = infiltrative or arcs
     rose = np.zeros(16)
@@ -372,37 +383,246 @@ def heading_into(tm, fr, arcs):
             "based_on": "infiltrative arcs" if any(a["infiltrative"] for a in arcs) else "all front arcs"}, ray
 
 
-def depth_and_fat(tm, fr):
-    """Depth hint ("consistent with"), what the border touches, and how far tumor reaches into fat."""
+DEPTH_PARAMS = ("WALL_MUSCLE_MIN_MM2", "WALL_FAT_MIN_MM2", "WALL_MIN_WIDTH_UM", "DEPTH_CONTACT_MIN_TILES",
+                "DEPTH_CONTACT_RADIUS_TILES", "DEPTH_RULE", "DEPTH_BEYOND_MIN_UM", "DEPTH_BEYOND_MIN_TILES")
+SEROSA_PARAMS = ("SEROSA_MIN_RUN_UM", "SEROSA_NEEDS_WALL", "SEROSA_MAX_FROM_WALL_UM")
+
+
+def setting(params, name):
+    """A tunable cut-off: the calibration passes params={name: value}; otherwise the value in src/cutoffs.py."""
+    return params[name] if params and name in params else getattr(cutoffs, name)
+
+
+def remembered(tm, key, compute):
+    """
+    Compute once per slide and settings, then reuse. The calibration asks for the depth hint thousands of times per
+    slide (once per setting combination); the slow geometry only depends on a few of the settings.
+    """
+    cache = tm.__dict__.setdefault("_depth_cache", {})
+    if key not in cache:
+        cache[key] = compute()
+    return cache[key]
+
+
+def wall_layers(tm, params=None):
+    """
+    The muscle wall and the fat around the bowel, from the raw (unsmoothed) labels: regions big enough to be real
+    layers, so stray tiles and the thin muscularis mucosae don't count. Small gaps (one tile) are closed first.
+    With WALL_MIN_WIDTH_UM > 0, a muscle region must also be thick on average (area / length of its midline): the
+    muscularis propria is ~1-2 mm thick, the muscularis mucosae well under one tile.
+    """
+    def big(name, min_mm2, min_width_um=0):
+        m = (tm.raw_label == CLASS_INDEX[name]) & tm.tissue
+        m = ndimage.binary_closing(m, structure=np.ones((3, 3), bool)) & tm.tissue
+        lab = measure.label(m, connectivity=2)
+        keep = np.zeros(tm.shape, bool)
+        for p in measure.regionprops(lab):
+            if p.area * tm.tile_mm2 < min_mm2:
+                continue
+            width_um = p.area / max(int(morphology.skeletonize(p.image).sum()), 1) * tm.tile_um
+            if width_um >= min_width_um:
+                keep[lab == p.label] = True
+        return keep
+
+    muscle_mm2, width_um, fat_mm2 = (setting(params, "WALL_MUSCLE_MIN_MM2"), setting(params, "WALL_MIN_WIDTH_UM"),
+                                     setting(params, "WALL_FAT_MIN_MM2"))
+    return (remembered(tm, ("wall", muscle_mm2, width_um), lambda: big("muscle", muscle_mm2, width_um)),
+            remembered(tm, ("fat", fat_mm2), lambda: big("fat", fat_mm2)))
+
+
+def wall_band(wall):
+    """The muscle wall as one solid band: gaps between muscle bundles closed, pockets enclosed by muscle filled in."""
+    r = cutoffs.WALL_BAND_CLOSE_TILES
+    padded = np.pad(wall, r + 1)
+    closed = ndimage.binary_closing(padded, structure=disk(r))[r + 1:-r - 1, r + 1:-r - 1]
+    return ndimage.binary_fill_holes(closed | wall)
+
+
+def lining_and_outer_edge(tm):
+    """
+    Landmarks for "which side of the wall is the inside". Lining = normal mucosa, plus the tissue's edge where
+    mucosa or tumor dominate (the luminal surface; a big tumor often hides the mucosa). Outer edge = the rest of the
+    tissue edge (fat / muscle / stroma: the outside of the bowel, or a cut). Holes inside the tissue don't count.
+    """
+    edge = tm.tissue & neighbors_of(~ndimage.binary_fill_holes(tm.tissue), off_grid=True)
+    kernel = disk(2).astype(float)
+    inner = (tm.class_mask("normal_mucosa") | tm.class_mask("tumor")).astype(float)
+    outer = np.logical_or.reduce([tm.class_mask(n) for n in ("fat", "muscle", "stroma")]).astype(float)
+    luminal = edge & (ndimage.convolve(inner, kernel, mode="constant") > ndimage.convolve(outer, kernel, mode="constant"))
+    return luminal | tm.class_mask("normal_mucosa"), edge & ~luminal
+
+
+def wall_crossed_um(band, start, ends, tile_um, samples=48):
+    """For straight lines from one tile (start) to each of `ends` (two index arrays): µm of each line inside the band."""
+    r0, c0 = start
+    r1, c1 = ends
+    t = np.linspace(0, 1, samples)[None, :]
+    rr = np.rint(r0 + (r1 - r0)[:, None] * t).astype(int)
+    cc = np.rint(c0 + (c1 - c0)[:, None] * t).astype(int)
+    return band[rr, cc].mean(axis=1) * np.hypot(r1 - r0, c1 - c0) * tile_um
+
+
+def beyond_wall(tm, fr, params=None):
+    """
+    Raw tumor tiles on the FAR side of the muscle wall (away from the lining), at least DEPTH_BEYOND_MIN_UM past it.
+    Position, not contact: tumor in the fat is usually wrapped in scar-like stroma, so it rarely touches fat tiles,
+    and fat inside the wall (submucosa) looks like fat outside it. A tumor tile counts when
+      1. it lies DEPTH_BEYOND_MIN_UM or more outside the solid wall band (wall_band), and not in a lymph node;
+      2. the straight line to the nearest lining tile crosses WALL_CROSS_MIN_UM or more of wall (quick check);
+      3. of the lining tiles nearby (up to DEPTH_LINING_REACH_UM farther than the nearest), at least
+         DEPTH_BEYOND_MAJORITY are behind the wall too (one stray lining tile can't decide the side);
+      4. the nearest outside landmark (fat, or the outer tissue edge) is NOT behind the wall.
+    Returns the mask of those tiles.
+    """
+    wall, _ = wall_layers(tm, params)
+    min_um = setting(params, "DEPTH_BEYOND_MIN_UM")
+    key = ("beyond", setting(params, "WALL_MUSCLE_MIN_MM2"), setting(params, "WALL_MIN_WIDTH_UM"), min_um)
+
+    def compute():
+        none = np.zeros(tm.shape, bool)
+        lining, outer_edge = remembered(tm, ("lining",), lambda: lining_and_outer_edge(tm))
+        if not wall.any() or not lining.any():
+            return none
+        band = wall_band(wall)
+        past_um = ndimage.distance_transform_edt(~band) * tm.tile_um
+        nodes = remembered(tm, ("nodes",), lambda: lymph_nodes(tm, fr)[1])
+        raw_tumor = (tm.raw_label == CLASS_INDEX["tumor"]) & tm.tissue
+        candidates = raw_tumor & (past_um >= min_um) & ~dilate(nodes, 1)                                # 1
+        if not candidates.any():
+            return none
+        outside = (outer_edge | (tm.raw_label == CLASS_INDEX["fat"])) & tm.tissue & ~band
+        to_lining, near_lining = ndimage.distance_transform_edt(~lining, return_indices=True)
+        near_outside = ndimage.distance_transform_edt(~outside, return_indices=True)[1] if outside.any() else None
+        lr, lc = np.nonzero(lining)
+        cross_um, reach = cutoffs.WALL_CROSS_MIN_UM, cutoffs.DEPTH_LINING_REACH_UM / tm.tile_um
+        out = np.zeros(tm.shape, bool)
+        for r, c in zip(*np.nonzero(candidates)):
+            nearest = (near_lining[0][[r], [c]], near_lining[1][[r], [c]])
+            if wall_crossed_um(band, (r, c), nearest, tm.tile_um)[0] < cross_um:                       # 2
+                continue
+            nearby = np.flatnonzero(np.hypot(lr - r, lc - c) <= to_lining[r, c] + reach)
+            nearby = nearby[::max(1, len(nearby) // 300)]                                  # at most ~300 lines
+            behind = wall_crossed_um(band, (r, c), (lr[nearby], lc[nearby]), tm.tile_um) >= cross_um
+            if behind.mean() < cutoffs.DEPTH_BEYOND_MAJORITY:                                          # 3
+                continue
+            if near_outside is not None:                                                                # 4
+                end = (near_outside[0][[r], [c]], near_outside[1][[r], [c]])
+                if wall_crossed_um(band, (r, c), end, tm.tile_um)[0] >= tm.tile_um:
+                    continue
+            out[r, c] = True
+        return out
+
+    return remembered(tm, key, compute)
+
+
+def depth_evidence(tm, fr, params=None):
+    """
+    What the depth hint is decided from: the wall and fat layers, how many raw tumor tiles touch each, and the tumor
+    tiles beyond the wall (beyond_wall). Uses the RAW tumor tiles (not the smoothed main tumor): invasion happens as thin
+    strands of glands, which smoothing and the "largest piece" step erase (on a pT2 slide: 99 raw contacts -> 0).
+    """
+    wall, fat_layer = wall_layers(tm, params)
+    radius = setting(params, "DEPTH_CONTACT_RADIUS_TILES")
+    key = ("contact", setting(params, "WALL_MUSCLE_MIN_MM2"), setting(params, "WALL_FAT_MIN_MM2"),
+           setting(params, "WALL_MIN_WIDTH_UM"), radius)
+
+    def contact():
+        raw_tumor = (tm.raw_label == CLASS_INDEX["tumor"]) & tm.tissue
+
+        def touching(layer):
+            if not layer.any():
+                return np.zeros(tm.shape, bool)
+            grown = ndimage.binary_dilation(layer, structure=np.ones((3, 3), bool), iterations=radius)
+            return raw_tumor & grown & ~layer
+        return int(touching(wall).sum()), int(touching(fat_layer).sum())   # counts only: keeps the cache small
+
+    n_wall, n_fat = remembered(tm, key, contact)
+    position = setting(params, "DEPTH_RULE") in ("position", "either")
+    beyond = beyond_wall(tm, fr, params) if position else np.zeros(tm.shape, bool)
+    return {"wall": wall, "fat_layer": fat_layer, "n_wall_contact": n_wall, "n_fat_contact": n_fat,
+            "beyond": beyond, "n_beyond": int(beyond.sum())}
+
+
+def depth_level(ev, params=None):
+    """
+    The decision, from depth_evidence. DEPTH_RULE picks what "consistent with at least pT3" means:
+      "contact"   raw tumor tiles touch a fat layer (the v1/v2 rule)
+      "position"  raw tumor tiles lie beyond the muscle wall (beyond_wall)
+      "either"    one of the two
+    Returns (deepest layer, level 1-3 or None, reason): reason = "beyond_wall" / "fat_contact" for level 3, else None.
+    Depth is only judged when the section shows the muscle wall: without it, fat next to tumor may be fat inside the
+    wall (submucosa) or outside it, and "doesn't reach the wall" means nothing (depth_and_fat still warns about the fat).
+    """
+    need, rule = setting(params, "DEPTH_CONTACT_MIN_TILES"), setting(params, "DEPTH_RULE")
+    if not ev["wall"].any():
+        return "not_assessable", None, None
+    if rule in ("position", "either") and ev["n_beyond"] >= setting(params, "DEPTH_BEYOND_MIN_TILES"):
+        return "fat", 3, "beyond_wall"
+    if rule in ("contact", "either") and ev["n_fat_contact"] >= need:
+        return "fat", 3, "fat_contact"
+    if ev["n_wall_contact"] >= need:
+        return "muscle", 2, None
+    return "mucosa_submucosa", 1, None
+
+
+def depth_and_fat(tm, fr, params=None):
+    """
+    Depth hint ("consistent with"), what the border touches, and how far tumor reaches into fat.
+    Contact only counts against real layers (wall_layers). When the section shows no muscle wall, depth can't be
+    judged; if tumor touches fat there, that is reported as a "look here" warning, not as a depth.
+    """
     touch = {name: int(fr.contact[name].sum()) for name in ("muscle", "fat", "stroma", "normal_mucosa")}
     n_border = max(int((fr.border_type > 0).sum()), 1)
     n_front = max(int((fr.border_type == BORDER_FRONT).sum()), 1)
-    if touch["fat"]:
-        deepest = "fat"
-        hint = "Tumor touches fat: consistent with at least pT3 (check that this fat lies outside the muscle wall)."
-    elif touch["muscle"]:
-        deepest = "muscle"
-        hint = ("Tumor reaches muscle (the map can't tell the thin muscularis mucosae from the "
-                "muscularis propria).")
-    else:
-        deepest = "mucosa"
-        hint = "No muscle or fat contact in this section."
 
-    muscle = tm.class_mask("muscle") & fr.in_section
+    ev = depth_evidence(tm, fr, params)
+    wall, fat_layer = ev["wall"], ev["fat_layer"]
+    need = setting(params, "DEPTH_CONTACT_MIN_TILES")
+    n_fat, n_wall, n_beyond = ev["n_fat_contact"], ev["n_wall_contact"], ev["n_beyond"]
+    deepest, level, reason = depth_level(ev, params)
+    if reason == "beyond_wall":
+        hint = ("Tumor lies beyond the muscle wall (on the side away from the lining): consistent with at least pT3 "
+                "(check that this is the muscularis propria, not a fold of it).")
+    elif reason == "fat_contact":
+        hint = "Tumor touches fat: consistent with at least pT3 (check that this fat lies outside the muscle wall)."
+    elif level == 2:
+        hint = "Tumor reaches the muscle wall (muscularis propria): consistent with at least pT2."
+    elif level == 1:
+        hint = ("The muscle wall is in this section but tumor doesn't reach it: consistent with pTis/pT1 here "
+                "(deeper invasion can sit in other sections).")
+    elif n_fat >= need:
+        hint = ("No muscle wall in this section, so depth can't be judged. Tumor does touch fat here: check it. Fat "
+                "outside the bowel wall would mean at least pT3, but fat also sits inside the wall (submucosa).")
+    else:
+        hint = "No muscle wall in this section: depth can't be judged from this slide."
+
     depth_um, deep_grid = None, np.zeros(tm.shape, bool)
-    if touch["fat"] and muscle.any():
-        to_muscle = ndimage.distance_transform_edt(~muscle) * tm.tile_um
-        beyond = fr.main_filled & dilate(tm.class_mask("fat"), 2)    # tumor tiles out in the fat
+    if reason == "beyond_wall":
+        past_um = ndimage.distance_transform_edt(~wall_band(wall)) * tm.tile_um
+        depth_um = float(past_um[ev["beyond"]].max())
+        deep_grid = ev["beyond"] & (past_um > cutoffs.FAT_DEPTH_FLAG_UM)
+    elif reason == "fat_contact" and wall.any():
+        raw_tumor = (tm.raw_label == CLASS_INDEX["tumor"]) & tm.tissue
+        to_muscle = ndimage.distance_transform_edt(~wall) * tm.tile_um
+        beyond = raw_tumor & dilate(fat_layer, 2)                     # tumor tiles out in the fat
         if beyond.any():
             depth_um = float(to_muscle[beyond].max())
             deep_grid = beyond & (to_muscle > cutoffs.FAT_DEPTH_FLAG_UM)
-    fat_text = (f"Front touches fat along {mm(touch['fat'] * tm.tile_um)} ({touch['fat'] / n_front:.0%} of the front)."
-                if touch["fat"] else "Front doesn't touch fat.")
+    fat_text = (f"Tumor touches fat in {n_fat} tiles (about {mm(n_fat * tm.tile_um)})." if n_fat >= need
+                else "Tumor doesn't touch fat.")
+    if reason == "beyond_wall":
+        fat_text += f" {n_beyond} tumor tiles lie beyond the muscle wall."
     if depth_um is not None:
-        fat_text += f" Tumor reaches about {mm(depth_um)} past the nearest muscle."
+        past = "the muscle wall" if reason == "beyond_wall" else "the nearest muscle"
+        fat_text += f" Tumor reaches about {mm(depth_um)} past {past}."
     invasion = {"border_touch_fraction": {name: rnd(n / n_border) for name, n in touch.items()},
-                "deepest_layer": deepest, "t_stage_hint": hint}
-    fat = {"contact_mm": rnd(touch["fat"] * tm.tile_um / 1000, 2), "share_of_front": rnd(touch["fat"] / n_front),
+                "deepest_layer": deepest, "depth_level": level, "t_stage_hint": hint,
+                "depth_rule": setting(params, "DEPTH_RULE"), "depth_reason": reason,
+                "wall_in_section": bool(wall.any()), "fat_in_section": bool(fat_layer.any()),
+                "wall_contact_tiles": n_wall, "fat_contact_tiles": n_fat, "beyond_wall_tiles": n_beyond,
+                "fat_contact_without_wall": bool(level is None and n_fat >= need)}
+    fat = {"contact_mm": rnd(n_fat * tm.tile_um / 1000, 2) if n_fat >= need else 0.0,
+           "share_of_front": rnd(touch["fat"] / n_front),
            "depth_past_muscle_um": rnd(depth_um, 0),
            "over_5mm": bool(depth_um is not None and depth_um > cutoffs.FAT_DEPTH_FLAG_UM), "text": fat_text}
     return invasion, fat, deep_grid
@@ -471,16 +691,30 @@ def necrosis_and_rim(tm, fr):
 
 
 def mucin(tm, fr):
-    """Mucin inside the tumor, and mucin pools out in the fat (past the muscle)."""
+    """
+    Mucin in the tumor, and mucin pools out in the fat (past the muscle). "In the tumor" = inside the filled tumor
+    outline PLUS mucin pools touching it (within cutoffs.MUCIN_ATTACH_TILES): in mucinous tumors the pools sit at the
+    edge of the tumor glands, not only in fully enclosed holes (measured against TCGA's mucinous label, see
+    reports/overnight_v4).
+    """
     mucus = tm.class_mask("mucus")
-    fraction = (mucus & fr.main_filled).sum() / max(int(fr.main_filled.sum()), 1)
+    pools_lab = measure.label(mucus & fr.in_section, connectivity=2)
+    near = dilate(fr.main_filled, cutoffs.MUCIN_ATTACH_TILES)
+    attached = np.isin(pools_lab, np.unique(pools_lab[near & (pools_lab > 0)]))
+    region = fr.main_filled | attached
+    fraction = (mucus & region).sum() / max(int(region.sum()), 1)
+    check = bool(fraction >= cutoffs.MUCIN_FLAG_FRACTION)
+    share = f"{fraction:.1%}" if fraction < 0.1 else f"{fraction:.0%}"
     if fraction > cutoffs.MUCINOUS_FRACTION:
-        label = (f"Mucinous: {fraction:.0%} of the tumor is mucin (over the "
+        label = (f"Mucinous: {share} of the tumor (with the mucin pools attached to it) is mucin (over the "
                  f"{cutoffs.MUCINOUS_FRACTION:.0%} cutoff for mucinous adenocarcinoma).")
+    elif check:
+        label = (f"{share} of the tumor (with the mucin pools attached to it) is mucin: check for mucinous features "
+                 f"(on TCGA slides at this level, about half were diagnosed mucinous).")
     elif fraction > 0:
-        label = f"{fraction:.0%} of the tumor is mucin (mucinous features)."
+        label = f"{share} of the tumor (with the mucin pools attached to it) is mucin (a little)."
     else:
-        label = "No mucin inside the tumor."
+        label = "No mucin in or next to the tumor."
 
     muscle = tm.class_mask("muscle") & fr.in_section
     to_muscle = ndimage.distance_transform_edt(~muscle) * tm.tile_um if muscle.any() else None
@@ -496,14 +730,17 @@ def mucin(tm, fr):
         pools.append({**tm.tile_ref(r, c), "area_mm2": rnd(p.area * tm.tile_mm2), "distance_past_muscle_um": rnd(past, 0),
                       "text": f"Mucin pool in fat, {where}: check for floating tumor cells."})
         pool_grid |= m
-    return {"fraction_in_tumor": rnd(fraction), "label": label, "pools": pools}, pool_grid
+    return {"fraction_in_tumor": rnd(fraction), "check_mucinous": check, "label": label, "pools": pools}, pool_grid
 
 
 # --- immune cells ---------------------------------------------------------------------------
 
 def immune(tm, fr, node_mask):
     """Lymphocytes in the tumor core vs the front band vs outside, by side. Location only, not type."""
-    p_lymph = tm.probs[..., CLASS_INDEX["lymphocytes"]]
+    if "p_immune" in tm.extra:   # lymphocyte detector (src/detectors.py): also counts lymphocytes scattered in stroma/tumor
+        p_lymph, measure = tm.extra["p_immune"], "mean p_immune (lymphocyte detector) per tile in each zone (0-1)"
+    else:
+        p_lymph, measure = tm.probs[..., CLASS_INDEX["lymphocytes"]], "mean P(lymphocytes) per tile in each zone (0-1)"
     valid = tm.tissue & ~node_mask                    # lymph nodes aren't part of the immune reaction
 
     def mean_in(mask):
@@ -535,27 +772,43 @@ def immune(tm, fr, node_mask):
             "H&E shows where lymphocytes sit, not their type (no CD8/CD4) or what they're doing.")
     return {"core_fraction": rnd(core), "margin_fraction": rnd(margin), "peritumoral_fraction": rnd(peri),
             "margin_by_side": by_side, "pattern": pattern, "pattern_cutoffs_calibrated": False,
-            "measure": "mean P(lymphocytes) per tile in each zone (0-1)", "text": text}
+            "measure": measure, "text": text}
 
 
 # --- the outer surface ----------------------------------------------------------------------
 
-def outer_edge(tm, fr):
-    """Distance from tumor to the outer tissue edge (the side away from the lumen); flag if it touches."""
+def outer_edge(tm, fr, params=None):
+    """
+    Distance from tumor to the outer tissue edge (the side away from the lumen); flag if it touches.
+    Stricter than "tumor reaches any tissue edge" (that fired on all 5 of our first TCGA slides, 4 of them pT1-pT3):
+    only judged in sections that show the muscle wall or fat, and the tumor must lie on the outer edge along at least
+    SEROSA_MIN_RUN_UM.
+    """
+    caveat = ("The outer edge may be a cut surface rather than serosa, and the rectum below the "
+              "peritoneal fold has no serosa: check before calling pT4a.")
+    wall, fat_layer = wall_layers(tm, params)
+    if setting(params, "SEROSA_NEEDS_WALL") and not (wall.any() or fat_layer.any()):
+        return {"found": False, "distance_um": None, "touches": False,
+                "text": "This section doesn't show the muscle wall or fat, so the serosa can't be judged.",
+                "caveat": caveat}, np.zeros(tm.shape, bool)
     region = (fr.in_section | fr.main_filled) & tm.tissue
     boundary = region & neighbors_of(~tm.tissue, off_grid=True)
     kernel = disk(2).astype(float)
-    wall = np.logical_or.reduce([tm.class_mask(n) for n in ("fat", "muscle", "stroma")]) & ~fr.tumor
+    wall_like = np.logical_or.reduce([tm.class_mask(n) for n in ("fat", "muscle", "stroma")]) & ~fr.tumor
     inner = np.logical_or.reduce([tm.class_mask(n) for n in ("normal_mucosa", "mucus", "necrosis", "lymphocytes")])
-    outer = boundary & (ndimage.convolve(wall.astype(float), kernel, mode="constant")
+    outer = boundary & (ndimage.convolve(wall_like.astype(float), kernel, mode="constant")
                         > ndimage.convolve(inner.astype(float), kernel, mode="constant"))
-    caveat = ("The outer edge may be a cut surface rather than serosa, and the rectum below the "
-              "peritoneal fold has no serosa: check before calling pT4a.")
+    layers = wall | fat_layer
+    if layers.any():   # the serosa is outside the muscle wall: ignore edges far from the wall / fat (the luminal side)
+        outer &= ndimage.distance_transform_edt(~layers) * tm.tile_um <= setting(params, "SEROSA_MAX_FROM_WALL_UM")
     if not outer.any():
         return {"found": False, "distance_um": None, "touches": False,
                 "text": "No outer tissue edge found in this section.", "caveat": caveat}, np.zeros(tm.shape, bool)
     distance = float((ndimage.distance_transform_edt(~outer) * tm.tile_um)[fr.main].min())
-    touches = bool((fr.main & outer).any())
-    text = ("Possible serosal involvement: check (pT4a). Tumor reaches the outer tissue edge." if touches
-            else f"Tumor within {mm(distance)} of the outer tissue edge.")
-    return {"found": True, "distance_um": round(distance), "touches": touches, "text": text, "caveat": caveat}, (fr.main & outer)
+    on_edge = fr.main & outer
+    run_um = float(on_edge.sum() * tm.tile_um)
+    touches = bool(run_um >= setting(params, "SEROSA_MIN_RUN_UM"))
+    text = (f"Possible serosal involvement: check (pT4a). Tumor lies on the outer tissue edge along about {mm(run_um)}."
+            if touches else f"Tumor within {mm(distance)} of the outer tissue edge.")
+    return {"found": True, "distance_um": round(distance), "touches": touches, "run_on_edge_um": round(run_um),
+            "text": text, "caveat": caveat}, (on_edge if touches else np.zeros(tm.shape, bool))

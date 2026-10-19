@@ -127,6 +127,8 @@ def _high_risk_flags(s):
     out = []
     if s["invasion"]["deepest_layer"] == "fat":
         out.append("Tumor touches fat: consistent with at least pT3 (check).")
+    if s["invasion"].get("fat_contact_without_wall"):
+        out.append("Tumor touches fat, but no muscle wall in this section: depth unknown (check the fat).")
     if s["outer_edge"]["touches"]:
         out.append("Possible serosal involvement: check (pT4a).")
     if s["border"]["pattern"] == "infiltrative":
@@ -152,7 +154,8 @@ def _high_risk_flags(s):
 def _caveats(s):
     out = list(ALWAYS_CAVEATS)
     if not s["border"]["pattern_cutoff_calibrated"]:
-        out.append("Pushing vs infiltrative uses a placeholder solidity cutoff: not yet calibrated with a pathologist.")
+        out.append("Pushing vs infiltrative cut-offs were set from by-eye calls on slide thumbnails (agreed on 15 of 19 "
+                   "held-out TCGA slides), not checked by a pathologist.")
     if any(row["source"] == "PLACEHOLDER" for row in RISK_POINTS):
         out.append("Some risk-map points are placeholders until the features doc's points table is copied in.")
     skipped = [f["title"] for f in s["flags"] if f["status"] == "skipped"]

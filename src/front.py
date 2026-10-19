@@ -3,12 +3,16 @@ Step 0 of the analysis: the tumor, its invasive front, and distance zones around
 
 Definitions (from our features doc):
   - Tumor = smoothed P(tumor) >= 0.5, cleaned with an opening (radius 1) and small holes filled.
-    The largest piece is the main tumor; the other pieces are candidate satellites.
     (Smoothing + opening means pieces smaller than about 3x3 tiles, ~0.3 mm, are not detected.)
+  - Pieces closer than TUMOR_JOIN_UM through tissue are ONE tumor (the map often cuts a tumor into
+    pieces with stroma, mucus or a tear); the largest joined tumor is the main tumor, and its outline
+    includes the gaps between its pieces. The other pieces are candidate satellites. Less than
+    TUMOR_MIN_MM2 of tumor = no main tumor (scattered false tumor tiles).
   - Invasive front = where the main tumor touches stroma, muscle or fat. We also count lymphocytes,
     because an immune band at the edge sits in the stroma there. Where the tumor touches background,
     mucus or the gut lumen is its SURFACE, not its front (otherwise every ragged surface looks
-    infiltrative). Where it touches normal mucosa is spread within the lining, labelled "mucosa".
+    infiltrative); a border tile next to glass (the cut edge, a tear) is surface too, even if stroma
+    is also next to it. Where it touches normal mucosa is spread within the lining, labelled "mucosa".
   - Zones, by distance to the front: core = more than 500 µm inside, front band = within 500 µm on
     either side, peritumoral = 0.5 to 2 mm outside.
   - A slide can hold several tissue sections (TCGA slides often have 2-3 serial sections). We analyze
@@ -107,6 +111,27 @@ def tumor_mask(tm):
     return fill_small_holes(tumor, cutoffs.SMALL_HOLE_TILES)
 
 
+def join_pieces(tm, tumor):
+    """
+    Label tumor pieces, joining pieces closer than TUMOR_JOIN_UM into one; the gap must be tissue (holes and tears
+    inside the tissue count, glass around separate fragments doesn't). Returns (labels, id of the biggest joined tumor).
+    """
+    r = max(1, int(round(tm.tiles(cutoffs.TUMOR_JOIN_UM) / 2)))
+    bridge = ndimage.binary_dilation(tumor, structure=disk(r)) & ndimage.binary_fill_holes(tm.tissue)
+    groups = measure.label(bridge | tumor, connectivity=2)
+    groups[~tumor] = 0
+    sizes = np.bincount(groups.ravel())
+    sizes[0] = 0
+    return groups, int(sizes.argmax())
+
+
+def tumor_region(tm, main):
+    """The main tumor's outline: its tiles, the gaps between its joined pieces, and holes inside it (tissue only)."""
+    r = max(1, int(round(tm.tiles(cutoffs.TUMOR_JOIN_UM) / 2)))
+    closed = ndimage.binary_closing(np.pad(main, r + 1), structure=disk(r))[r + 1:-(r + 1), r + 1:-(r + 1)]
+    return ndimage.binary_fill_holes((closed & ndimage.binary_fill_holes(tm.tissue)) | main)
+
+
 def classify_border(tm, main_filled):
     """Which border tiles of the main tumor are front, mucosa, or surface, and what each one touches."""
     border = main_filled & neighbors_of(~main_filled, off_grid=True)
@@ -116,7 +141,7 @@ def classify_border(tm, main_filled):
         contact["background"] |= outside & (nb_label == NO_TISSUE)
         for name in CLASSES:
             contact[name] |= outside & (nb_label == CLASS_INDEX[name])
-    is_front = np.logical_or.reduce([contact[n] for n in FRONT_CLASSES])
+    is_front = np.logical_or.reduce([contact[n] for n in FRONT_CLASSES]) & ~contact["background"]   # glass = edge
     is_mucosa = np.logical_or.reduce([contact[n] for n in MUCOSA_CLASSES])
 
     border_type = np.full(tm.shape, BORDER_NONE)
@@ -148,19 +173,18 @@ def find_front(tm):
     """Run step 0 on a TileMap. Returns a Front, or None if there is no tumor on the slide."""
     sections, n_sections = tissue_sections(tm)
     tumor = tumor_mask(tm)
-    pieces = measure.label(tumor, connectivity=2)
-    if pieces.max() == 0:
+    if not tumor.any():
         return None
-
-    sizes = np.bincount(pieces.ravel())
-    sizes[0] = 0
-    main_id = int(sizes.argmax())
+    pieces, main_id = join_pieces(tm, tumor)
     main = pieces == main_id
-    main_filled = ndimage.binary_fill_holes(main)
 
     under_main = sections[main & (sections > 0)]
     section_id = int(np.bincount(under_main).argmax()) if under_main.size else 0
     in_section = (sections == section_id) & tm.tissue
+    main &= (sections == section_id)
+    if main.sum() * tm.tile_mm2 < cutoffs.TUMOR_MIN_MM2:
+        return None
+    main_filled = tumor_region(tm, main)
 
     border_type, contact = classify_border(tm, main_filled)
     signed_um, zone = distance_zones(tm, main_filled, border_type, in_section)

@@ -1,0 +1,98 @@
+{
+  "depth": {
+    "slides": 58,
+    "judged": 16,
+    "exact": 7,
+    "shallower": 8,
+    "deeper_than_pT": 1,
+    "claim_true": "15/16",
+    "T3T4_reached_level3": "2/27"
+  },
+  "serosa": {
+    "pT4_found": "0/13",
+    "false_alarms": "1/45"
+  },
+  "depth_by_pT": {
+    "cant_judge": {
+      "T1": 14,
+      "T2": 10,
+      "T3": 11,
+      "T4": 7
+    },
+    "1": {
+      "T1": 3,
+      "T2": 1,
+      "T3": 1,
+      "T4": 0
+    },
+    "2": {
+      "T1": 0,
+      "T2": 2,
+      "T3": 2,
+      "T4": 4
+    },
+    "3": {
+      "T1": 1,
+      "T2": 0,
+      "T3": 0,
+      "T4": 2
+    }
+  },
+  "qc_totals": {
+    "n_tiles_read": 585954,
+    "n_tissue_tiles": 530986,
+    "qc_background": 28804,
+    "qc_blood": 7307,
+    "qc_blur": 18857
+  },
+  "means": {
+    "tumor_frac": 0.5555344827586206,
+    "necrosis_frac": 0.06624137931034482,
+    "necrosis_in_tumor": 0.0032586206896551726,
+    "mucin_in_tumor": 0.00153448275862069,
+    "unsure": 0.028224137931034482,
+    "unsure_low_conf": 0.028224137931034482,
+    "unsure_disagree": NaN
+  },
+  "unsure_median_max": [
+    0.024,
+    0.084
+  ],
+  "without_musk": {
+    "depth": {
+      "slides": 58,
+      "judged": 17,
+      "exact": 6,
+      "shallower": 9,
+      "deeper_than_pT": 2,
+      "claim_true": "15/17",
+      "T3T4_reached_level3": "2/27"
+    },
+    "serosa": {
+      "pT4_found": "0/13",
+      "false_alarms": "1/45"
+    },
+    "means": {
+      "necrosis_frac": 0.06722413793103449,
+      "necrosis_in_tumor": 0.003620689655172414,
+      "unsure": 0.02855172413793103
+    },
+    "slides_where_depth_changed": [
+      "TCGA-F4-6808-01Z-00-DX1",
+      "TCGA-G4-6321-01Z-00-DX1"
+    ]
+  },
+  "mucin_vs_tcga_mucinous": {
+    "n_mucinous": 9,
+    "n_other": 49,
+    "median_mucin_in_tumor_mucinous": 0.0,
+    "median_mucin_in_tumor_other": 0.0,
+    "auroc": 0.5408163265306123
+  },
+  "immune_vs_msi": {
+    "n_msi_high": 12,
+    "n_mss": 45,
+    "auroc_margin": 0.7601851851851852,
+    "auroc_core": 0.6046511627906976
+  }
+}

@@ -35,6 +35,8 @@ Clinical framing: decision support that flags features that are tedious and inco
 - **Laptop / VS Code**: write code, run the Streamlit app on small result files downloaded from Delta.
 - Code moves via GitHub: write on laptop → push → `git pull` on Delta → run.
 - Never commit: `.env`, tokens, slides, model weights, big arrays, anything in `data/`.
+  Exception: our own small trained classifier heads (scikit-learn, a few KB) live in `models/` with a model card
+  (`models/README.md`); compact evaluation outputs live in `reports/`.
 - Delta home quota is small: set `HF_HOME` to a project/work directory before loading models.
 - Code must run headless on Delta (no GUI), use GPU if available, fall back to CPU, show progress with tqdm,
   and save results to files (sessions end and memory is lost).
@@ -84,11 +86,24 @@ Made on Delta by the whole-slide pipeline (GPU):
   p_mucus, p_necrosis, p_stroma, label, confidence`
   (x, y = level-0 pixel top-left; label = argmax class name; confidence = max prob)
   Optional: `p_nerve`, `p_artery` (trained yes/no detectors, 0-1), `alt_label` (a second model's top class,
-  e.g. MUSK's when the p_* columns are CONCH's; disagreement = "unsure here")
+  e.g. MUSK's when the p_* columns are CONCH's; kept for reference, the analysis doesn't use it: MUSK is used
+  only for the blood check, "unsure here" = low confidence only), `p_immune` (lymphocyte detector,
+  0-1; `features.immune()` uses it instead of P(lymphocytes) when present), `p_blood` (MUSK blood check, 0-1).
+  `scripts/process_slide.py` writes `p_immune`, `p_blood`, `alt_label` (MUSK's tissue8), and also `colorful`
+  (share of stained pixels), `blur` (Laplacian variance), `mask_coverage`, and texture measures `edges,
+  structure_cov, ink_bluegreen, ink_black, ink_red` (src/detectors.texture_measures; older folders get them from
+  `scripts/add_texture_measures.py`, CPU); `qc_reason` is `background` (src/detectors.quality_check: colorless and
+  not fat, or glass, or glass / pen ink by texture when those columns exist; docs/preprocessing_test.md), `blood` (src/detectors.is_blood: p_blood >=
+  cutoffs.BLOOD_PROB, not labeled fat) or `blur` (src/detectors.quality_check: < cutoffs.BLUR_REL x the
+  slide's typical sharpness). `scripts/recheck_quality.py` re-applies these rules to saved tiles (CPU).
 - `embeddings.npy`: float32 [n_tiles, dim], rows in the same order as tiles.csv (CONCH 512, MUSK 1024)
+- `embeddings_musk.npy`: optional, MUSK embeddings [n_tiles, 1024] when embeddings.npy is CONCH's
 - `tiles/<row>_<col>.jpg`: optional 128 px tile previews for click-to-zoom
+- `structures.csv` (optional, not made by `process_slide.py` yet; `src/structures.py`): nerve / vessel side
+  classifier, NOT one of the 8 map classes: `row, col, p_nerve, p_vessel, p_other, structure, p_artery`
+  (p_artery = zero-shot artery-vs-vein, experimental and unvalidated). For perineural / venous invasion flags.
 - `summary.json` slide info: `slide_id, mpp (0.5), tile_size_px (224), thumbnail_downsample, grid_shape,
-  model {name, prompts_version}, embeddings_model`, optional `project, pT, pN, stage`
+  model {name, prompts_version}, embeddings_model`, optional `project, pT, pN, stage, qc, blood_check, alt_model`
 
 Made on the laptop or Delta (CPU only):
 - `phrase_scores.csv`: `row, col` + one column per key in `src/phrases.py` (`scripts/score_phrases.py`;
@@ -140,13 +155,20 @@ Update this contract here if it must change.
 - Login nodes: light work only (git, pip, file listing). Long commands there can get cut off.
 
 ## Repo layout
-`app/` Streamlit app · `src/` shared code · `scripts/` runnable steps · `tests/` pytest on fake slides ·
-`docs/` handoffs + `summary_example.json` · `notebooks/` experiments · `data/` git-ignored.
-- Models: `src/models.py` (CONCH, MUSK, zero-shot, `encode_texts`), `src/prompts.py`, `src/datasets.py`, `src/slides.py`
-- Analysis (CPU): `src/tilemap.py` (tiles.csv -> grids) -> `src/front.py` -> `src/features.py`, `src/flags.py`
-  (+ `src/phrases.py`), `src/risk.py`; `src/analysis.py` runs them all; `src/cutoffs.py`; `src/viz.py` (class colors)
-- Scripts: `first_look.py` (model bake-off), `analyze_slide.py`, `score_phrases.py`, `make_fake_slide.py`,
-  `check_setup.py`. Still to build: the whole-slide pipeline (tile + embed + classify -> tiles.csv, embeddings.npy).
+`app/` Streamlit app · `src/` shared code · `scripts/` the slide pipeline · `scripts/models/` how the classifiers were
+built and tested · `models/` trained heads + model card · `reports/` evaluation outputs (one folder per run) ·
+`calibration/` depth-hint calibration · `docs/` write-ups (index: `docs/README.md`) · `tests/` pytest ·
+`notebooks/` experiments · `data/` git-ignored.
+- Models: `src/models.py` (CONCH, MUSK, zero-shot, `encode_texts`), `src/prompts.py`, `src/datasets.py`, `src/slides.py`,
+  `src/classifier.py` (tissue8), `src/detectors.py` (glass / blur check, immune, blood), `src/structures.py`
+- Analysis (CPU): `src/tilemap.py` (tiles.csv -> grids) -> `src/front.py` -> `src/features.py`,
+  `src/flags.py` (+ `src/phrases.py`), `src/risk.py`; `src/analysis.py` runs them all; `src/cutoffs.py`; `src/viz.py`
+- Scripts (`scripts/README.md`): `process_slide.py` (whole-slide pipeline: fat-aware tissue mask + 224 px tiles + CONCH
+  tissue model `models/tissue8_split_v1.joblib` + lymphocyte detector `models/immune_v1.joblib` + MUSK blood check
+  `models/structures_musk_v1.joblib` + second opinion `models/tissue8_musk_v1.joblib` + glass / blur check ->
+  tiles.csv, embeddings.npy, embeddings_musk.npy, tiles/, thumbnail.png, summary.json), `process_slides_gpu.sbatch`
+  (it + phrases + analysis), `score_phrases.py`, `analyze_slide.py`, `make_fake_slide.py`, `check_setup.py`,
+  `get_gdc_slides.py`, `calibrate_analysis.py`. Why MUSK for blood: `docs/slide_pipeline.md`.
 
 ## Validation we want for judges
 Normal (-11) slides → near-zero tumor; tissue accuracy on ~100 hand-checked tiles (zero-shot vs small classifier);

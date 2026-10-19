@@ -21,7 +21,7 @@ from src.prompts import CLASSES
 NO_TISSUE = -1
 CLASS_INDEX = {name: i for i, name in enumerate(CLASSES)}
 # Optional per-tile columns (see CLAUDE.md data contract): detector outputs and a second model's label
-EXTRA_PROB_COLUMNS = ("p_nerve", "p_artery")
+EXTRA_PROB_COLUMNS = ("p_nerve", "p_artery", "p_immune")
 ALT_LABEL_COLUMN = "alt_label"
 
 
@@ -35,10 +35,11 @@ class TileMap:
     extra: dict = field(default_factory=dict)   # optional [R, C] layers, e.g. "p_nerve", "alt_label"
 
     def __post_init__(self):
-        self.smooth = smooth_probs(self.probs, self.tissue)
-        self.label = top_class(self.smooth, self.tissue)       # smoothed: use for the analysis
         self.raw_label = top_class(self.probs, self.tissue)    # raw: what the model said per tile
         self.confidence = np.where(self.tissue, self.probs.max(axis=2), 0.0)
+        self.overruled, probs = overrule(self.probs, self.raw_label, self.extra.get(ALT_LABEL_COLUMN))
+        self.smooth = smooth_probs(probs, self.tissue)
+        self.label = top_class(self.smooth, self.tissue)       # smoothed (after overrules): use for the analysis
 
     @classmethod
     def from_csv(cls, path, mpp=0.5, shape=None):
@@ -98,6 +99,25 @@ class TileMap:
         x, y = self.x[r, c], self.y[r, c]
         return {"row": r, "col": c,
                 "x": None if np.isnan(x) else int(x), "y": None if np.isnan(y) else int(y)}
+
+
+def overrule(probs, raw_label, alt, rules=None):
+    """
+    Where the main model's top class and the second model (alt_label) form one of `rules` (main, alt), move the
+    main class's probability onto the alt class, for the analysis only (tiles.csv keeps the model's numbers).
+    rules=None: cutoffs.ALT_OVERRULES (empty now: no overrules). Returns ([R, C] bool: overruled tiles, adjusted probs).
+    """
+    rules = cutoffs.ALT_OVERRULES if rules is None else rules
+    out, mask = probs.copy(), np.zeros(raw_label.shape, bool)
+    if alt is None:
+        return mask, out
+    for main, second in rules:
+        m, s = CLASS_INDEX[main], CLASS_INDEX[second]
+        hit = (raw_label == m) & (alt == s)
+        out[hit, s] += out[hit, m]
+        out[hit, m] = 0
+        mask |= hit
+    return mask, out
 
 
 def smooth_probs(probs, tissue, size=cutoffs.SMOOTH_SIZE):

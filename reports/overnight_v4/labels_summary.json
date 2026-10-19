@@ -1,0 +1,183 @@
+{
+ "class_fat": {
+  "n": 48,
+  "unclear": 3,
+  "glass": 27,
+  "agree_of_judged": 0.2,
+  "agree_of_tissue": 0.5,
+  "mine": {
+   "background": 27,
+   "fat": 9,
+   "blood": 3,
+   "mucus": 3,
+   "necrosis": 1,
+   "muscle": 1,
+   "tumor": 1
+  }
+ },
+ "class_mucus": {
+  "n": 48,
+  "unclear": 13,
+  "glass": 10,
+  "agree_of_judged": 0.34,
+  "agree_of_tissue": 0.48,
+  "mine": {
+   "mucus": 12,
+   "background": 10,
+   "stroma": 6,
+   "necrosis": 3,
+   "fat": 2,
+   "lymphocytes": 1,
+   "tumor": 1
+  }
+ },
+ "class_necrosis": {
+  "n": 48,
+  "unclear": 18,
+  "glass": 13,
+  "agree_of_judged": 0.1,
+  "agree_of_tissue": 0.18,
+  "mine": {
+   "background": 13,
+   "tumor": 7,
+   "muscle": 3,
+   "necrosis": 3,
+   "blood": 2,
+   "lymphocytes": 1,
+   "stroma": 1
+  }
+ },
+ "class_stroma": {
+  "n": 48,
+  "unclear": 13,
+  "glass": 1,
+  "agree_of_judged": 0.66,
+  "agree_of_tissue": 0.68,
+  "mine": {
+   "stroma": 23,
+   "tumor": 4,
+   "muscle": 4,
+   "background": 1,
+   "necrosis": 1,
+   "blood": 1,
+   "lymphocytes": 1
+  }
+ },
+ "blood_border": {
+  "n": 48,
+  "unclear": 10,
+  "glass": 13,
+  "agree_of_judged": null,
+  "agree_of_tissue": null,
+  "mine": {
+   "blood": 13,
+   "background": 13,
+   "stroma": 5,
+   "muscle": 3,
+   "tumor": 3,
+   "lymphocytes": 1
+  }
+ },
+ "class_tumor": {
+  "n": 48,
+  "unclear": 8,
+  "glass": 1,
+  "agree_of_judged": 0.8,
+  "agree_of_tissue": 0.82,
+  "mine": {
+   "tumor": 32,
+   "normal_mucosa": 3,
+   "stroma": 2,
+   "mucus": 1,
+   "muscle": 1,
+   "background": 1
+  }
+ },
+ "class_normal_mucosa": {
+  "n": 48,
+  "unclear": 17,
+  "glass": 2,
+  "agree_of_judged": 0.48,
+  "agree_of_tissue": 0.52,
+  "mine": {
+   "normal_mucosa": 15,
+   "tumor": 11,
+   "mucus": 2,
+   "background": 2,
+   "fat": 1
+  }
+ },
+ "class_lymphocytes": {
+  "n": 48,
+  "unclear": 8,
+  "glass": 0,
+  "agree_of_judged": 0.8,
+  "agree_of_tissue": 0.8,
+  "mine": {
+   "lymphocytes": 32,
+   "tumor": 4,
+   "stroma": 2,
+   "blood": 1,
+   "muscle": 1
+  }
+ },
+ "blood": {
+  "n": 48,
+  "unclear": 12,
+  "glass": 11,
+  "agree_of_judged": 0.44,
+  "agree_of_tissue": 0.64,
+  "mine": {
+   "blood": 16,
+   "background": 11,
+   "stroma": 6,
+   "tumor": 2,
+   "necrosis": 1
+  }
+ },
+ "overrule": {
+  "n": 48,
+  "unclear": 8,
+  "glass": 13,
+  "agree_of_judged": 0.4,
+  "agree_of_tissue": 0.59,
+  "mine": {
+   "muscle": 16,
+   "background": 13,
+   "blood": 6,
+   "stroma": 3,
+   "tumor": 2
+  }
+ },
+ "class_muscle": {
+  "n": 48,
+  "unclear": 9,
+  "glass": 10,
+  "agree_of_judged": 0.33,
+  "agree_of_tissue": 0.45,
+  "mine": {
+   "muscle": 13,
+   "stroma": 12,
+   "background": 10,
+   "mucus": 2,
+   "lymphocytes": 1,
+   "tumor": 1
+  }
+ },
+ "blood_border_by_p": {
+  "0.3-0.5": {
+   "background": 10,
+   "blood": 6,
+   "muscle": 3,
+   "stroma": 2,
+   "tumor": 2,
+   "lymphocytes": 1
+  },
+  "0.5-0.7": {
+   "blood": 7,
+   "stroma": 3,
+   "background": 3,
+   "tumor": 1
+  }
+ }
+}

@@ -1,0 +1,131 @@
+{
+  "nct_tissue": {
+    "zero_shot": {
+      "n_tiles": 89434,
+      "accuracy": 0.8694791689961312,
+      "balanced_accuracy": 0.8734406003433741,
+      "log_loss": 0.8277506232261658,
+      "ece": 0.09823283851166692,
+      "per_class": {
+        "tumor": 0.735000349235175,
+        "normal_mucosa": 0.8160447335387424,
+        "muscle": 0.8777334515366431,
+        "fat": 0.9484962044777554,
+        "lymphocytes": 0.9975772259236826,
+        "mucus": 0.9768435251798561,
+        "necrosis": 0.9644718554551772,
+        "stroma": 0.6713574573999617
+      },
+      "flagged_as_blood": 0.0
+    },
+    "classifier": {
+      "n_tiles": 89434,
+      "accuracy": 0.8018426996444306,
+      "balanced_accuracy": 0.803375329742738,
+      "log_loss": 0.8756511028698963,
+      "ece": 0.11439722430282653,
+      "per_class": {
+        "tumor": 0.9258224488370469,
+        "normal_mucosa": 0.9469359808284834,
+        "muscle": 0.608451536643026,
+        "fat": 0.9170750456423561,
+        "lymphocytes": 0.9694557411092845,
+        "mucus": 0.8639838129496403,
+        "necrosis": 0.9410180681028492,
+        "stroma": 0.25426000382921693
+      },
+      "flagged_as_blood": 0.008274258112127378
+    }
+  },
+  "nct_structures": {
+    "flagged_by_tissue": {
+      "tumor": {
+        "n": 14317,
+        "as_nerve": 0.0,
+        "as_vessel": 0.0020255640148075715
+      },
+      "normal_mucosa": {
+        "n": 8763,
+        "as_nerve": 0.0,
+        "as_vessel": 0.00022823234052265205
+      },
+      "muscle": {
+        "n": 13536,
+        "as_nerve": 0.018912529550827423,
+        "as_vessel": 0.13002364066193853
+      },
+      "fat": {
+        "n": 10407,
+        "as_nerve": 0.002017872585759585,
+        "as_vessel": 0.013068127222062074
+      },
+      "lymphocytes": {
+        "n": 11557,
+        "as_nerve": 8.652764558276369e-05,
+        "as_vessel": 0.005797352254045167
+      },
+      "mucus": {
+        "n": 8896,
+        "as_nerve": 0.020008992805755396,
+        "as_vessel": 0.024955035971223023
+      },
+      "necrosis": {
+        "n": 11512,
+        "as_nerve": 0.00017373175816539263,
+        "as_vessel": 0.014506601806810284
+      },
+      "stroma": {
+        "n": 10446,
+        "as_nerve": 0.009573042312847023,
+        "as_vessel": 0.05858701895462378
+      }
+    },
+    "overall_nerve": 0.0062392378737392935,
+    "overall_vessel": 0.033488382494353375
+  },
+  "pathgen": {
+    "all": {
+      "n_patches": 2141,
+      "nerve": {
+        "caption_mentions": 35,
+        "auroc_max_p": 0.8162528829195497,
+        "flagged_when_mentioned": 0.14285714285714285,
+        "flagged_when_not_mentioned": 0.005698005698005698
+      },
+      "vessel": {
+        "caption_mentions": 333,
+        "auroc_max_p": 0.6463581944776635,
+        "flagged_when_mentioned": 0.34534534534534533,
+        "flagged_when_not_mentioned": 0.12057522123893805
+      },
+      "tumor": {
+        "caption_mentions": 1377,
+        "auroc_tumor_fraction": 0.6942106103639827,
+        "mean_tumor_fraction_mentioned": 0.5412127814088599,
+        "mean_tumor_fraction_not_mentioned": 0.212369109947644
+      }
+    },
+    "colorectal": {
+      "n_patches": 578,
+      "nerve": {
+        "caption_mentions": 1,
+        "auroc_max_p": 0.9566724436741768,
+        "flagged_when_mentioned": 0.0,
+        "flagged_when_not_mentioned": 0.008665511265164644
+      },
+      "vessel": {
+        "caption_mentions": 40,
+        "auroc_max_p": 0.7431226765799257,
+        "flagged_when_mentioned": 0.325,
+        "flagged_when_not_mentioned": 0.07063197026022305
+      },
+      "tumor": {
+        "caption_mentions": 456,
+        "auroc_tumor_fraction": 0.6785033793500144,
+        "mean_tumor_fraction_mentioned": 0.8119517543859649,
+        "mean_tumor_fraction_not_mentioned": 0.5163934426229508
+      }
+    }
+  },
+  "pathgen_skipped": []
+}

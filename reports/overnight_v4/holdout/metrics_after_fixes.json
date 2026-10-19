@@ -1,0 +1,93 @@
+{
+  "depth": {
+    "slides": 67,
+    "judged": 11,
+    "exact": 5,
+    "shallower": 6,
+    "deeper_than_pT": 0,
+    "claim_true": "11/11",
+    "T3T4_reached_level3": "3/42"
+  },
+  "serosa": {
+    "pT4_found": "0/21",
+    "false_alarms": "0/46"
+  },
+  "depth_by_pT": {
+    "cant_judge": {
+      "T1": 2,
+      "T2": 21,
+      "T3": 18,
+      "T4": 15
+    },
+    "2": {
+      "T1": 0,
+      "T2": 2,
+      "T3": 2,
+      "T4": 4
+    },
+    "3": {
+      "T1": 0,
+      "T2": 0,
+      "T3": 1,
+      "T4": 2
+    }
+  },
+  "qc_totals": {
+    "n_tiles_read": 869301,
+    "n_tissue_tiles": 795271,
+    "qc_background": 43688,
+    "qc_blood": 9733,
+    "qc_blur": 20609
+  },
+  "means": {
+    "tumor_frac": 0.5917761194029851,
+    "necrosis_frac": 0.06729850746268656,
+    "necrosis_in_tumor": 0.005074626865671642,
+    "mucin_in_tumor": 0.0011492537313432837,
+    "unsure": 0.030656716417910446,
+    "unsure_low_conf": 0.030656716417910446,
+    "unsure_disagree": NaN
+  },
+  "unsure_median_max": [
+    0.028,
+    0.106
+  ],
+  "without_musk": {
+    "depth": {
+      "slides": 67,
+      "judged": 13,
+      "exact": 5,
+      "shallower": 7,
+      "deeper_than_pT": 1,
+      "claim_true": "12/13",
+      "T3T4_reached_level3": "3/42"
+    },
+    "serosa": {
+      "pT4_found": "1/21",
+      "false_alarms": "0/46"
+    },
+    "means": {
+      "necrosis_frac": 0.06888059701492538,
+      "necrosis_in_tumor": 0.006388059701492537,
+      "unsure": 0.031208955223880595
+    },
+    "slides_where_depth_changed": [
+      "TCGA-AA-3544-01Z-00-DX1",
+      "TCGA-D5-6540-01Z-00-DX1",
+      "TCGA-F5-6813-01Z-00-DX1"
+    ]
+  },
+  "mucin_vs_tcga_mucinous": {
+    "n_mucinous": 12,
+    "n_other": 55,
+    "median_mucin_in_tumor_mucinous": 0.003,
+    "median_mucin_in_tumor_other": 0.0,
+    "auroc": 0.7643939393939394
+  },
+  "immune_vs_msi": {
+    "n_msi_high": 5,
+    "n_mss": 52,
+    "auroc_margin": 0.5461538461538461,
+    "auroc_core": 0.506
+  }
+}

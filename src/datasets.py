@@ -23,6 +23,22 @@ NCT_TO_CLASS = {
 }
 
 
+# STARC-9 folder name -> our class name (Stanford, 200 patients; see scripts/models/get_starc9.py).
+# BLD (blood) is not one of our 8 map classes yet: kept as its own label so the team can decide
+# later whether it becomes a 9th class or just an "ignore / not tumor" label.
+STARC_TO_CLASS = {
+    "TUM": "tumor",
+    "NOR": "normal_mucosa",
+    "MUS": "muscle",
+    "ADI": "fat",
+    "LYM": "lymphocytes",
+    "MUC": "mucus",
+    "NCS": "necrosis",
+    "FCT": "stroma",     # "fibroconnective tissue"
+    "BLD": "blood",
+}
+
+
 def sample_nct(nct_dir, n_per_class=50, seed=0):
     """
     Pick n random tiles per class. Returns a list of (path, our_class_name).

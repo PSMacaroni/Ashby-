@@ -1,0 +1,193 @@
+{
+  "TCGA-A6-3809-01Z-00-DX1": {
+    "info": {
+      "mpp": 0.252,
+      "read_px": 444,
+      "grid": [
+        89,
+        295
+      ],
+      "tissue_cells": 3594,
+      "edge_cells": 1435
+    },
+    "tested": 2435,
+    "flagged_background": {
+      "edge": 0,
+      "interior": 0
+    },
+    "flagged_by_label": {},
+    "necrosis_tiles": 320,
+    "necrosis_flagged": 0,
+    "fat_tiles_low_color": 0,
+    "labels_edge": {
+      "tumor": 797,
+      "mucus": 289,
+      "necrosis": 276,
+      "normal_mucosa": 37,
+      "stroma": 28,
+      "muscle": 7,
+      "lymphocytes": 1
+    },
+    "labels_interior": {
+      "tumor": 879,
+      "necrosis": 44,
+      "stroma": 42,
+      "normal_mucosa": 17,
+      "mucus": 13,
+      "muscle": 2,
+      "lymphocytes": 2,
+      "fat": 1
+    }
+  },
+  "TCGA-AA-3844-01Z-00-DX1": {
+    "info": {
+      "mpp": 0.2325,
+      "read_px": 482,
+      "grid": [
+        121,
+        99
+      ],
+      "tissue_cells": 2076,
+      "edge_cells": 996
+    },
+    "tested": 1996,
+    "flagged_background": {
+      "edge": 0,
+      "interior": 0
+    },
+    "flagged_by_label": {},
+    "necrosis_tiles": 56,
+    "necrosis_flagged": 0,
+    "fat_tiles_low_color": 0,
+    "labels_edge": {
+      "tumor": 885,
+      "stroma": 41,
+      "necrosis": 39,
+      "normal_mucosa": 27,
+      "mucus": 3,
+      "muscle": 1
+    },
+    "labels_interior": {
+      "tumor": 931,
+      "stroma": 25,
+      "normal_mucosa": 22,
+      "necrosis": 17,
+      "muscle": 3,
+      "lymphocytes": 1,
+      "mucus": 1
+    }
+  },
+  "TCGA-AA-3875-01Z-00-DX1": {
+    "info": {
+      "mpp": 0.2325,
+      "read_px": 482,
+      "grid": [
+        98,
+        69
+      ],
+      "tissue_cells": 1931,
+      "edge_cells": 777
+    },
+    "tested": 1777,
+    "flagged_background": {
+      "edge": 0,
+      "interior": 0
+    },
+    "flagged_by_label": {},
+    "necrosis_tiles": 45,
+    "necrosis_flagged": 0,
+    "fat_tiles_low_color": 0,
+    "labels_edge": {
+      "tumor": 419,
+      "normal_mucosa": 176,
+      "stroma": 127,
+      "muscle": 36,
+      "necrosis": 13,
+      "lymphocytes": 5,
+      "mucus": 1
+    },
+    "labels_interior": {
+      "tumor": 559,
+      "stroma": 299,
+      "normal_mucosa": 88,
+      "necrosis": 32,
+      "lymphocytes": 14,
+      "muscle": 5,
+      "mucus": 3
+    }
+  },
+  "TCGA-AH-6547-01Z-00-DX1": {
+    "info": {
+      "mpp": 0.252,
+      "read_px": 444,
+      "grid": [
+        54,
+        42
+      ],
+      "tissue_cells": 1137,
+      "edge_cells": 169
+    },
+    "tested": 1137,
+    "flagged_background": {
+      "edge": 0,
+      "interior": 0
+    },
+    "flagged_by_label": {},
+    "necrosis_tiles": 12,
+    "necrosis_flagged": 0,
+    "fat_tiles_low_color": 0,
+    "labels_edge": {
+      "tumor": 131,
+      "stroma": 18,
+      "necrosis": 11,
+      "normal_mucosa": 6,
+      "muscle": 3
+    },
+    "labels_interior": {
+      "tumor": 790,
+      "stroma": 138,
+      "normal_mucosa": 36,
+      "lymphocytes": 3,
+      "necrosis": 1
+    }
+  },
+  "TCGA-CM-4746-01Z-00-DX1": {
+    "info": {
+      "mpp": 0.252,
+      "read_px": 444,
+      "grid": [
+        197,
+        231
+      ],
+      "tissue_cells": 30711,
+      "edge_cells": 7020
+    },
+    "tested": 2500,
+    "flagged_background": {
+      "edge": 0,
+      "interior": 0
+    },
+    "flagged_by_label": {},
+    "necrosis_tiles": 52,
+    "necrosis_flagged": 0,
+    "fat_tiles_low_color": 0,
+    "labels_edge": {
+      "tumor": 990,
+      "muscle": 181,
+      "stroma": 122,
+      "mucus": 103,
+      "normal_mucosa": 73,
+      "necrosis": 29,
+      "lymphocytes": 2
+    },
+    "labels_interior": {
+      "tumor": 381,
+      "muscle": 372,
+      "stroma": 129,
+      "normal_mucosa": 90,
+      "necrosis": 23,
+      "mucus": 4,
+      "lymphocytes": 1
+    }
+  }
+}

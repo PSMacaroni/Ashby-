@@ -1,0 +1,617 @@
+case,project,pT,pN,stage,ajcc_edition,prior_treatment,primary_diagnosis,lymphatic_invasion,vascular_invasion,perineural_invasion,msi_mantis,msi_sensor,mucinous
+TCGA-3L-AA1B,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3057,0.05,False
+TCGA-4N-A93T,TCGA-COAD,T4a,N1b,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3317,0.69,False
+TCGA-4T-AA8H,TCGA-COAD,T3,N0,Stage IIA,7th,No,Mucinous adenocarcinoma,,,,0.3144,0.17,True
+TCGA-5M-AAT4,TCGA-COAD,T3,N0,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.3232,0.55,False
+TCGA-5M-AAT5,TCGA-COAD,,,,,Not Reported,Not Reported,,,,0.3131,0.35,False
+TCGA-5M-AAT6,TCGA-COAD,,,,,Yes,Not Reported,,,,0.66,20.58,False
+TCGA-5M-AATE,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3252,0.47,False
+TCGA-A6-2671,TCGA-COAD,,,,,Yes,Not Reported,,,,0.35,0.37,False
+TCGA-A6-2672,TCGA-COAD,T3,N1,Stage IIIB,,No,"Adenocarcinoma, NOS",,,,0.9618,31.87,False
+TCGA-A6-2674,TCGA-COAD,T3,N2,Stage IV,6th,No,Mucinous adenocarcinoma,,,,0.4577,0.02,True
+TCGA-A6-2675,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.363,0.05,False
+TCGA-A6-2676,TCGA-COAD,T4,N0,Stage IIB,6th,No,"Adenocarcinoma, NOS",,,,,17.34,False
+TCGA-A6-2677,TCGA-COAD,T3a,N1,Stage III,6th,,Clear cell carcinoma,,,,0.319,0,False
+TCGA-A6-2678,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.36,0.64,False
+TCGA-A6-2679,TCGA-COAD,T3,N0,Stage IIB,6th,No,"Adenocarcinoma, NOS",,,,0.3403,0.19,False
+TCGA-A6-2680,TCGA-COAD,T3,N0,Stage II,6th,No,"Adenocarcinoma, NOS",,,,0.3468,,False
+TCGA-A6-2681,TCGA-COAD,,,,,,Not Reported,,,,0.3456,0.13,False
+TCGA-A6-2682,TCGA-COAD,T2c,NX,Stage II,6th,,"Adenocarcinoma, NOS",,,,0.3444,,False
+TCGA-A6-2683,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3644,1.46,False
+TCGA-A6-2684,TCGA-COAD,,,,,Yes,"Adenocarcinoma, NOS",,,,0.4665,14.49,False
+TCGA-A6-2685,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3571,0,False
+TCGA-A6-2686,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,1.2375,41.35,False
+TCGA-A6-3807,TCGA-COAD,T3,N2,Stage IIIC,,No,"Adenocarcinoma, NOS",,,,0.4215,1.24,False
+TCGA-A6-3808,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.406,0.62,False
+TCGA-A6-3809,TCGA-COAD,T4,N0,Stage IIB,6th,No,Mucinous adenocarcinoma,,,,0.9595,36.48,True
+TCGA-A6-3810,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3137,1.08,False
+TCGA-A6-4105,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3528,0.3,False
+TCGA-A6-4107,TCGA-COAD,T3,N1b,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3809,0.01,False
+TCGA-A6-5656,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3197,15.42,False
+TCGA-A6-5657,TCGA-COAD,T3,N1,Stage IIIB,,No,"Adenocarcinoma, NOS",,,,0.3201,0.13,False
+TCGA-A6-5659,TCGA-COAD,T2,N0,Stage I,,No,"Adenocarcinoma, NOS",,,,0.4614,1,False
+TCGA-A6-5660,TCGA-COAD,T3,N2b,Stage IIIC,,No,"Adenocarcinoma, NOS",,,,0.3322,0.73,False
+TCGA-A6-5661,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,,33.38,False
+TCGA-A6-5662,TCGA-COAD,,,,,Yes,Not Reported,,,,,1,False
+TCGA-A6-5664,TCGA-COAD,T4a,N2a,Stage IIIC,7th,No,"Adenocarcinoma, NOS",,,,0.4019,0,False
+TCGA-A6-5665,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,1.1824,46.78,False
+TCGA-A6-5666,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3139,1,False
+TCGA-A6-5667,TCGA-COAD,T3,N1a,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3604,1.11,False
+TCGA-A6-6137,TCGA-COAD,T3,N1c,Stage IIIB,,No,"Adenocarcinoma, NOS",,,,0.3386,0.08,False
+TCGA-A6-6138,TCGA-COAD,T2,N0,Stage I,,No,"Adenocarcinoma, NOS",,,,0.3495,0.22,False
+TCGA-A6-6140,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3659,,False
+TCGA-A6-6141,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3495,0.01,False
+TCGA-A6-6142,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3596,0.07,False
+TCGA-A6-6648,TCGA-COAD,T3,N0,Stage IVA,7th,No,"Adenocarcinoma, NOS",,,,0.3926,0.52,False
+TCGA-A6-6649,TCGA-COAD,T3,N1b,Stage IIIB,,No,"Adenocarcinoma, NOS",,,,0.4012,0.19,False
+TCGA-A6-6650,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.466,2.26,False
+TCGA-A6-6651,TCGA-COAD,T3,N1b,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3785,0.08,False
+TCGA-A6-6652,TCGA-COAD,T3,N0,Stage IVA,,No,"Adenocarcinoma, NOS",,,,0.3866,0.3,False
+TCGA-A6-6653,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,1.0708,33.02,False
+TCGA-A6-6654,TCGA-COAD,T3,N1,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3351,0.07,False
+TCGA-A6-A565,TCGA-COAD,T3,N2,Stage IIIC,6th,No,Mucinous adenocarcinoma,,,,0.3972,0.41,True
+TCGA-A6-A566,TCGA-COAD,,,,,Yes,Not Reported,,,,0.2956,0,False
+TCGA-A6-A567,TCGA-COAD,,,,,Yes,"Adenocarcinoma, NOS",,,,0.2929,0.07,False
+TCGA-A6-A56B,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.3073,0.22,False
+TCGA-A6-A5ZU,TCGA-COAD,T3,N1,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,,2.59,False
+TCGA-AA-3488,TCGA-COAD,T3,N2,Stage IV,5th,No,"Adenocarcinoma, NOS",,,,0.3711,,False
+TCGA-AA-3489,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.3996,0,False
+TCGA-AA-3492,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,1.2602,35.82,False
+TCGA-AA-3494,TCGA-COAD,T3,N0,Stage IV,5th,No,"Adenocarcinoma, NOS",,,,0.3581,,False
+TCGA-AA-3495,TCGA-COAD,T2,N0,Stage I,5th,No,"Adenocarcinoma, NOS",,,,0.3588,,False
+TCGA-AA-3496,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.4517,0.4,False
+TCGA-AA-3506,TCGA-COAD,T2,N0,Stage I,5th,No,"Adenocarcinoma, NOS",,,,0.3453,0.03,False
+TCGA-AA-3509,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AA-3510,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.341,0,False
+TCGA-AA-3511,TCGA-COAD,,,,,Yes,Not Reported,,,,0.391,0.06,False
+TCGA-AA-3514,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3123,1.1,False
+TCGA-AA-3516,TCGA-COAD,,,,,,Not Reported,,,,,,False
+TCGA-AA-3517,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3204,0.26,False
+TCGA-AA-3518,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,,4.34,False
+TCGA-AA-3519,TCGA-COAD,T3,N1,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.3647,0.69,False
+TCGA-AA-3520,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.3835,1.72,False
+TCGA-AA-3521,TCGA-COAD,,,,,,Not Reported,,,,0.3496,2.03,False
+TCGA-AA-3522,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3234,0.05,False
+TCGA-AA-3524,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.3154,0.1,False
+TCGA-AA-3525,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,,11.72,False
+TCGA-AA-3526,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3851,1.33,False
+TCGA-AA-3527,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3161,2.03,False
+TCGA-AA-3529,TCGA-COAD,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.4301,0.66,False
+TCGA-AA-3530,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3164,0.4,False
+TCGA-AA-3531,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3268,0.86,False
+TCGA-AA-3532,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3244,1.6,False
+TCGA-AA-3534,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3252,0.16,False
+TCGA-AA-3538,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3368,0,False
+TCGA-AA-3542,TCGA-COAD,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,,0,False
+TCGA-AA-3543,TCGA-COAD,T2,N0,Stage I,6th,Yes,Mucinous adenocarcinoma,,,,,4.56,True
+TCGA-AA-3544,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3291,0,False
+TCGA-AA-3548,TCGA-COAD,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.3218,0.04,False
+TCGA-AA-3549,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.2966,0,False
+TCGA-AA-3552,TCGA-COAD,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,,0.04,False
+TCGA-AA-3553,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,,0,False
+TCGA-AA-3554,TCGA-COAD,T3,N0,Stage IIA,6th,Yes,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AA-3555,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,,0.05,False
+TCGA-AA-3556,TCGA-COAD,,,,,,Multiple myeloma,,,,,,False
+TCGA-AA-3558,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3523,0.11,False
+TCGA-AA-3560,TCGA-COAD,,,,,,Not Reported,,,,0.3648,0.03,False
+TCGA-AA-3561,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3413,0.27,False
+TCGA-AA-3562,TCGA-COAD,,,,,,"Carcinoma in situ, NOS",,,,,,False
+TCGA-AA-3655,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.3473,0.2,False
+TCGA-AA-3660,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.3366,0.3,False
+TCGA-AA-3662,TCGA-COAD,,,,,,Not Reported,,,,,,False
+TCGA-AA-3663,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,1.2565,41.51,False
+TCGA-AA-3664,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.2631,0.79,False
+TCGA-AA-3666,TCGA-COAD,T3,N1,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.2807,1.17,False
+TCGA-AA-3667,TCGA-COAD,T2,N0,Stage I,5th,No,"Adenocarcinoma, NOS",,,,0.2649,0.71,False
+TCGA-AA-3672,TCGA-COAD,T3,N1,Stage III,5th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AA-3673,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.284,0.51,False
+TCGA-AA-3675,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.2618,0.31,False
+TCGA-AA-3678,TCGA-COAD,T2,N1,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.2741,0.65,False
+TCGA-AA-3679,TCGA-COAD,T3,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.2575,0.41,False
+TCGA-AA-3680,TCGA-COAD,T4,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.2615,0.33,False
+TCGA-AA-3681,TCGA-COAD,T3,N1,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.263,0.52,False
+TCGA-AA-3684,TCGA-COAD,T4,N2,Stage IV,5th,No,Mucinous adenocarcinoma,,,,0.2513,0.09,True
+TCGA-AA-3685,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.2703,0.49,False
+TCGA-AA-3688,TCGA-COAD,T3,N1,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.3017,1.27,False
+TCGA-AA-3692,TCGA-COAD,,,,,Yes,Not Reported,,,,0.2721,0.31,False
+TCGA-AA-3693,TCGA-COAD,T4,N1,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.2829,1.09,False
+TCGA-AA-3695,TCGA-COAD,T3,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.2817,0.65,False
+TCGA-AA-3696,TCGA-COAD,T3,N1,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.2665,0.4,False
+TCGA-AA-3697,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AA-3710,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.8652,31.62,False
+TCGA-AA-3712,TCGA-COAD,T3,N2,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.3407,0.53,False
+TCGA-AA-3713,TCGA-COAD,T3,N0,Stage IV,5th,No,"Adenocarcinoma, NOS",,,,0.8168,26.26,False
+TCGA-AA-3715,TCGA-COAD,T3,N0,Stage II,5th,No,Adenosquamous carcinoma,,,,1.092,44.26,False
+TCGA-AA-3811,TCGA-COAD,T3,N2,Stage III,5th,No,Adenocarcinoma with neuroendocrine differentiation,,,,1.1337,38.84,False
+TCGA-AA-3812,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.2659,0.18,False
+TCGA-AA-3814,TCGA-COAD,T3,N0,Stage IIA,6th,No,Adenocarcinoma with mixed subtypes,,,,0.2754,0.35,False
+TCGA-AA-3815,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AA-3818,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.268,0.57,False
+TCGA-AA-3819,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.261,0.25,False
+TCGA-AA-3821,TCGA-COAD,T2,N0,Stage I,6th,No,Mucinous adenocarcinoma,,,,0.942,30.92,True
+TCGA-AA-3831,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.276,1.61,False
+TCGA-AA-3833,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.9553,27.18,False
+TCGA-AA-3837,TCGA-COAD,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.2784,0.82,True
+TCGA-AA-3841,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.2896,0.79,False
+TCGA-AA-3842,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3246,0.68,False
+TCGA-AA-3844,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3264,0.87,False
+TCGA-AA-3845,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.9169,30.53,False
+TCGA-AA-3846,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3293,0.67,False
+TCGA-AA-3848,TCGA-COAD,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.2571,0.66,False
+TCGA-AA-3850,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3018,0.07,False
+TCGA-AA-3851,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3204,0.43,False
+TCGA-AA-3852,TCGA-COAD,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.2731,0.32,True
+TCGA-AA-3854,TCGA-COAD,T2,N0,Stage I,6th,No,Mucinous adenocarcinoma,,,,0.2733,0.89,True
+TCGA-AA-3855,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3187,0.11,False
+TCGA-AA-3856,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.2645,0.3,False
+TCGA-AA-3858,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.2586,0.37,False
+TCGA-AA-3860,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AA-3861,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AA-3862,TCGA-COAD,,,,,,Not Reported,,,,,,False
+TCGA-AA-3864,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.8915,23.86,False
+TCGA-AA-3866,TCGA-COAD,T2,N0,Stage I,5th,No,"Adenocarcinoma, NOS",,,,0.3267,0.43,False
+TCGA-AA-3867,TCGA-COAD,,,,,,Not Reported,,,,0.3148,0.42,False
+TCGA-AA-3869,TCGA-COAD,T4,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.4048,0.67,False
+TCGA-AA-3870,TCGA-COAD,,,,,,Not Reported,,,,0.3807,0.6,False
+TCGA-AA-3872,TCGA-COAD,T4,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.3976,1.08,False
+TCGA-AA-3875,TCGA-COAD,T1,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.2689,0.14,False
+TCGA-AA-3877,TCGA-COAD,T1,N0,Stage I,6th,No,Mucinous adenocarcinoma,,,,0.8655,32.33,True
+TCGA-AA-3930,TCGA-COAD,T3,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.3672,0.43,False
+TCGA-AA-3939,TCGA-COAD,,,,,,Not Reported,,,,0.36,1.02,False
+TCGA-AA-3941,TCGA-COAD,T4,N1b,Stage IVA,7th,No,"Adenocarcinoma, NOS",,,,0.3682,1.05,False
+TCGA-AA-3947,TCGA-COAD,T4,N0,Stage IIB,6th,No,Mucinous adenocarcinoma,,,,1.2515,40,True
+TCGA-AA-3949,TCGA-COAD,T3,N1,Stage IIIB,6th,No,Mucinous adenocarcinoma,,,,0.751,24.11,True
+TCGA-AA-3950,TCGA-COAD,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.75,25.38,True
+TCGA-AA-3952,TCGA-COAD,,,,,,Not Reported,,,,0.3274,0.43,False
+TCGA-AA-3955,TCGA-COAD,T2,N2a,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3279,0.16,False
+TCGA-AA-3956,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3246,0.16,False
+TCGA-AA-3966,TCGA-COAD,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,1.296,43.67,True
+TCGA-AA-3967,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AA-3968,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.331,0.22,False
+TCGA-AA-3970,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AA-3971,TCGA-COAD,T3,N1,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.3362,0.49,False
+TCGA-AA-3972,TCGA-COAD,T3,N2,,,,Not Reported,,,,,,False
+TCGA-AA-3973,TCGA-COAD,T4,N1,Stage IV,5th,No,"Adenocarcinoma, NOS",,,,0.3291,0.47,False
+TCGA-AA-3975,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3404,0.21,False
+TCGA-AA-3976,TCGA-COAD,T2,N1,Stage IIIA,6th,No,"Adenocarcinoma, NOS",,,,0.3308,0.3,False
+TCGA-AA-3977,TCGA-COAD,T2,N0,,6th,No,"Adenocarcinoma, NOS",,,,0.3545,0.37,False
+TCGA-AA-3979,TCGA-COAD,T1,N0,,,,Not Reported,,,,0.3186,1.51,False
+TCGA-AA-3980,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3103,0.38,False
+TCGA-AA-3982,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.3356,0.06,False
+TCGA-AA-3984,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3334,0.14,False
+TCGA-AA-3986,TCGA-COAD,,,,,,Not Reported,,,,0.3248,0.09,False
+TCGA-AA-3989,TCGA-COAD,T3,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.3311,0.19,False
+TCGA-AA-3994,TCGA-COAD,T3,N1,Stage IIIB,6th,No,Mucinous adenocarcinoma,,,,0.2838,0.99,True
+TCGA-AA-A004,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.2846,0.84,False
+TCGA-AA-A00A,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,,7.51,False
+TCGA-AA-A00D,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,,0,False
+TCGA-AA-A00E,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,,14.23,False
+TCGA-AA-A00F,TCGA-COAD,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,,0.07,False
+TCGA-AA-A00J,TCGA-COAD,T4,N1,Stage IIIB,6th,No,Mucinous adenocarcinoma,,,,,11.59,True
+TCGA-AA-A00K,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,,0.41,False
+TCGA-AA-A00L,TCGA-COAD,,,,,,Not Reported,,,,,0,False
+TCGA-AA-A00N,TCGA-COAD,T4,N0,Stage IIB,6th,No,Mucinous adenocarcinoma,,,,0.3279,32.47,True
+TCGA-AA-A00O,TCGA-COAD,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.2697,1.05,False
+TCGA-AA-A00Q,TCGA-COAD,T4,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,,0,False
+TCGA-AA-A00R,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,,12.68,False
+TCGA-AA-A00U,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,,0.03,False
+TCGA-AA-A00W,TCGA-COAD,T1,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,,0,False
+TCGA-AA-A00Z,TCGA-COAD,,,,,,Not Reported,,,,0.3206,0,False
+TCGA-AA-A010,TCGA-COAD,T4,N0,Stage IIB,6th,No,"Adenocarcinoma, NOS",,,,0.3765,4.19,False
+TCGA-AA-A017,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.28,1.19,False
+TCGA-AA-A01C,TCGA-COAD,T2,N1,Stage IIIA,6th,No,"Adenocarcinoma, NOS",,,,0.2539,0.1,False
+TCGA-AA-A01D,TCGA-COAD,,,,,Yes,Not Reported,,,,0.2695,0.71,False
+TCGA-AA-A01F,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,,0.03,False
+TCGA-AA-A01G,TCGA-COAD,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,,0,True
+TCGA-AA-A01I,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.2695,0.87,False
+TCGA-AA-A01K,TCGA-COAD,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.2795,1.3,False
+TCGA-AA-A01P,TCGA-COAD,T3,N1,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.6789,20.7,False
+TCGA-AA-A01Q,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,,5.43,False
+TCGA-AA-A01R,TCGA-COAD,T3,N2,Stage III,5th,No,Mucinous adenocarcinoma,,,,0.7418,22.57,True
+TCGA-AA-A01S,TCGA-COAD,T3,N1,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.325,0.6,False
+TCGA-AA-A01T,TCGA-COAD,T3,N1,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.3369,1.26,False
+TCGA-AA-A01V,TCGA-COAD,T2,N0,Stage I,5th,No,"Adenocarcinoma, NOS",,,,0.3163,0.31,False
+TCGA-AA-A01X,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3184,0.38,False
+TCGA-AA-A01Z,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.3259,0.42,False
+TCGA-AA-A022,TCGA-COAD,T4,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,1.1662,43,False
+TCGA-AA-A024,TCGA-COAD,,,,,,Not Reported,,,,0.2567,0.75,False
+TCGA-AA-A029,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.2837,2.01,False
+TCGA-AA-A02E,TCGA-COAD,T3,N1,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.2544,1.66,False
+TCGA-AA-A02F,TCGA-COAD,T3,N1,Stage IV,6th,No,"Carcinoma, NOS",,,,0.2783,1.83,False
+TCGA-AA-A02H,TCGA-COAD,T3,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.2874,2.03,False
+TCGA-AA-A02J,TCGA-COAD,T3,N0,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.2836,0.54,False
+TCGA-AA-A02K,TCGA-COAD,T4,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AA-A02O,TCGA-COAD,T3,N0,Stage II,6th,No,"Adenocarcinoma, NOS",,,,0.3293,0.48,False
+TCGA-AA-A02R,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,1.2923,32.62,False
+TCGA-AA-A02W,TCGA-COAD,,,,,Yes,Not Reported,,,,0.2652,0.77,False
+TCGA-AA-A02Y,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3389,0.38,False
+TCGA-AA-A03F,TCGA-COAD,T3,N2,Stage III,5th,No,Mucinous adenocarcinoma,,,,0.3075,0.22,True
+TCGA-AA-A03J,TCGA-COAD,T2,N0,Stage I,5th,No,"Adenocarcinoma, NOS",,,,0.3238,0.22,False
+TCGA-AD-5900,TCGA-COAD,T2,N0,Stage I,7th,No,Mucinous adenocarcinoma,,,,0.9101,36.46,True
+TCGA-AD-6548,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.4334,0.02,False
+TCGA-AD-6888,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3466,0.13,False
+TCGA-AD-6889,TCGA-COAD,,,,,Yes,Not Reported,,,,1.3414,40.44,False
+TCGA-AD-6890,TCGA-COAD,T1,N0,,7th,No,"Adenocarcinoma, NOS",,,,0.3483,0.03,False
+TCGA-AD-6895,TCGA-COAD,,,,,,Basaloid squamous cell carcinoma,,,,0.8416,23.11,False
+TCGA-AD-6899,TCGA-COAD,T4a,N2b,Stage IIIC,7th,No,Mucinous adenocarcinoma,,,,0.355,0.07,True
+TCGA-AD-6901,TCGA-COAD,T3,N0,,7th,No,"Adenocarcinoma, NOS",,,,0.3533,0.18,False
+TCGA-AD-6963,TCGA-COAD,T3,N0,,7th,No,"Adenocarcinoma, NOS",,,,0.3442,0.02,False
+TCGA-AD-6964,TCGA-COAD,,,,,Yes,"Adenocarcinoma, NOS",,,,0.7365,18.65,False
+TCGA-AD-6965,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3643,0.33,False
+TCGA-AD-A5EJ,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,1.0934,22.4,False
+TCGA-AD-A5EK,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.2808,0.32,False
+TCGA-AF-2687,TCGA-READ,,,,,Yes,Unknown,,,,0.3529,0.08,False
+TCGA-AF-2689,TCGA-READ,T3,N2,Stage IV,,No,"Adenocarcinoma, NOS",,,,0.3486,1.28,False
+TCGA-AF-2690,TCGA-READ,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.3412,0.03,False
+TCGA-AF-2691,TCGA-READ,T1,N0,Stage I,,No,"Adenocarcinoma, NOS",,,,0.3267,1.16,False
+TCGA-AF-2692,TCGA-READ,,,,,Yes,"Adenocarcinoma, NOS",,,,0.3259,1.32,False
+TCGA-AF-2693,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.339,0.02,False
+TCGA-AF-3400,TCGA-READ,T3,N0,Stage IIA,,No,Mucinous adenocarcinoma,,,,0.3156,0.93,True
+TCGA-AF-3911,TCGA-READ,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.3559,0.15,False
+TCGA-AF-3913,TCGA-READ,T3a,N0,Stage III,7th,,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AF-3914,TCGA-READ,,,,,Yes,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AF-4110,TCGA-READ,T4a,N2b,Stage IVA,7th,No,"Adenocarcinoma, NOS",,,,0.3522,0.06,False
+TCGA-AF-5654,TCGA-READ,T2,N0,Stage I,,No,"Adenocarcinoma, NOS",,,,0.3231,0.19,False
+TCGA-AF-6136,TCGA-READ,T3,N1b,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3329,0.16,False
+TCGA-AF-6655,TCGA-READ,T2,N1,Stage IIIA,7th,No,"Adenocarcinoma, NOS",,,,0.3465,0.16,False
+TCGA-AF-6672,TCGA-READ,,,,,Yes,"Adenocarcinoma, NOS",,,,0.3345,0.02,False
+TCGA-AF-A56K,TCGA-READ,,,,,Yes,"Adenocarcinoma, NOS",,,,0.3197,0.29,False
+TCGA-AF-A56L,TCGA-READ,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.3287,0.22,False
+TCGA-AF-A56N,TCGA-READ,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3275,0.54,False
+TCGA-AG-3574,TCGA-READ,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.3356,0,False
+TCGA-AG-3575,TCGA-READ,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.3841,0,False
+TCGA-AG-3578,TCGA-READ,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,,0,True
+TCGA-AG-3580,TCGA-READ,T1,N0,Stage I,5th,No,"Adenocarcinoma, NOS",,,,0.3094,0.04,False
+TCGA-AG-3581,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3144,0,False
+TCGA-AG-3582,TCGA-READ,T3,N1,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,,0.04,False
+TCGA-AG-3583,TCGA-READ,T3,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.3724,0.12,False
+TCGA-AG-3584,TCGA-READ,T3,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.3271,0.35,False
+TCGA-AG-3586,TCGA-READ,T3,N2,Stage III,5th,No,Mucinous adenocarcinoma,,,,,0.15,True
+TCGA-AG-3587,TCGA-READ,,,,,Yes,Unknown,,,,,0.23,False
+TCGA-AG-3591,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3455,0.09,False
+TCGA-AG-3592,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3478,0.37,False
+TCGA-AG-3593,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,,0,False
+TCGA-AG-3594,TCGA-READ,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.3367,0.05,True
+TCGA-AG-3598,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3443,0,False
+TCGA-AG-3599,TCGA-READ,T2,N0,Stage I,5th,No,Mucinous adenocarcinoma,,,,0.3477,0.39,True
+TCGA-AG-3600,TCGA-READ,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,,0.1,False
+TCGA-AG-3601,TCGA-READ,T4,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,,1.17,False
+TCGA-AG-3602,TCGA-READ,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.341,0,False
+TCGA-AG-3605,TCGA-READ,T3,N1,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.33,0.24,False
+TCGA-AG-3608,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,,0.3,False
+TCGA-AG-3609,TCGA-READ,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,,0.03,False
+TCGA-AG-3611,TCGA-READ,,,,,,Not Reported,,,,,,False
+TCGA-AG-3612,TCGA-READ,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AG-3725,TCGA-READ,T3,N2,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.3507,1.05,False
+TCGA-AG-3726,TCGA-READ,T2,N0,Stage I,5th,No,"Adenocarcinoma, NOS",,,,0.293,0.97,False
+TCGA-AG-3727,TCGA-READ,T3,N1,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.2939,1.55,False
+TCGA-AG-3728,TCGA-READ,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.3413,0.43,False
+TCGA-AG-3731,TCGA-READ,T3,N1,Stage IV,5th,No,"Adenocarcinoma, NOS",,,,0.3516,0.01,False
+TCGA-AG-3732,TCGA-READ,T2,N0,Stage I,5th,No,"Adenocarcinoma, NOS",,,,0.3066,0.34,False
+TCGA-AG-3742,TCGA-READ,T1,N0,Stage I,5th,No,"Adenocarcinoma, NOS",,,,0.3199,0.24,False
+TCGA-AG-3878,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.2791,0.06,False
+TCGA-AG-3881,TCGA-READ,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.2842,0.79,True
+TCGA-AG-3882,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.2963,0.5,False
+TCGA-AG-3883,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.2889,0.29,False
+TCGA-AG-3885,TCGA-READ,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.3285,0.66,False
+TCGA-AG-3887,TCGA-READ,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.2587,0.34,True
+TCGA-AG-3890,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.2774,0.59,False
+TCGA-AG-3891,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AG-3892,TCGA-READ,T1,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.5876,0.08,False
+TCGA-AG-3893,TCGA-READ,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.2849,0.56,False
+TCGA-AG-3894,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.2675,0.09,False
+TCGA-AG-3896,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.2715,0.68,False
+TCGA-AG-3898,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.2685,0.24,False
+TCGA-AG-3901,TCGA-READ,T3,N1,Stage IIIB,6th,No,Mucinous adenocarcinoma,,,,0.2547,0.03,True
+TCGA-AG-3902,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.2705,0.24,False
+TCGA-AG-3906,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AG-3909,TCGA-READ,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.2612,0.72,False
+TCGA-AG-3999,TCGA-READ,,,,,Yes,Unknown,,,,0.3504,8.8,False
+TCGA-AG-4001,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.2809,5.69,False
+TCGA-AG-4005,TCGA-READ,T3,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.3323,7.84,False
+TCGA-AG-4007,TCGA-READ,T4,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.3394,6.54,False
+TCGA-AG-4008,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.2652,0.37,False
+TCGA-AG-4009,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AG-4015,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.2981,0.7,False
+TCGA-AG-4021,TCGA-READ,,,,,Yes,Unknown,,,,0.346,0.21,False
+TCGA-AG-4022,TCGA-READ,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.3436,0.25,False
+TCGA-AG-A002,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3178,0.46,False
+TCGA-AG-A008,TCGA-READ,T2,N0,Stage I,6th,No,Mucinous adenocarcinoma,,,,0.6176,27.36,True
+TCGA-AG-A00C,TCGA-READ,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.5582,0.91,False
+TCGA-AG-A00H,TCGA-READ,,,,,,Not Reported,,,,,,False
+TCGA-AG-A00Y,TCGA-READ,,,,,Yes,Unknown,,,,0.2637,0.85,False
+TCGA-AG-A011,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.2669,0,False
+TCGA-AG-A014,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AG-A015,TCGA-READ,,,,,Yes,Unknown,,,,0.5815,14.94,False
+TCGA-AG-A016,TCGA-READ,T3,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.282,28.84,False
+TCGA-AG-A01J,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.2531,0.36,False
+TCGA-AG-A01L,TCGA-READ,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.2594,0.09,False
+TCGA-AG-A01N,TCGA-READ,,,,,,Not Reported,,,,0.2832,0.75,False
+TCGA-AG-A01W,TCGA-READ,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.2895,0.37,False
+TCGA-AG-A01Y,TCGA-READ,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.3053,0.97,False
+TCGA-AG-A020,TCGA-READ,T3,N1,Stage III,5th,No,Mucinous adenocarcinoma,,,,0.3111,0.39,True
+TCGA-AG-A023,TCGA-READ,T4,N2,Stage IV,5th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AG-A025,TCGA-READ,T1,N0,Stage I,5th,No,"Adenocarcinoma, NOS",,,,0.2593,0.66,False
+TCGA-AG-A026,TCGA-READ,T4,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.3214,1.92,False
+TCGA-AG-A02G,TCGA-READ,T2,N1,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.2752,1.51,False
+TCGA-AG-A02N,TCGA-READ,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,1.2673,39.69,False
+TCGA-AG-A02X,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.2853,1.74,False
+TCGA-AG-A032,TCGA-READ,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.2539,0.57,False
+TCGA-AG-A036,TCGA-READ,T3,N2,Stage III,5th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AH-6544,TCGA-READ,T3,N1,,7th,No,"Adenocarcinoma, NOS",,,,0.3308,0.07,False
+TCGA-AH-6547,TCGA-READ,T3,N0,,7th,No,"Adenocarcinoma, NOS",,,,0.3524,0,False
+TCGA-AH-6549,TCGA-READ,T3,NX,,7th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-AH-6643,TCGA-READ,T3,N2b,Stage IIIC,7th,No,"Adenocarcinoma, NOS",,,,0.3494,0.57,False
+TCGA-AH-6644,TCGA-READ,T3,NX,,7th,No,"Adenocarcinoma, NOS",,,,0.3448,0.17,False
+TCGA-AH-6897,TCGA-READ,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.344,0.22,False
+TCGA-AH-6903,TCGA-READ,T3,N1b,Stage IIIB,7th,No,Mucinous adenocarcinoma,,,,0.3374,0.01,True
+TCGA-AM-5820,TCGA-COAD,T4a,N2,Stage IVA,7th,No,"Adenocarcinoma, NOS",,,,0.3465,1.64,False
+TCGA-AM-5821,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.8795,30.25,False
+TCGA-AU-3779,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3365,0.29,False
+TCGA-AU-6004,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.8424,27.82,False
+TCGA-AY-4070,TCGA-COAD,,,,,Yes,Not Reported,,,,0.2687,0.78,False
+TCGA-AY-4071,TCGA-COAD,T1,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.2716,1.3,False
+TCGA-AY-5543,TCGA-COAD,T3,N1a,Stage IVA,7th,No,"Adenocarcinoma, NOS",,,,0.3374,0.61,False
+TCGA-AY-6196,TCGA-COAD,T3,N2b,Stage IIIC,7th,No,Mucinous adenocarcinoma,,,,0.3602,0.23,True
+TCGA-AY-6197,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.965,31.61,False
+TCGA-AY-6386,TCGA-COAD,T3,N1a,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.327,0.27,False
+TCGA-AY-A54L,TCGA-COAD,,,,,Yes,Not Reported,,,,0.2932,0.39,False
+TCGA-AY-A69D,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3161,0.21,False
+TCGA-AY-A71X,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3062,0.22,False
+TCGA-AY-A8YK,TCGA-COAD,T3,N2a,Stage IVA,7th,No,"Adenocarcinoma, NOS",,,,0.3268,0.32,False
+TCGA-AZ-4308,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.363,0.11,False
+TCGA-AZ-4313,TCGA-COAD,T1a,N0,Stage IA,,,"Adenocarcinoma, NOS",,,,0.7225,,False
+TCGA-AZ-4315,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3429,0.67,False
+TCGA-AZ-4614,TCGA-COAD,T4a,N1,Stage IVA,,No,"Adenocarcinoma, NOS",,,,0.3773,0.94,False
+TCGA-AZ-4615,TCGA-COAD,,,,,Yes,Not Reported,,,,1.0327,33.79,False
+TCGA-AZ-4616,TCGA-COAD,T3,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.3171,0.79,False
+TCGA-AZ-4681,TCGA-COAD,T3,N0,,,,"Adenocarcinoma, NOS",,,,0.3537,0.02,False
+TCGA-AZ-4682,TCGA-COAD,T3,N0,Stage IVA,,No,"Adenocarcinoma, NOS",,,,0.367,0.13,False
+TCGA-AZ-4684,TCGA-COAD,T3,N2,Stage IVA,,No,"Adenocarcinoma, NOS",,,,0.3572,,False
+TCGA-AZ-5403,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,0.3101,0.27,False
+TCGA-AZ-5407,TCGA-COAD,T1,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3611,0.46,False
+TCGA-AZ-6598,TCGA-COAD,T3,N0,Stage II,5th,No,"Adenocarcinoma, NOS",,,,1.3777,43.27,False
+TCGA-AZ-6599,TCGA-COAD,T2,N0,Stage I,5th,No,"Adenocarcinoma, NOS",,,,0.3766,0.14,False
+TCGA-AZ-6600,TCGA-COAD,T4,N1,Stage IV,5th,No,"Adenocarcinoma, NOS",,,,0.3613,0.46,False
+TCGA-AZ-6601,TCGA-COAD,,,,,,Not Reported,,,,,,False
+TCGA-AZ-6603,TCGA-COAD,T2,N1,,5th,No,"Adenocarcinoma, NOS",,,,0.3686,0.35,False
+TCGA-AZ-6605,TCGA-COAD,T4,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.3467,0.02,False
+TCGA-AZ-6606,TCGA-COAD,T4,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.3623,0.2,False
+TCGA-AZ-6607,TCGA-COAD,T4,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.354,0,False
+TCGA-AZ-6608,TCGA-COAD,,,,,,"Hodgkin lymphoma, NOS",,,,,,False
+TCGA-BM-6198,TCGA-READ,,,,,,"Adenocarcinoma, NOS",,,,,,False
+TCGA-CA-5254,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3896,0.53,False
+TCGA-CA-5255,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3805,0.07,False
+TCGA-CA-5256,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3522,0.07,False
+TCGA-CA-5796,TCGA-COAD,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.3604,0.15,True
+TCGA-CA-5797,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3554,0.61,False
+TCGA-CA-6715,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Papillary adenocarcinoma, NOS",,,,0.3669,0.11,False
+TCGA-CA-6716,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Papillary adenocarcinoma, NOS",,,,0.3773,0.56,False
+TCGA-CA-6717,TCGA-COAD,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.3653,0.01,True
+TCGA-CA-6718,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3722,0,False
+TCGA-CA-6719,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3645,0.24,False
+TCGA-CI-6622,TCGA-READ,T4,N0,Stage IIB,7th,No,"Adenocarcinoma, NOS",,,,0.3223,0,False
+TCGA-CI-6624,TCGA-READ,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3402,0.02,False
+TCGA-CK-4947,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3269,0.07,False
+TCGA-CK-4948,TCGA-COAD,T3,N1,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.3486,0.22,False
+TCGA-CK-4950,TCGA-COAD,T3,N1,Stage IIIB,6th,No,Mucinous adenocarcinoma,,,,0.3697,0.31,True
+TCGA-CK-4951,TCGA-COAD,,,,,Yes,Mucinous adenocarcinoma,,,,0.7849,21.62,True
+TCGA-CK-4952,TCGA-COAD,T4,N2,Stage IIIC,6th,No,Mucinous adenocarcinoma,,,,0.3926,0.29,True
+TCGA-CK-5912,TCGA-COAD,,,,,,Not Reported,,,,0.3783,1.79,False
+TCGA-CK-5913,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.9213,32.98,False
+TCGA-CK-5914,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.3446,1.56,False
+TCGA-CK-5915,TCGA-COAD,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.3162,0.29,False
+TCGA-CK-5916,TCGA-COAD,T1,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.9208,35.2,False
+TCGA-CK-6746,TCGA-COAD,T4b,N0,Stage IIB,6th,No,"Adenocarcinoma, NOS",,,,1.1685,36.05,False
+TCGA-CK-6747,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3727,0.64,False
+TCGA-CK-6748,TCGA-COAD,T3,N1,Stage IV,6th,No,Mucinous adenocarcinoma,,,,0.3564,0.22,True
+TCGA-CK-6751,TCGA-COAD,T2,N0,Stage I,5th,No,Mucinous adenocarcinoma,,,,0.3583,0.05,True
+TCGA-CL-4957,TCGA-READ,T3,N1,,,No,"Adenocarcinoma, NOS",,,,0.3362,0.05,False
+TCGA-CL-5917,TCGA-READ,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.359,1.58,False
+TCGA-CL-5918,TCGA-READ,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3446,0.61,False
+TCGA-CM-4743,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.8182,23.82,False
+TCGA-CM-4744,TCGA-COAD,T2,N0,Stage I,,No,"Adenocarcinoma, NOS",,,,0.3613,0.03,False
+TCGA-CM-4746,TCGA-COAD,T2,N0,Stage I,,No,"Adenocarcinoma, NOS",,,,0.8512,21.49,False
+TCGA-CM-4747,TCGA-COAD,T4a,N1b,Stage IVA,,No,"Adenocarcinoma, NOS",,,,0.3787,0.01,False
+TCGA-CM-4748,TCGA-COAD,T4a,N1a,Stage IIIB,,No,Mucinous adenocarcinoma,,,,0.365,0.04,True
+TCGA-CM-4750,TCGA-COAD,T1,N1b,Stage IIIA,,No,"Adenocarcinoma, NOS",,,,0.3583,0.18,False
+TCGA-CM-4751,TCGA-COAD,T3,N1b,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3606,0,False
+TCGA-CM-4752,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3498,0.02,False
+TCGA-CM-5341,TCGA-COAD,T2,N1a,Stage IIIA,,No,"Adenocarcinoma, NOS",,,,0.3524,0,False
+TCGA-CM-5344,TCGA-COAD,T3,N1b,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3396,0.47,False
+TCGA-CM-5348,TCGA-COAD,T3,N1a,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3321,0.56,False
+TCGA-CM-5349,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3249,0,False
+TCGA-CM-5860,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3393,0.54,False
+TCGA-CM-5861,TCGA-COAD,,,,,Yes,"Adenocarcinoma, NOS",,,,0.9692,34.37,False
+TCGA-CM-5862,TCGA-COAD,T3,N1a,Stage IVA,7th,No,"Adenocarcinoma, NOS",,,,0.3545,1.45,False
+TCGA-CM-5863,TCGA-COAD,T3,N1b,Stage IIIB,7th,No,Mucinous adenocarcinoma,,,,0.3973,0,True
+TCGA-CM-5864,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3329,0.53,False
+TCGA-CM-5868,TCGA-COAD,T4a,N1a,Stage IVA,7th,No,"Adenocarcinoma, NOS",,,,0.3403,0.89,False
+TCGA-CM-6161,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3145,0.25,False
+TCGA-CM-6162,TCGA-COAD,T3,N1a,Stage IIIB,7th,No,Mucinous adenocarcinoma,,,,0.8773,29.11,True
+TCGA-CM-6163,TCGA-COAD,T1,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3345,0.07,False
+TCGA-CM-6164,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3277,0.05,False
+TCGA-CM-6165,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3145,0.1,False
+TCGA-CM-6166,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3171,0.33,False
+TCGA-CM-6167,TCGA-COAD,T3,N2b,Stage IIIC,7th,No,"Adenocarcinoma, NOS",,,,0.3157,0.06,False
+TCGA-CM-6168,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.4083,1.02,False
+TCGA-CM-6169,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3404,0.78,False
+TCGA-CM-6170,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3219,0.21,False
+TCGA-CM-6171,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,1.1813,43,False
+TCGA-CM-6172,TCGA-COAD,T3,N1a,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3388,0.16,False
+TCGA-CM-6674,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.7398,21.08,False
+TCGA-CM-6675,TCGA-COAD,,,,,Yes,Not Reported,,,,0.357,0.38,False
+TCGA-CM-6676,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.353,0.05,False
+TCGA-CM-6677,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3529,0.48,False
+TCGA-CM-6678,TCGA-COAD,,,,,Yes,"Adenocarcinoma, NOS",,,,0.349,0.13,False
+TCGA-CM-6679,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3381,0.16,False
+TCGA-CM-6680,TCGA-COAD,T3,N2a,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.4575,1.17,False
+TCGA-D5-5537,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3494,0.42,False
+TCGA-D5-5538,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3546,0.4,False
+TCGA-D5-5539,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3573,0.38,False
+TCGA-D5-5540,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3281,0.88,False
+TCGA-D5-5541,TCGA-COAD,T3,N1a,Stage IIIB,,No,"Adenocarcinoma, NOS",,,,0.328,0.51,False
+TCGA-D5-6529,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3658,0.18,False
+TCGA-D5-6530,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,1.0856,41.17,False
+TCGA-D5-6531,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.347,0.81,False
+TCGA-D5-6532,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3466,0.62,False
+TCGA-D5-6533,TCGA-COAD,T4b,N0,,7th,No,"Adenocarcinoma, NOS",,,,0.3337,0.52,False
+TCGA-D5-6534,TCGA-COAD,T3,N0,Stage IIA,7th,No,Mucinous adenocarcinoma,,,,0.3343,0.04,True
+TCGA-D5-6535,TCGA-COAD,T3,N1,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.343,0.28,False
+TCGA-D5-6536,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3522,0.23,False
+TCGA-D5-6537,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3503,0.37,False
+TCGA-D5-6538,TCGA-COAD,T3,N2,Stage IIIB,,No,"Adenocarcinoma, NOS",,,,0.3432,0.75,False
+TCGA-D5-6539,TCGA-COAD,T3,N0,,7th,No,"Adenocarcinoma, NOS",,,,0.3265,0,False
+TCGA-D5-6540,TCGA-COAD,T2,N0,Stage I,,No,Mucinous adenocarcinoma,,,,0.9984,32.59,True
+TCGA-D5-6541,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3319,0.11,False
+TCGA-D5-6898,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3407,0.17,False
+TCGA-D5-6920,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3434,0.01,False
+TCGA-D5-6922,TCGA-COAD,T3,N1,Stage IIIA,7th,No,"Adenocarcinoma, NOS",,,,0.3579,0.07,False
+TCGA-D5-6923,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3476,0.2,False
+TCGA-D5-6924,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3409,0.06,False
+TCGA-D5-6926,TCGA-COAD,T4a,N1,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3496,0.18,False
+TCGA-D5-6927,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.7283,17.61,False
+TCGA-D5-6928,TCGA-COAD,T3,N0,Stage IIA,7th,No,Mucinous adenocarcinoma,,,,0.6559,14.76,True
+TCGA-D5-6929,TCGA-COAD,T3,N1,Stage IV,7th,No,"Adenocarcinoma, NOS",,,,0.3524,0.09,False
+TCGA-D5-6930,TCGA-COAD,T3,N0,Stage IIA,7th,No,Mucinous adenocarcinoma,,,,0.6864,15.2,True
+TCGA-D5-6931,TCGA-COAD,T4b,N2,Stage IIIC,7th,No,"Adenocarcinoma, NOS",,,,0.3574,0.12,False
+TCGA-D5-6932,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3444,0.19,False
+TCGA-D5-7000,TCGA-COAD,T2,N0,Stage I,7th,No,Mucinous adenocarcinoma,,,,0.3496,0.06,True
+TCGA-DC-4745,TCGA-READ,T3,N1a,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3391,0.66,False
+TCGA-DC-4749,TCGA-READ,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3406,0.31,False
+TCGA-DC-5337,TCGA-READ,T1,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3191,0.15,False
+TCGA-DC-5869,TCGA-READ,T3,N1a,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3785,0.42,False
+TCGA-DC-6154,TCGA-READ,T4a,N2b,Stage IVA,7th,No,"Adenocarcinoma, NOS",,,,0.331,1.57,False
+TCGA-DC-6155,TCGA-READ,T2,N1b,Stage IIIA,7th,No,"Adenocarcinoma, NOS",,,,0.3493,0.16,False
+TCGA-DC-6156,TCGA-READ,T4a,N2b,Stage IVA,7th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-DC-6157,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.331,0.33,False
+TCGA-DC-6158,TCGA-READ,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.339,0.34,False
+TCGA-DC-6160,TCGA-READ,T2,N0,Stage I,6th,No,"Adenocarcinoma, NOS",,,,0.321,0.17,False
+TCGA-DC-6681,TCGA-READ,T3,N2a,Stage IVA,7th,No,"Adenocarcinoma, NOS",,,,0.3433,0,False
+TCGA-DC-6682,TCGA-READ,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3334,0.09,False
+TCGA-DC-6683,TCGA-READ,T3,N1b,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3459,0.19,False
+TCGA-DM-A0X9,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3503,0.2,False
+TCGA-DM-A0XD,TCGA-COAD,,,,,Yes,"Adenocarcinoma, NOS",,,,0.3301,0.15,False
+TCGA-DM-A0XF,TCGA-COAD,T3,N2,Stage IIIC,,No,"Adenocarcinoma, NOS",,,,0.3334,0.1,False
+TCGA-DM-A1D0,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3358,0.67,False
+TCGA-DM-A1D4,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3544,0.35,False
+TCGA-DM-A1D6,TCGA-COAD,T3,N0,Stage IIA,,No,Mucinous adenocarcinoma,,,,0.3534,0.53,True
+TCGA-DM-A1D7,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3316,0.01,False
+TCGA-DM-A1D8,TCGA-COAD,T3,N1,,,No,"Adenocarcinoma, NOS",,,,0.3468,0.47,False
+TCGA-DM-A1D9,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.335,0.33,False
+TCGA-DM-A1DA,TCGA-COAD,T3,N2,Stage IIIC,,No,"Adenocarcinoma, NOS",,,,0.3952,2.42,False
+TCGA-DM-A1DB,TCGA-COAD,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3441,0.25,False
+TCGA-DM-A1HA,TCGA-COAD,T3,N2,Stage IIIC,,No,"Adenocarcinoma, NOS",,,,0.3507,1.46,False
+TCGA-DM-A280,TCGA-COAD,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.3888,0.01,True
+TCGA-DM-A282,TCGA-COAD,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.3739,0.03,True
+TCGA-DM-A285,TCGA-COAD,T3,N2,Stage IV,6th,No,Mucinous adenocarcinoma,,,,0.3761,0.13,True
+TCGA-DM-A288,TCGA-COAD,T3,N2,Stage IIIC,6th,No,Mucinous adenocarcinoma,,,,0.3948,0.31,True
+TCGA-DM-A28A,TCGA-COAD,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.3995,0.25,False
+TCGA-DM-A28E,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.379,0.04,False
+TCGA-DM-A28F,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.3791,0.24,False
+TCGA-DM-A28G,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3656,0.01,False
+TCGA-DM-A28H,TCGA-COAD,,,,,Yes,"Adenocarcinoma, NOS",,,,0.3898,0.15,False
+TCGA-DM-A28K,TCGA-COAD,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.397,0.05,True
+TCGA-DM-A28M,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3983,0.13,False
+TCGA-DT-5265,TCGA-READ,T3,N0,Stage II,6th,No,Mucinous adenocarcinoma,,,,0.3389,0.13,True
+TCGA-DY-A0XA,TCGA-READ,T3,N0,Stage IIA,,No,"Adenocarcinoma, NOS",,,,0.3458,0.29,False
+TCGA-DY-A1DC,TCGA-READ,,,,,Yes,"Adenocarcinoma, NOS",,,,0.3327,0.18,False
+TCGA-DY-A1DD,TCGA-READ,T3,N1,Stage IIIB,,No,"Adenocarcinoma, NOS",,,,0.3611,1,False
+TCGA-DY-A1DE,TCGA-READ,,,,,Yes,Unknown,,,,,,False
+TCGA-DY-A1DF,TCGA-READ,T3,N2,Stage IIIC,,No,"Adenocarcinoma, NOS",,,,0.3545,0.72,False
+TCGA-DY-A1DG,TCGA-READ,,,,,Yes,Unknown,,,,0.363,0.8,False
+TCGA-EF-5830,TCGA-READ,T4a,N0,Stage IIB,7th,No,"Adenocarcinoma, NOS",,,,0.3447,0.63,False
+TCGA-EI-6506,TCGA-READ,T3,N0,Stage IIA,7th,No,Tubular adenocarcinoma,,,,0.3332,0.05,False
+TCGA-EI-6507,TCGA-READ,T3,N0,Stage IIA,7th,No,Mucinous adenocarcinoma,,,,0.6711,15.99,True
+TCGA-EI-6508,TCGA-READ,T3,N1a,Stage IIIB,7th,No,Adenocarcinoma in tubulovillous adenoma,,,,0.3488,0.24,False
+TCGA-EI-6509,TCGA-READ,,,,,Yes,Adenocarcinoma in tubulovillous adenoma,,,,0.3555,0.5,False
+TCGA-EI-6510,TCGA-READ,T2,N0,,7th,No,Adenocarcinoma in tubulovillous adenoma,,,,0.3574,0.05,False
+TCGA-EI-6511,TCGA-READ,T3,N1,Stage IIIB,7th,No,Adenocarcinoma in tubulovillous adenoma,,,,0.3537,0.15,False
+TCGA-EI-6512,TCGA-READ,T3,N1,Stage IIIB,7th,No,Adenocarcinoma in tubulovillous adenoma,,,,0.3602,0.71,False
+TCGA-EI-6513,TCGA-READ,T3,N1,Stage IIIB,7th,No,Adenocarcinoma in tubulovillous adenoma,,,,0.3553,0.48,False
+TCGA-EI-6514,TCGA-READ,T3,N0,Stage IIA,7th,No,Adenocarcinoma in tubulovillous adenoma,,,,0.3382,0.38,False
+TCGA-EI-6881,TCGA-READ,T3,N1,Stage IIIA,6th,No,Adenocarcinoma in tubulovillous adenoma,,,,0.3444,0.21,False
+TCGA-EI-6882,TCGA-READ,T3,N0,Stage IIA,7th,No,Adenocarcinoma with mixed subtypes,,,,0.9044,25.05,False
+TCGA-EI-6883,TCGA-READ,T3,N0,Stage IIC,7th,No,Tubular adenocarcinoma,,,,0.3433,0.27,False
+TCGA-EI-6884,TCGA-READ,T3,N1,Stage IIIA,7th,No,Tubular adenocarcinoma,,,,0.3424,0,False
+TCGA-EI-6885,TCGA-READ,,,,,Yes,Tubular adenocarcinoma,,,,0.3401,0.11,False
+TCGA-EI-6917,TCGA-READ,T3,N1,Stage IIIA,7th,No,Adenocarcinoma with mixed subtypes,,,,0.3457,0.03,False
+TCGA-EI-7002,TCGA-READ,T3,N2,Stage IV,7th,No,Tubular adenocarcinoma,,,,0.3622,0.54,False
+TCGA-EI-7004,TCGA-READ,T4a,N2b,,7th,No,Mucinous adenocarcinoma,,,,0.345,0.06,True
+TCGA-F4-6459,TCGA-COAD,T3,N2a,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3642,0.31,False
+TCGA-F4-6460,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3437,0.24,False
+TCGA-F4-6461,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3699,0.23,False
+TCGA-F4-6463,TCGA-COAD,T3,N0,Stage IIA,7th,No,Mucinous adenocarcinoma,,,,0.3302,0.14,True
+TCGA-F4-6569,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3647,0.06,False
+TCGA-F4-6570,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.9787,31.81,False
+TCGA-F4-6703,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.4396,1,False
+TCGA-F4-6704,TCGA-COAD,T3,N2b,Stage IIIC,7th,No,Mucinous adenocarcinoma,,,,0.3596,0.06,True
+TCGA-F4-6805,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3882,0.03,False
+TCGA-F4-6806,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3957,0.1,False
+TCGA-F4-6807,TCGA-COAD,T3,N2b,Stage IIIC,7th,No,"Adenocarcinoma, NOS",,,,0.3514,0,False
+TCGA-F4-6808,TCGA-COAD,T1,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3566,0.12,False
+TCGA-F4-6809,TCGA-COAD,T3,N1,Stage IVA,7th,No,"Adenocarcinoma, NOS",,,,0.3476,0.02,False
+TCGA-F4-6854,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3387,0.1,False
+TCGA-F4-6855,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3419,0.03,False
+TCGA-F4-6856,TCGA-COAD,T2,N0,Stage I,7th,No,Mucinous adenocarcinoma,,,,0.8729,27.56,True
+TCGA-F5-6464,TCGA-READ,T4b,N2a,Stage IIIC,7th,No,"Adenocarcinoma, NOS",,,,0.3424,0.04,False
+TCGA-F5-6465,TCGA-READ,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3415,0,False
+TCGA-F5-6571,TCGA-READ,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3388,0.35,False
+TCGA-F5-6702,TCGA-READ,,,,,Yes,Unknown,,,,0.328,0.02,False
+TCGA-F5-6810,TCGA-READ,,,,,Not Reported,Not Reported,,,,0.3292,0.13,False
+TCGA-F5-6811,TCGA-READ,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3549,0.35,False
+TCGA-F5-6812,TCGA-READ,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3556,0.01,False
+TCGA-F5-6813,TCGA-READ,T4a,N2,Stage IIIC,7th,No,"Adenocarcinoma, NOS",,,,0.3558,0.45,False
+TCGA-F5-6814,TCGA-READ,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3409,0.34,False
+TCGA-F5-6861,TCGA-READ,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3338,0,False
+TCGA-F5-6863,TCGA-READ,,,,,Yes,Unknown,,,,0.3566,0.08,False
+TCGA-F5-6864,TCGA-READ,T3,N2a,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.3486,0.19,False
+TCGA-G4-6293,TCGA-COAD,T3,N1,Stage III,5th,No,"Adenocarcinoma, NOS",,,,0.3277,0.28,False
+TCGA-G4-6294,TCGA-COAD,,,,,,Not Reported,,,,0.3774,1.01,False
+TCGA-G4-6295,TCGA-COAD,T3,N0,Stage II,6th,No,"Adenocarcinoma, NOS",,,,0.3241,0.24,False
+TCGA-G4-6297,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3325,0.14,False
+TCGA-G4-6298,TCGA-COAD,T4a,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,0.3334,0.31,False
+TCGA-G4-6299,TCGA-COAD,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.3963,0.88,False
+TCGA-G4-6302,TCGA-COAD,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.4592,3.04,True
+TCGA-G4-6303,TCGA-COAD,,,,,Yes,Not Reported,,,,0.359,0.5,False
+TCGA-G4-6304,TCGA-COAD,,,,,Yes,Not Reported,,,,0.5676,7.18,False
+TCGA-G4-6306,TCGA-COAD,T2,N0,,6th,No,"Adenocarcinoma, NOS",,,,0.3415,0.25,False
+TCGA-G4-6307,TCGA-COAD,T3,N1,Stage IIIB,2nd,No,"Adenocarcinoma, NOS",,,,0.316,0.41,False
+TCGA-G4-6309,TCGA-COAD,,,,,Yes,Not Reported,,,,0.9341,26.62,False
+TCGA-G4-6310,TCGA-COAD,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-G4-6311,TCGA-COAD,T3,N1,Stage III,6th,No,"Adenocarcinoma, NOS",,,,0.3185,0.19,False
+TCGA-G4-6314,TCGA-COAD,T3,N2,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-G4-6315,TCGA-COAD,T3,N1,Stage IV,6th,No,"Adenocarcinoma, NOS",,,,0.3321,0.25,False
+TCGA-G4-6317,TCGA-COAD,T3,N2,Stage IIIC,6th,No,"Adenocarcinoma, NOS",,,,0.3455,0.89,False
+TCGA-G4-6320,TCGA-COAD,T3,N1,Stage III,6th,No,"Adenocarcinoma, NOS",,,,0.5674,14.97,False
+TCGA-G4-6321,TCGA-COAD,,,,,,Not Reported,,,,0.3258,0.18,False
+TCGA-G4-6322,TCGA-COAD,T3,N1,Stage IIIB,6th,No,Mucinous adenocarcinoma,,,,0.3214,0.14,True
+TCGA-G4-6323,TCGA-COAD,Tis,N0,Stage IA,7th,No,"Adenocarcinoma, NOS",,,,0.3512,0.42,False
+TCGA-G4-6586,TCGA-COAD,,,,,,"Basal cell carcinoma, NOS",,,,1.0607,33.57,False
+TCGA-G4-6588,TCGA-COAD,,,,,,"Squamous cell carcinoma, NOS",,,,1.0066,34.69,False
+TCGA-G4-6625,TCGA-COAD,,,,,,"Melanoma, NOS",,,,,,False
+TCGA-G4-6626,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.349,0.39,False
+TCGA-G4-6627,TCGA-COAD,T3,N0,Stage IIA,6th,No,"Adenocarcinoma, NOS",,,,0.3582,0.02,False
+TCGA-G4-6628,TCGA-COAD,,,,,,"Adenocarcinoma, NOS",,,,0.7863,19.28,False
+TCGA-G5-6233,TCGA-READ,T3,N2,,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-G5-6235,TCGA-READ,T3,N1,Stage IIIB,6th,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-G5-6572,TCGA-READ,,,,,No,"Adenocarcinoma, NOS",,,,,,False
+TCGA-G5-6641,TCGA-READ,T1,N1,Stage IIIA,6th,No,Mucinous adenocarcinoma,,,,0.3305,0.02,True
+TCGA-NH-A50T,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.2912,0.31,False
+TCGA-NH-A50U,TCGA-COAD,T4a,N0,Stage IVA,7th,No,Mucinous adenocarcinoma,,,,0.3425,0.5,True
+TCGA-NH-A50V,TCGA-COAD,T3,N2a,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.2879,0.32,False
+TCGA-NH-A5IV,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,1.2012,41.02,False
+TCGA-NH-A6GA,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3295,1.07,False
+TCGA-NH-A6GB,TCGA-COAD,T3,N2b,Stage IIIC,7th,No,"Adenocarcinoma, NOS",,,,0.3185,0.31,False
+TCGA-NH-A6GC,TCGA-COAD,T4b,N1b,Stage IVB,7th,No,Mucinous adenocarcinoma,,,,0.3241,0.73,True
+TCGA-NH-A8F7,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.3241,0.36,False
+TCGA-NH-A8F8,TCGA-COAD,T4a,N2b,Stage IV,7th,No,"Adenocarcinoma, NOS",,,,0.3144,0.23,False
+TCGA-QG-A5YV,TCGA-COAD,T4b,N1a,Stage IIIC,7th,No,"Adenocarcinoma, NOS",,,,0.2586,0,False
+TCGA-QG-A5YW,TCGA-COAD,T3,N2b,Stage IIIC,7th,No,"Adenocarcinoma, NOS",,,,0.2723,0.47,False
+TCGA-QG-A5YX,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.304,0.18,False
+TCGA-QG-A5Z1,TCGA-COAD,T3,N1b,Stage IIIB,7th,No,"Adenocarcinoma, NOS",,,,0.2924,0.03,False
+TCGA-QG-A5Z2,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.86,19.29,False
+TCGA-QL-A97D,TCGA-COAD,T2,N0,Stage I,7th,No,"Adenocarcinoma, NOS",,,,0.3204,0.56,False
+TCGA-SS-A7HO,TCGA-COAD,,,,,Yes,Not Reported,,,,0.3318,1.19,False
+TCGA-T9-A92H,TCGA-COAD,T3,N0,Stage IIA,7th,No,"Adenocarcinoma, NOS",,,,0.317,0.4,False
+TCGA-WS-AB45,TCGA-COAD,T3,N0,Stage IIA,6th,No,Mucinous adenocarcinoma,,,,0.6782,24.48,True

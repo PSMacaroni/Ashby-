@@ -66,9 +66,11 @@ def layout(variant):
         tumor = _ellipse(18, 48, 16, 18) & (rr >= 6)
     if variant == "infiltrative":
         fingers = _box(30, 37, 35, 37) | _box(33, 39, 40, 42) | _box(26, 28, 27, 33)
+        more_fingers = _box(34, 41, 50, 52) | _box(18, 20, 24, 29)   # fingers + satellites reach cutoffs' 7; kept out
+                                                                         # of marks so the budding hotspot stays put
         satellites = _box(40, 44, 30, 34) | _box(34, 38, 22, 26) | _box(42, 46, 40, 44)
         island = _box(44, 48, 62, 66)       # ~2 mm from the main tumor, in fat, next to an "artery"
-        tumor |= fingers | satellites | island
+        tumor |= fingers | more_fingers | satellites | island
         marks.update(fingers=fingers, satellites=satellites, island=island,
                      artery=_box(45, 47, 68, 68))
     label[tumor] = K["tumor"]
