@@ -190,12 +190,13 @@ def panel(slide, data, items):
     if want:
         st.session_state[tab_key] = want
     tabs = ["Report", f"Check ({len(items)})", "Spot", "Details", "Notes"]
-    current = st.session_state.get(tab_key, "Report")
+    current = st.session_state.get(tab_key) or "Report"       # None after a click on the open tab
     current = next((t for t in tabs if t.split(" ")[0] == current.split(" ")[0]), "Report")
     st.session_state[tab_key] = current
 
     with st.container(key="panelcard"):
-        tab = st.segmented_control("Section", tabs, key=tab_key, label_visibility="collapsed", width="stretch") or "Report"
+        tab = st.segmented_control("Section", tabs, key=tab_key, label_visibility="collapsed", width="stretch",
+                                   required=True) or "Report"       # required: a click on the open tab keeps it
         prev, mem["last_tab"] = mem.get("last_tab"), tab
         if prev is not None and tab != prev and not want:
             mem["spot_via_click"] = False          # the user switched tabs by hand
@@ -299,7 +300,8 @@ def check_tab(slide, data, items):
     counts = {g: sum(1 for it in items if it["group"] == g) for g, _ in worklist.GROUPS}
     groups = [g for g, _ in worklist.GROUPS if counts[g]]
     group = st.segmented_control("Group", groups, default=groups[0], key=f"group_{k}", label_visibility="collapsed",
-                                 width="stretch", format_func=lambda g: f"{worklist.SHORT_NAMES[g]} · {counts[g]}") or groups[0]
+                                 width="stretch", required=True,
+                                 format_func=lambda g: f"{worklist.SHORT_NAMES[g]} · {counts[g]}") or groups[0]
     mine = [it for it in items if it["group"] == group]
     ui.note(f"{sum(1 for it in items if it['id'] in done)} of {len(items)} reviewed · the pointers on the map (F1, R1, ...) "
             "are this group's items · hints to look at, not findings")
