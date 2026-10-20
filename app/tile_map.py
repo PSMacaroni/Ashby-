@@ -288,11 +288,38 @@ def figure(data, scan, overlays, legends, opacity=0.45, active=None, selected=No
     per_mode = {m: [] for m in modes}          # trace indices that belong to one layer only
 
     arcs, sats = growth or ([], [])
+    layer_traces = []                          # traces that fade with the opacity slider (besides the images)
+    if "zones" in modes and (arcs or arrow):
+        # growth arrows (and the main direction of invasion) as traces, so the slider and the layer
+        # buttons control them like everything else on the layer
+        reach = max(g["rows"], g["cols"]) * 0.07
+        segments = [((a["center_rc"]), a["normal_rc"], reach) for a in arcs]
+        if arrow:
+            segments.append((arrow[0], arrow[1], max(g["rows"], g["cols"]) * 0.16))
+        xs, ys, hx, hy, angles, sizes = [], [], [], [], [], []
+        for (r, c), (dr, dc), length in segments:
+            x0, y0, x1, y1 = c + 0.5, r + 0.5, c + 0.5 + dc * length, r + 0.5 + dr * length
+            xs += [x0, x1, None]
+            ys += [y0, y1, None]
+            hx.append(x1)
+            hy.append(y1)
+            angles.append(np.degrees(np.arctan2(dc, -dr)))     # clockwise from "up" on the screen (rows go down)
+            sizes.append(16 if length > reach else 11)
+        per_mode["zones"].append(len(traces))
+        layer_traces.append(len(traces))
+        traces.append(go.Scatter(x=xs, y=ys, mode="lines", line=dict(color=GROWTH_COLOR, width=2.4), opacity=opacity,
+                                 hoverinfo="skip", showlegend=False, name="", visible=active == "zones"))
+        per_mode["zones"].append(len(traces))
+        layer_traces.append(len(traces))
+        traces.append(go.Scatter(x=hx, y=hy, mode="markers", opacity=opacity, hoverinfo="skip", showlegend=False,
+                                 name="", visible=active == "zones",
+                                 marker=dict(symbol="triangle-up", size=sizes, angle=angles, color=GROWTH_COLOR)))
     if sats and "zones" in modes:
+        layer_traces.append(len(traces))
         per_mode["zones"].append(len(traces))
         traces.append(go.Scatter(
             x=[p["col"] + 0.5 for p in sats], y=[p["row"] + 0.5 for p in sats], mode="markers",
-            marker=dict(symbol="circle-open", size=18, color=GROWTH_COLOR, line=dict(width=2)),
+            marker=dict(symbol="circle-open", size=18, color=GROWTH_COLOR, line=dict(width=2)), opacity=opacity,
             hovertemplate="%{text}<extra></extra>", showlegend=False, name="", visible=active == "zones",
             text=[f"Satellite · {p.get('diameter_um', '?')} µm across · {p.get('distance_to_main_um', '?')} µm "
                   f"from the main tumor · in {p.get('sits_in', '?')}"
@@ -303,9 +330,10 @@ def figure(data, scan, overlays, legends, opacity=0.45, active=None, selected=No
             symbol, color = FLAG_MARKERS.get(key, ("circle", "#000000"))
             mine = [(t, c) for k, t, c in flags if k == key]
             per_mode["risk"].append(len(traces))
+            layer_traces.append(len(traces))
             traces.append(go.Scatter(
                 x=[c["col"] + 0.5 for _, c in mine], y=[c["row"] + 0.5 for _, c in mine], mode="markers",
-                marker=dict(symbol=symbol, size=11, color=color, line=dict(width=1, color="#FFFFFF")),
+                marker=dict(symbol=symbol, size=11, color=color, line=dict(width=1, color="#FFFFFF")), opacity=opacity,
                 hovertemplate="%{text}<extra></extra>", showlegend=False, name="", visible=active == "risk",
                 text=[f"{t}{' (strong)' if c.get('strong') else ''}: {c.get('why', '')}" for t, c in mine],
                 customdata=[[int(data.index_grid[c["row"], c["col"]])] for _, c in mine]))
@@ -330,26 +358,13 @@ def figure(data, scan, overlays, legends, opacity=0.45, active=None, selected=No
 
     fig = go.Figure(traces)
 
-    # annotations: pointer labels (always) + growth arrows and the direction arrow (zones only)
+    # annotations: the pointer labels
     base_ann = []
     for m in markers:
         base_ann.append(dict(x=m["c"] + 0.5, y=m["r"] + 0.5, text=f"<b>{m['label']}</b>", showarrow=True, arrowhead=0,
                              arrowwidth=1.5, arrowcolor=m["color"], ax=22, ay=-26, bgcolor="#FFFFFF",
                              bordercolor=m["color"], borderwidth=1.5, borderpad=3, font=dict(color=m["color"], size=12)))
-    zone_ann = []
-    reach = max(g["rows"], g["cols"]) * 0.07
-    for a in arcs:
-        (r, c), (dr, dc) = a["center_rc"], a["normal_rc"]
-        zone_ann.append(dict(x=c + 0.5 + dc * reach, y=r + 0.5 + dr * reach, ax=c + 0.5, ay=r + 0.5, axref="x",
-                             ayref="y", showarrow=True, arrowhead=2, arrowsize=1, arrowwidth=2.4,
-                             arrowcolor=GROWTH_COLOR, text=""))
-    if arrow:
-        (r, c), (dr, dc) = arrow
-        length = max(g["rows"], g["cols"]) * 0.16
-        zone_ann.append(dict(x=c + 0.5 + dc * length, y=r + 0.5 + dr * length, ax=c + 0.5, ay=r + 0.5, axref="x",
-                             ayref="y", showarrow=True, arrowhead=2, arrowsize=1.2, arrowwidth=3,
-                             arrowcolor=GROWTH_COLOR, text=""))
-    fig.update_layout(annotations=base_ann + (zone_ann if active == "zones" else []))
+    fig.update_layout(annotations=base_ann)
 
     if selected is not None:
         r, c = int(data.rows[selected]), int(data.cols[selected])
@@ -373,11 +388,10 @@ def figure(data, scan, overlays, legends, opacity=0.45, active=None, selected=No
     if len(modes) > 1:
         buttons = []
         for m in modes:
-            layout_args = {"annotations": base_ann + (zone_ann if m == "zones" else [])}
-            buttons.append(dict(label=MODES.get(m, m), method="update", args=[{"visible": visibility(m)}, layout_args]))
+            buttons.append(dict(label=MODES.get(m, m), method="restyle", args=[{"visible": visibility(m)}]))
         menus.append(dict(type="buttons", direction="right", x=0, y=1.0, xanchor="left", yanchor="bottom",
                           pad=dict(b=8), showactive=True, active=modes.index(active), buttons=buttons, **style))
-    steps = [dict(method="restyle", args=[{"opacity": v}, overlay_idx], label="") for v in OPACITY_STEPS]
+    steps = [dict(method="restyle", args=[{"opacity": v}, overlay_idx + layer_traces], label="") for v in OPACITY_STEPS]
     slider = dict(active=min(range(len(OPACITY_STEPS)), key=lambda i: abs(OPACITY_STEPS[i] - opacity)), steps=steps,
                   x=0.62, len=0.38, xanchor="left", y=1.0, yanchor="bottom", pad=dict(t=2, b=4), ticklen=0,
                   minorticklen=0, bgcolor=THEME["border"], bordercolor=THEME["border"], borderwidth=0,

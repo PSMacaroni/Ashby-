@@ -55,12 +55,8 @@ background right after the first screen).
   matched, zooms to a spot on click, switches the coloring, and clears the search (`search.py`, below). The panel
   stays where it is.
 - Clicking a square marks it with a blue square (done by Plotly in the browser) and opens it in the Spot tab without
-  redrawing the map; the pointers of the last Check / Search / Details list stay on the map meanwhile. Streamlit
-  rebuilds the chart only when the picture itself must change (a "Show on map" link, a search, the fit button),
-  and that resets the view to the one the app set and the layer to Tissue.
-
-### The panel (right)
-
+  redrawing the map; the Check tab's pointers stay on the map for that click and go when you switch tabs by hand.
+  At opacity 0 only the scan shows: the arrows, rings and flag markers fade with the colored layer.
 - **Report**: fits without scrolling. The high-risk features, then one compact line per finding (tumor · growth
   pattern · depth hint · direction · ahead of the front · fat · immune · necrosis · mucin · stroma · outer edge ·
   unsure); hover a line for the analysis's full sentence. With Lumen set up, a plain-language paragraph comes first.

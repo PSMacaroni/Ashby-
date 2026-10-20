@@ -35,7 +35,8 @@ def memory(key):
     """What a slide's screen remembers between clicks."""
     store = st.session_state.setdefault("slide_memory", {})
     return store.setdefault(key, {"selected": None, "outline": None, "zoom": None, "zoom_rev": 0, "last_click": None,
-                                  "search": None, "match_on": True, "markers": [], "last_tab": None})
+                                  "search": None, "match_on": True, "markers": [], "last_tab": None,
+                                  "spot_via_click": False})
 
 
 def focus_on(key, loc, data, select=True):
@@ -175,7 +176,7 @@ def handle_click(event, k, data, first_hover):
                                 p.get("customdata"), first_hover)
     if idx is not None:
         mem["selected"], mem["outline"] = int(idx), None     # Plotly marks the square itself; the chart isn't rebuilt
-        mem["tab"] = "Spot"
+        mem["tab"], mem["spot_via_click"] = "Spot", True
         st.rerun(scope="app")
 
 
@@ -196,14 +197,16 @@ def panel(slide, data, items):
     with st.container(key="panelcard"):
         tab = st.segmented_control("Section", tabs, key=tab_key, label_visibility="collapsed", width="stretch") or "Report"
         prev, mem["last_tab"] = mem.get("last_tab"), tab
+        if prev is not None and tab != prev and not want:
+            mem["spot_via_click"] = False          # the user switched tabs by hand
         if prev == "Spot" and tab != "Spot" and mem["selected"] is not None:
             # leaving the Spot tab: drop the square marker. Plotly drew it in the browser, so the map is
             # redrawn once (the view returns to the last one the app set)
             mem["selected"], mem["outline"] = None, None
             mem["zoom_rev"] += 1
         with st.container(height=PANEL_HEIGHT, border=False):
-            # the Check tab sets the pointers; the other tabs keep the last ones,
-            # so clicking a square to inspect it doesn't change the map
+            # the Check tab sets the pointers. They stay only while a map click has just opened the Spot
+            # tab (so that click doesn't redraw the map); switching tabs by hand clears them
             if tab.startswith("Check"):
                 mem["markers"] = check_tab(slide, data, items)
             elif tab == "Spot":
@@ -214,7 +217,8 @@ def panel(slide, data, items):
                 notes_tab(slide)
             else:
                 report_tab(slide, data)
-        markers = mem["markers"]
+        keep = tab.startswith("Check") or (tab == "Spot" and mem.get("spot_via_click"))
+        markers = mem["markers"] if keep else []
         a, b = st.columns(2)
         a.download_button("PDF report", lambda: export.pdf_report(slide), file_name=f"{slide.slide_id}_report.pdf",
                           mime="application/pdf", key=f"dl_pdf_{k}", type="primary", width="stretch",
