@@ -1,9 +1,8 @@
 """
-Shared look and pieces for every screen: page style, the top bar with back/forward, and small
-HTML building blocks (chips, rows, list items) so all screens look the same.
+Shared look and pieces for every screen: page style (light, clinical), the top bar with the
+navigation, and small HTML building blocks (chips, rows, list items) so all screens look the same.
 
-Navigation works like a browser's history: each screen we open is added to a list; the arrows
-move back and forward through it.
+Screens: "cases" (the slide list) and "slide" (one slide).
 """
 import base64
 import html
@@ -18,10 +17,13 @@ T = THEME
 
 CSS = f"""
 <style>
-  /* page frame: no Streamlit decoration, centered content */
+  /* no grey fade while a screen updates: the old map stays until the new one replaces it */
+  [data-stale="true"], .stale-element, .stElementContainer[data-stale="true"] > * {{ opacity: 1 !important; transition: none !important; }}
+
+  /* page frame: no Streamlit decoration, wide content */
   [data-testid="stDecoration"] {{ display: none; }}
   header[data-testid="stHeader"] {{ background: transparent; }}
-  .block-container {{ max-width: 1380px; padding-top: 1.1rem !important; padding-bottom: 2.5rem; }}
+  .block-container {{ max-width: 1480px; padding-top: 0.9rem !important; padding-bottom: 2rem; }}
   h1, h2, h3, h4 {{ letter-spacing: -0.01em; font-weight: 650 !important; }}
   hr {{ margin: 0.6rem 0 !important; border-color: {T['border']} !important; }}
   [data-testid="stCaptionContainer"] {{ color: {T['muted']}; }}
@@ -31,58 +33,75 @@ CSS = f"""
   .tb img {{ width: 34px; height: 34px; }}
   .tb .name {{ font-weight: 650; font-size: 1.02rem; color: {T['text']}; line-height: 1.15; }}
   .tb .crumb {{ font-size: 0.82rem; color: {T['muted']}; }}
-  .st-key-topbar {{ border-bottom: 1px solid {T['border']}; padding-bottom: 10px; margin-bottom: 6px; }}
+  .st-key-topbar {{ border-bottom: 1px solid {T['border']}; padding-bottom: 8px; margin-bottom: 8px; }}
   .st-key-topbar button {{ min-height: 34px; padding: 0 10px; }}
 
   /* chips, rows, list items */
   .chip {{ display: inline-flex; align-items: center; gap: 6px; padding: 1px 9px; border-radius: 999px;
-          font-size: 0.75rem; font-weight: 600; border: 1px solid {T['border']}; color: {T['text2']};
-          background: {T['surface2']}; margin: 0 4px 4px 0; white-space: nowrap; }}
+          font-size: 0.76rem; font-weight: 600; border: 1px solid {T['border']}; color: {T['text2']};
+          background: {T['surface']}; margin: 0 4px 4px 0; white-space: nowrap; }}
   .chip i {{ width: 7px; height: 7px; border-radius: 50%; display: inline-block; }}
-  .chip.blue {{ color: #CFE3FF; border-color: #24467A; background: #12213A; }}
-  .chip.red {{ color: #FFD7D5; border-color: #6B2A27; background: #2A1414; }}
-  .chip.amber {{ color: #FBE7B5; border-color: #6A5320; background: #251E0D; }}
+  .chip.blue {{ color: #0F3D5E; border-color: #B7D1E6; background: {T['blue_bg']}; }}
+  .chip.red {{ color: {T['red']}; border-color: #F2B8B5; background: {T['red_bg']}; }}
+  .chip.amber {{ color: {T['amber']}; border-color: #F5D9A8; background: {T['amber_bg']}; }}
+  .chip.green {{ color: {T['green']}; border-color: #ABEFC6; background: {T['green_bg']}; }}
   .rows {{ border-top: 1px solid {T['border']}; }}
-  .row {{ display: grid; grid-template-columns: 112px 1fr; gap: 12px; padding: 9px 2px;
+  .row {{ display: grid; grid-template-columns: 128px 1fr; gap: 12px; padding: 7px 2px;
           border-bottom: 1px solid {T['border']}; font-size: 0.9rem; line-height: 1.45; }}
   .row .k {{ color: {T['muted']}; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em;
              padding-top: 2px; }}
   .row .v {{ color: {T['text']}; }}
-  .item {{ display: flex; gap: 10px; padding: 9px 2px; border-bottom: 1px solid {T['border']};
+  .row .v.strong {{ font-weight: 600; }}
+  .item {{ display: flex; gap: 10px; padding: 8px 2px; border-bottom: 1px solid {T['border']};
            font-size: 0.9rem; line-height: 1.45; }}
-  .item .dot {{ flex: 0 0 8px; height: 8px; border-radius: 50%; margin-top: 7px; }}
+  .item .dot {{ flex: 0 0 9px; height: 9px; border-radius: 50%; margin-top: 7px; }}
   .item .t {{ color: {T['text']}; font-weight: 500; }}
   .item .s {{ color: {T['text2']}; font-size: 0.84rem; }}
+  .item.done .t, .item.done .s {{ color: {T['muted']}; text-decoration: line-through; }}
   .sec {{ font-size: 0.74rem; font-weight: 700; color: {T['muted']}; text-transform: uppercase;
           letter-spacing: 0.08em; margin: 14px 0 4px; }}
   .lead {{ font-size: 0.95rem; line-height: 1.55; color: {T['text']}; }}
   .note {{ font-size: 0.8rem; color: {T['muted']}; line-height: 1.45; }}
   .legend {{ display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.8rem; color: {T['text2']}; }}
   .legend span {{ display: inline-flex; align-items: center; gap: 6px; }}
-  .legend i {{ width: 10px; height: 10px; border-radius: 3px; display: inline-block; }}
-  .banner {{ font-size: 0.8rem; color: #FBE7B5; background: #251E0D; border: 1px solid #6A5320;
+  .legend i {{ width: 10px; height: 10px; border-radius: 3px; display: inline-block; border: 1px solid rgba(0,0,0,.12); }}
+  .banner {{ font-size: 0.82rem; color: {T['amber']}; background: {T['amber_bg']}; border: 1px solid #F5D9A8;
              border-radius: 8px; padding: 6px 10px; }}
-  .stat b {{ color: {T['text']}; font-weight: 650; }}
-  .stat {{ color: {T['text2']}; font-size: 0.92rem; margin-right: 18px; }}
+  .banner.red {{ color: {T['red']}; background: {T['red_bg']}; border-color: #F2B8B5; }}
+  .banner.blue {{ color: #0F3D5E; background: {T['blue_bg']}; border-color: #B7D1E6; }}
+
+  /* the summary strip at the top of a slide */
+  .strip {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 4px 0 10px; }}
+  .strip div {{ background: {T['surface']}; border: 1px solid {T['border']}; border-radius: 8px; padding: 8px 12px; }}
+  .strip small {{ display: block; color: {T['muted']}; font-size: 0.72rem; text-transform: uppercase; letter-spacing: .05em; }}
+  .strip b {{ display: block; font-size: 1.02rem; font-weight: 650; color: {T['text']}; margin-top: 2px;
+             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+  .strip b.red {{ color: {T['red']}; }}
+  .strip b.amber {{ color: {T['amber']}; }}
+  .strip b.green {{ color: {T['green']}; }}
+
+  /* text boxes: a clearer edge on the white page */
+  [data-baseweb="textarea"], [data-baseweb="input"] {{ border: 1px solid #C5CCD4 !important; }}
 
   /* buttons that act like links ("Show on map") */
-  button[kind="tertiary"] {{ color: {T['accent']} !important; padding: 0 !important; min-height: 26px !important; }}
+  button[kind="tertiary"] {{ color: {T['accent']} !important; padding: 0 !important; min-height: 24px !important; }}
   button[kind="tertiary"]:hover {{ text-decoration: underline; }}
 
-  /* phones: icon-only navigation so the top bar stays on one line */
-  @media (max-width: 640px) {{
-    .st-key-nav_box [data-testid="stMarkdownContainer"], .st-key-nav_results [data-testid="stMarkdownContainer"] {{ display: none; }}
-    .tb .crumb, .st-key-nav_forward {{ display: none; }}
-    .tb img {{ width: 28px; height: 28px; }}
-    .tb .name {{ font-size: 0.92rem; }}
-    .block-container {{ padding-left: 1rem !important; padding-right: 1rem !important; }}
-  }}
+  /* the map's hover box must never catch the mouse: a click goes to the square under it */
+  .st-key-mapcard .hoverlayer, .st-key-mapcard .hoverlayer * {{ pointer-events: none !important; }}
 
   /* map + panel cards on the slide screen */
-  .st-key-mapcard, .st-key-panelcard {{ background: {T['surface']}; border: 1px solid {T['border']};
-          border-radius: 12px; padding: 14px 16px 12px; }}
-  .st-key-mapcard [data-testid="stPlotlyChart"] {{ border-radius: 8px; overflow: hidden; }}
+  .st-key-mapcard, .st-key-panelcard {{ background: #FFFFFF; border: 1px solid {T['border']};
+          border-radius: 10px; padding: 12px 14px 10px; }}
+  .st-key-mapcard [data-testid="stPlotlyChart"] {{ border-radius: 6px; overflow: hidden; border: 1px solid {T['border']}; }}
   .st-key-mapcard [data-testid="stSliderThumbValue"], .st-key-mapcard [data-testid="stSliderTickBar"] {{ display: none; }}
+
+  /* phones */
+  @media (max-width: 640px) {{
+    .tb .crumb {{ display: none; }}
+    .tb img {{ width: 28px; height: 28px; }}
+    .block-container {{ padding-left: 1rem !important; padding-right: 1rem !important; }}
+  }}
 </style>
 """
 
@@ -91,50 +110,26 @@ def inject_css():
     st.html(CSS)
 
 
-# ---------------------------------------------------------------- navigation history
-
-def _history():
-    if "history" not in st.session_state:
-        st.session_state.history = [{"name": "box"}]
-        st.session_state.hist_i = 0
-    return st.session_state.history
-
+# ---------------------------------------------------------------- navigation
 
 def current_view():
-    return _history()[st.session_state.hist_i]
+    return st.session_state.get("view", {"name": "cases"})
 
 
 def go(view):
-    """Open a new screen (drops any 'forward' history, like a browser)."""
-    hist = _history()[: st.session_state.hist_i + 1]
-    if hist[-1] != view:
-        hist.append(view)
-    st.session_state.history = hist
-    st.session_state.hist_i = len(hist) - 1
+    st.session_state["view"] = view
 
 
-def back():
-    st.session_state.hist_i = max(0, st.session_state.hist_i - 1)
-
-
-def forward():
-    st.session_state.hist_i = min(len(_history()) - 1, st.session_state.hist_i + 1)
-
-
-def top_bar(crumb):
+def top_bar(crumb, extra=None):
+    """The bar on every screen. extra: a function drawing widgets in the middle (e.g. a slide picker)."""
     with st.container(key="topbar", horizontal=True, vertical_alignment="center"):
         st.html(f'<div class="tb"><img src="{LOGO_URI}" alt="">'
                 f'<div><div class="name">Tumor Front Analyzer</div><div class="crumb">{html.escape(crumb)}</div></div></div>')
         st.space("stretch")
-        here = current_view()["name"]
-        st.button("Slide Box", icon=":material/grid_view:", key="nav_box", type="tertiary",
-                  on_click=go, args=({"name": "box"},), disabled=here == "box")
-        st.button("Model results", icon=":material/insights:", key="nav_results", type="tertiary",
-                  on_click=go, args=({"name": "results"},), disabled=here == "results")
-        i, n = st.session_state.hist_i, len(_history())
-        st.button("", icon=":material/arrow_back:", key="nav_back", help="Back", on_click=back, disabled=i == 0)
-        st.button("", icon=":material/arrow_forward:", key="nav_forward", help="Forward", on_click=forward,
-                  disabled=i >= n - 1)
+        if extra:
+            extra()
+        st.button("All slides", icon=":material/list:", key="nav_cases", type="tertiary",
+                  on_click=go, args=({"name": "cases"},), disabled=current_view()["name"] == "cases")
 
 
 # ---------------------------------------------------------------- HTML pieces (escape inputs!)
@@ -148,18 +143,24 @@ def chip(text, tone="", dot=None):
     return f'<span class="chip {tone}">{d}{esc(text)}</span>'
 
 
-def rows(pairs):
-    """Label/sentence rows, like a clean settings list."""
-    body = "".join(f'<div class="row"><div class="k">{esc(k)}</div><div class="v">{esc(v)}</div></div>'
-                   for k, v in pairs)
+def rows(pairs, tooltips=False):
+    """Label/value rows, like a clean settings list. pairs: (label, value) or (label, value, strong);
+    with tooltips=True the third element is the full sentence shown on hover."""
+    body = ""
+    for p in pairs:
+        k, v = p[0], p[1]
+        extra = p[2] if len(p) > 2 else None
+        strong = " strong" if (extra and not tooltips) else ""
+        title = f' title="{esc(extra)}"' if (tooltips and extra) else ""
+        body += f'<div class="row"{title}><div class="k">{esc(k)}</div><div class="v{strong}">{esc(v)}</div></div>'
     st.html(f'<div class="rows">{body}</div>')
 
 
-def item(title, sub="", color=None, title_html=None):
+def item(title, sub="", color=None, title_html=None, done=False):
     dot = f'<span class="dot" style="background:{color}"></span>' if color else ""
     t = title_html if title_html is not None else esc(title)
     s = f'<div class="s">{esc(sub)}</div>' if sub else ""
-    st.html(f'<div class="item">{dot}<div><div class="t">{t}</div>{s}</div></div>')
+    st.html(f'<div class="item{" done" if done else ""}">{dot}<div><div class="t">{t}</div>{s}</div></div>')
 
 
 def section(text):
@@ -173,3 +174,13 @@ def legend(items):
 
 def note(text):
     st.html(f'<div class="note">{esc(text)}</div>')
+
+
+def banner(text, tone=""):
+    st.html(f'<div class="banner {tone}">{esc(text)}</div>')
+
+
+def strip(cells):
+    """The summary strip: [(label, value, tone)]."""
+    body = "".join(f'<div><small>{esc(k)}</small><b class="{tone}">{esc(v)}</b></div>' for k, v, tone in cells)
+    st.html(f'<div class="strip">{body}</div>')

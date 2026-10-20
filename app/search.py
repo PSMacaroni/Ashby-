@@ -91,6 +91,10 @@ def known_words_scores(slide, data, classes, phrases):
     """Per-tile 0-1 score from the matched classes/phrases, and what was used (for the UI)."""
     cols, used = [], []
     for c in classes:
+        if c == "lymphocytes" and "p_immune" in data.extra:     # the lymphocyte detector sees scattered cells too
+            cols.append(np.nan_to_num(np.clip(data.extra["p_immune"], 0, 1)))
+            used.append("Lymphocytes (immune detector)")
+            continue
         cols.append(data.probs[:, CLASSES.index(c)])
         used.append(f"{NAMES[c]} (tissue score)")
     table = None

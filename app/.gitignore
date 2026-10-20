@@ -1,4 +1,3 @@
 # Made by the app while it runs: never commit
-demo_data/
-slide_box.json
-slide_box.tmp
+state.json
+state.tmp

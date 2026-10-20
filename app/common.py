@@ -10,18 +10,26 @@ ROOT = APP_DIR.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))   # so the team's shared code in src/ can be imported
 
-from src.prompts import CLASSES  # noqa: E402  (class order = column order in tiles.csv)
-from src.viz import CLASS_COLORS  # noqa: E402  (one color per class everywhere in the project)
+from src.prompts import CLASSES  # noqa: E402,F401  (class order = column order in tiles.csv)
+from src.viz import CLASS_COLORS  # noqa: E402,F401  (one color per class everywhere in the project)
 
-DEMO_DIR = APP_DIR / "demo_data"              # fake slides made by make_demo_data.py
-RESULTS_DIR = ROOT / "data" / "results"       # real slides copied down from Delta
-BOX_STATE_FILE = APP_DIR / "slide_box.json"   # renames, copies, hidden slides (written by the app)
+try:
+    from src.cutoffs import LOW_CONFIDENCE  # noqa: E402  ("unsure here" = top score below this)
+except Exception:                            # pragma: no cover - older src without the cut-off
+    LOW_CONFIDENCE = 0.9
+
+# Where slides come from: every folder with summary.json + tiles.csv in one of these.
+# showcase/results/ is in git (the 5 showcase slides); data/results/ is git-ignored (copied from Delta).
+RESULTS_DIRS = [ROOT / "showcase" / "results", ROOT / "data" / "results"]
+STATE_FILE = APP_DIR / "state.json"     # renames, hidden slides, copies, notes, reviewed items (written by the app)
 
 # Same values as .streamlit/config.toml, for the HTML, map and exports we draw ourselves
 THEME = {
-    "bg": "#0B0D10", "surface": "#14171C", "surface2": "#1A1E24", "border": "#262B33",
-    "text": "#E6E8EB", "text2": "#9AA3AF", "muted": "#7D8590",
-    "accent": "#4C9AFF", "button": "#1F6FEB",
+    "bg": "#FFFFFF", "surface": "#F4F6F8", "surface2": "#EAEEF2", "border": "#D9DEE4",
+    "text": "#1B1F24", "text2": "#424A55", "muted": "#6B7480",
+    "accent": "#1F5F8B", "button": "#1F5F8B",
+    "red": "#B42318", "red_bg": "#FEF3F2", "amber": "#B54708", "amber_bg": "#FFFAEB",
+    "green": "#1E7A4A", "green_bg": "#ECFDF3", "blue_bg": "#EAF2F9",
     "mono": "Cascadia Mono, SFMono-Regular, Consolas, Menlo, monospace",
 }
 
@@ -29,6 +37,7 @@ NAMES = {
     "tumor": "Tumor", "normal_mucosa": "Normal mucosa", "muscle": "Smooth muscle", "fat": "Fat",
     "lymphocytes": "Lymphocytes", "mucus": "Mucus", "necrosis": "Necrosis", "stroma": "Stroma",
 }
+SITES = {"TCGA-COAD": "Colon", "TCGA-READ": "Rectum"}
 
 # What each class typically looks like on H&E, so a pathologist knows what to check by eye.
 LOOKS_LIKE = {
@@ -57,7 +66,7 @@ KNOWN_MIXUPS = {
 # Risk points: matplotlib "Reds" (white -> dark red), scaled 0..max(4, highest points) like the figure
 REDS = ["#FFF5F0", "#FEE0D2", "#FCBBA1", "#FC9272", "#FB6A4A", "#EF3B2C", "#CB181D", "#A50F15", "#67000D"]
 # Search match: one blue scale (more = darker), so it never looks like risk
-RISK_RAMP = ["#B7D3F6", "#86B6EF", "#5598E7", "#2A78D6", "#1C5CAB", "#104281"]
+MATCH_RAMP = ["#C6DBEF", "#9ECAE1", "#6BAED6", "#4292C6", "#2171B5", "#084594"]
 # Zones around the invasive front (figure: core dark red, front band orange, peritumoral peach,
 # other tissue light gray, the front itself black)
 ZONES = {
@@ -66,6 +75,8 @@ ZONES = {
     "peritumoral": ("Peritumoral (0.5-2 mm)", "#FFD9B3"),
     "outside": ("Other tissue", "#D9D9D9"),
 }
+ZONE_SHORT = {"core": "Tumor core", "front_band": "Front band", "peritumoral": "Peritumoral", "outside": "Other tissue",
+              "": "—"}
 FRONT_COLOR = "#000000"
 GROWTH_COLOR = "#1F5BFF"         # the figure's blue arrows / circles
 # Flag markers: (plotly symbol, color), from src/viz.py FLAG_MARKERS
@@ -73,10 +84,11 @@ FLAG_MARKERS = {"perineural": ("triangle-up", "#000000"), "venous": ("square", "
                 "lymphatic": ("diamond", "#FF7F00"), "budding": ("star", "#B15928"),
                 "stroma_maturity": ("x", "#666666"), "adenoma": ("cross", "#33A02C")}
 # Certainty: only the doubtful tiles get a color, so they stand out
-CERTAINTY = {"Sure": None, "Check": "#E8B341", "Unsure": "#E5534B"}
-NOT_ANALYZED = "#8B929C"
-
-HIGH_CONF = 0.80          # top score at or above this (and no flags) = "Sure"
+UNSURE_COLOR = "#E8A33D"
+NOT_ANALYZED = "#9AA1AA"
+# Pointer colors per worklist group
+POINTER_COLORS = {"flags": "#B42318", "risk": "#7A1C1C", "unsure": "#B54708", "mucin": "#0E7490",
+                  "islands": "#1F5BFF", "nodes": "#5B21B6", "search": "#1F5F8B", "other": "#1F5F8B"}
 
 
 def risk_color(points, top=4):
@@ -94,6 +106,13 @@ def pct(x, digits=0):
     return f"{100 * float(x):.{digits}f}%"
 
 
+def mm(um):
+    """Micrometers -> 'x.x mm' (or 'n/a')."""
+    if um is None:
+        return "n/a"
+    return f"{float(um) / 1000:.1f} mm"
+
+
 def get(d, path, default=None):
     """get(summary, 'invasion.direction.text') -> value, or default if any part is missing."""
     for part in path.split("."):
@@ -101,3 +120,20 @@ def get(d, path, default=None):
             return default
         d = d[part]
     return d
+
+
+def site_name(summary):
+    return SITES.get(summary.get("project") or "", summary.get("project") or "")
+
+
+def stage_text(summary):
+    """'pT4a N2b · Stage IVA' from what the pipeline recorded (TCGA report), or ''."""
+    parts = []
+    if summary.get("pT"):
+        parts.append(f"p{summary['pT']}" if not str(summary["pT"]).startswith("p") else summary["pT"])
+    if summary.get("pN"):
+        parts.append(str(summary["pN"]))
+    text = " ".join(parts)
+    if summary.get("stage"):
+        text = f"{text} · {summary['stage']}" if text else str(summary["stage"])
+    return text

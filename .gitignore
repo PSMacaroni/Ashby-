@@ -35,3 +35,6 @@ env/
 # OS / editor
 .DS_Store
 .vscode/
+
+# Tile previews copied from Delta (15-30k small JPGs per slide): never commit
+showcase/results/*/tiles/
